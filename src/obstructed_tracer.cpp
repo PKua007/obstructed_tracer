@@ -12,10 +12,13 @@
 #include <iomanip>
 #include <cstdlib>
 #include <fstream>
+#include <random>
 
 #include "Utils.h"
 #include "Parameters.h"
 #include "RandomWalker.h"
+#include "move_generator/GaussianMoveGenerator.h"
+#include "move_filter/DefaultMoveFilter.h"
 
 int main(int argc, char **argv)
 {
@@ -33,10 +36,14 @@ int main(int argc, char **argv)
     parameters.print(std::cout);
     std::cout << std::endl;
 
-    RandomWalker randomWalker(0.f, 0.f, parameters.sigma, parameters.numberOfSteps);
+    std::random_device randomSeed;
+    GaussianMoveGenerator moveGenerator(parameters.sigma, randomSeed());
+    DefaultMoveFilter moveFilter;
+    RandomWalker randomWalker(parameters.numberOfSteps, &moveGenerator, &moveFilter);
     std::cout << "[main] Starting simulation..." << std::endl;
     Trajectory trajectory = randomWalker.run();
-    std::cout << "[main] Finished. Final position: " << trajectory.getLast() << std::endl;
+    std::cout << "[main] Finished. Initial position: " << trajectory.getFirst() << ", accepted steps: ";
+    std::cout << (trajectory.getSize() - 1) << ", final position: " << trajectory.getLast() << std::endl;
 
     std::string outputFilename = argv[2];
     std::ofstream output(outputFilename);

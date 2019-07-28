@@ -10,9 +10,16 @@
 
 #include <iosfwd>
 
+#include "Move.h"
+
 struct Point  {
     float x;
     float y;
+
+    Point operator+(Move move) const;
+    Point operator-(Move move) const;
+    Point &operator+=(Move move);
+    Point &operator-=(Move move);
 };
 
 std::ostream &operator<<(std::ostream &out, Point point);

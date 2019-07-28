@@ -13,20 +13,17 @@
 #include <random>
 
 #include "Trajectory.h"
+#include "MoveGenerator.h"
+#include "MoveFilter.h"
 
 class RandomWalker {
 private:
-    float initX;
-    float initY;
     std::size_t numberOfSteps;
-
-    std::mt19937 randomGenerator;
-    std::normal_distribution<float> normalDistribution;
-
-    float nextGaussian();
+    MoveGenerator *moveGenerator;
+    MoveFilter *moveFilter;
 
 public:
-    RandomWalker(float initX, float initY, float standardDeviation, std::size_t numberOfSteps);
+    RandomWalker(std::size_t numberOfSteps, MoveGenerator *moveGenerator, MoveFilter *moveFilter);
 
     Trajectory run();
 };

@@ -1,2 +1,2 @@
 sigma = 0.5
-numberOfSteps = 100
+numberOfSteps = 100000
