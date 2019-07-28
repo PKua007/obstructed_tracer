@@ -10,7 +10,7 @@
 
 #include <random>
 
-#include "../MoveFilter.h"
+#include "../random_walker/MoveFilter.h"
 #include "../image/Image.h"
 
 class ImageMoveFilter: public MoveFilter {

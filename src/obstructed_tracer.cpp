@@ -16,7 +16,7 @@
 
 #include "Utils.h"
 #include "Parameters.h"
-#include "RandomWalker.h"
+#include "random_walker/RandomWalker.h"
 #include "move_generator/GaussianMoveGenerator.h"
 #include "move_filter/DefaultMoveFilter.h"
 
