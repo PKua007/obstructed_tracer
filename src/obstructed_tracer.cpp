@@ -1,6 +1,6 @@
 /*
  ============================================================================
- Name        : obstructed_tracer.cu
+ Name        : obstructed_tracer.cpp
  Author      : Piotr Kubala
  Version     :
  Copyright   : 
@@ -14,6 +14,7 @@
 
 #include "Utils.h"
 #include "Parameters.h"
+#include "RandomWalker.h"
 
 int main(int argc, char **argv)
 {
@@ -27,9 +28,14 @@ int main(int argc, char **argv)
         die("[main] Cannot open " + inputFilename + " to read parameters");
 
     Parameters parameters(input);
-
     std::cout << "[main] Parameters loaded from " + inputFilename << ":" << std::endl;
     parameters.print(std::cout);
+
+    RandomWalker randomWalker(0.f, 0.f, parameters.sigma, parameters.numberOfSteps);
+    std::cout << "[main] Starting simulation..." << std::endl;
+    Trajectory trajectory = randomWalker.run();
+    std::cout << "[main] Finished. Trajectory size: " << trajectory.size() << ", final position: ";
+    std::cout << trajectory.back() << std::endl;
 
     return EXIT_SUCCESS;
 }
