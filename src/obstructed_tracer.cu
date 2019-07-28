@@ -13,8 +13,8 @@
 
 int main(void)
 {
-	std::cout << "obstucted_tracer" << std::endl;
-	
-	return EXIT_SUCCESS;
+    std::cout << "obstucted_tracer" << std::endl;
+
+    return EXIT_SUCCESS;
 }
 
