@@ -22,23 +22,17 @@ RandomWalker::RandomWalker(float initX, float initY, float distributionVariance,
 }
 
 Trajectory RandomWalker::run() {
-    Trajectory trajectory;
-    trajectory.reserve(this->numberOfSteps);
+    Trajectory trajectory(this->numberOfSteps + 1);
 
     Point tracer = {this->initX, this->initY};
-    trajectory.push_back(tracer);
+    trajectory.addPoint(tracer);
     for (std::size_t i = 0; i < this->numberOfSteps; i++) {
         float deltaX = this->nextGaussian();
         float deltaY = this->nextGaussian();
         tracer.x += deltaX;
         tracer.y += deltaY;
-        trajectory.push_back(tracer);
+        trajectory.addPoint(tracer);
     }
 
     return trajectory;
-}
-
-std::ostream &operator<<(std::ostream& out, Point point) {
-    out << "{" << point.x << ", " << point.y << "}";
-    return out;
 }

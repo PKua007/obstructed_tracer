@@ -12,14 +12,7 @@
 #include <array>
 #include <random>
 
-struct Point  {
-    float x;
-    float y;
-};
-
-std::ostream &operator<<(std::ostream &out, Point point);
-
-using Trajectory = std::vector<Point>;
+#include "Trajectory.h"
 
 class RandomWalker {
 private:
