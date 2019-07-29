@@ -14,11 +14,12 @@
 #include <fstream>
 #include <random>
 
-#include "Utils.h"
 #include "Parameters.h"
+#include "utils/Utils.h"
 #include "random_walker/RandomWalker.h"
 #include "move_generator/GaussianMoveGenerator.h"
 #include "move_filter/DefaultMoveFilter.h"
+#include "image/PPMImageReader.h"
 
 int main(int argc, char **argv)
 {
