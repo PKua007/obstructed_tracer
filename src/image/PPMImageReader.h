@@ -18,6 +18,11 @@ public:
 };
 
 class PPMImageReader {
+private:
+    void verifyMetadata(std::istream& input, const std::string& magic, std::size_t width, std::size_t height,
+                        std::size_t depth, int whitespaceBeforeData) const;
+    Image readImageData(std::istream& input, std::size_t width, std::size_t height) const;
+
 public:
     Image read(std::istream &input) const;
 };
