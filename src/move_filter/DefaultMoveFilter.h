@@ -13,7 +13,7 @@
 class DefaultMoveFilter : public MoveFilter {
 public:
     bool isMoveValid(Point tracer, Move move) const;
-    Point randomValidPoint() const;
+    Point randomValidPoint();
 };
 
 #endif /* DEFAULTMOVEFILTER_H_ */

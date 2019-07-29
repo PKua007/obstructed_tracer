@@ -16,7 +16,7 @@ public:
     virtual ~MoveFilter() = default;
 
     virtual bool isMoveValid(Point tracer, Move move) const = 0;
-    virtual Point randomValidPoint() const = 0;
+    virtual Point randomValidPoint() = 0;
 };
 
 #endif /* MOVEFILTER_H_ */

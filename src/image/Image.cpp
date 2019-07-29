@@ -16,7 +16,7 @@ Image::Image(std::size_t width, std::size_t height) :
         width{width}, height{height} {
     Expects(width > 0);
     Expects(height > 0);
-    this->data.reserve(width * height);
+    this->data.resize(width * height, WHITE);
 }
 
 std::size_t Image::getHeight() const {
@@ -27,6 +27,9 @@ std::size_t Image::getWidth() const {
     return this->width;
 }
 
+std::size_t Image::getNumberOfPixels() const {
+    return this->width * this->height;
+}
 
 Color* Image::getData() {
     return this->data.data();
@@ -36,15 +39,15 @@ const Color* Image::getData() const {
     return this->data.data();
 }
 
-Color& Image::operator ()(std::size_t x, std::size_t y) {
-    Expects(x < width);
-    Expects(y < height);
+Color& Image::operator()(std::size_t x, std::size_t y) {
+    Expects(x < this->width);
+    Expects(y < this->height);
     return this->data[x + y * this->width];
 }
 
-Color Image::operator ()(std::size_t x, std::size_t y) const {
-    Expects(x < width);
-    Expects(y < height);
+Color Image::operator()(std::size_t x, std::size_t y) const {
+    Expects(x < this->width);
+    Expects(y < this->height);
     return this->data[x + y * this->width];
 }
 
@@ -56,6 +59,10 @@ std::ostream& operator<<(std::ostream& out, Color color) {
     return out;
 }
 
-bool operator ==(Color color1, Color color2) {
+bool operator==(Color color1, Color color2) {
     return color1.r == color2.r && color1.g == color2.g && color1.b == color2.b;
+}
+
+bool operator!=(Color color1, Color color2) {
+    return !(color1 == color2);
 }

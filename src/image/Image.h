@@ -23,6 +23,7 @@ struct Color {
 
 std::ostream &operator<<(std::ostream &out, Color color);
 bool operator==(Color color1, Color color2);
+bool operator!=(Color color1, Color color2);
 
 class Image {
 private:
@@ -35,6 +36,7 @@ public:
 
     std::size_t getHeight() const;
     std::size_t getWidth() const;
+    std::size_t getNumberOfPixels() const;
     Color *getData();
     const Color *getData() const;
     Color &operator()(std::size_t x, std::size_t y);

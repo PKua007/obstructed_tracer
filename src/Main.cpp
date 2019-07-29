@@ -19,6 +19,7 @@
 #include "random_walker/RandomWalker.h"
 #include "move_generator/GaussianMoveGenerator.h"
 #include "move_filter/DefaultMoveFilter.h"
+#include "move_filter/ImageMoveFilter.h"
 #include "image/PPMImageReader.h"
 
 int main(int argc, char **argv)
@@ -37,9 +38,17 @@ int main(int argc, char **argv)
     parameters.print(std::cout);
     std::cout << std::endl;
 
+    std::ifstream imageFile(parameters.imageFile);
+    if (!imageFile)
+        die("[main] Cannot open " + parameters.imageFile + " to load image");
+    PPMImageReader imageReader;
+    Image image = imageReader.read(imageFile);
+    std::cout << "[main] Loaded image " << parameters.imageFile << " (" << image.getWidth() << "px x ";
+    std::cout << image.getHeight() << "px)" << std::endl;
+
     std::random_device randomSeed;
     GaussianMoveGenerator moveGenerator(parameters.sigma, randomSeed());
-    DefaultMoveFilter moveFilter;
+    ImageMoveFilter moveFilter(image, randomSeed());
     RandomWalker randomWalker(parameters.numberOfSteps, &moveGenerator, &moveFilter);
     std::cout << "[main] Starting simulation..." << std::endl;
     Trajectory trajectory = randomWalker.run();

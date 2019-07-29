@@ -11,6 +11,6 @@ bool DefaultMoveFilter::isMoveValid(Point tracer, Move move) const {
     return true;
 }
 
-Point DefaultMoveFilter::randomValidPoint() const {
+Point DefaultMoveFilter::randomValidPoint() {
     return {0.f, 0.f};
 }
