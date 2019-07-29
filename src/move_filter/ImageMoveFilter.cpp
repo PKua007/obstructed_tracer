@@ -11,46 +11,59 @@
 #include "../utils/Assertions.h"
 
 ImageMoveFilter::ImageMoveFilter(Image image, unsigned int seed) :
-        image{image} {
+        width{image.getWidth()}, height{image.getHeight()} {
     this->randomGenerator.seed(seed);
+    this->validPointsMap.reserve(image.getNumberOfPixels());
 
-    for (std::size_t i = 0; i < this->image.getWidth(); i++)
-        for (std::size_t j = 0; j < this->image.getHeight(); j++)
-            if (this->image(i, j) == WHITE)
-                this->validPoints.push_back(ImagePoint{i, j});
+    // Image y axis starts from left upper corner downwards, so image is scanned from the bottom left, because
+    // validPointsMap is in "normal" coordinate system, with (0, 0) in left bottom corner
+    for (std::size_t y = 0; y < this->height; y++) {
+        for (std::size_t x = 0; x < this->width; x++) {
+            if (image(x, this->height - y - 1) == WHITE) {
+                this->validPointsIndices.push_back(this->validPointsMap.size());
+                this->validPointsMap.push_back(true);
+            } else {
+                this->validPointsMap.push_back(false);
+            }
+        }
+    }
 
-    if (this->validPoints.empty())
+    if (this->validPointsIndices.empty())
         throw std::runtime_error("No valid points found in a given image");
-    std::cout << "[ImageMoveFilter::ImageMoveFilter] Found " << validPoints.size() << " valid starting pixels out of ";
-    std::cout << this->image.getNumberOfPixels() << " total" << std::endl;
+    std::cout << "[ImageMoveFilter::ImageMoveFilter] Found " << this->validPointsIndices.size();
+    std::cout << " valid starting pixels out of " << this->validPointsMap.size() << " total" << std::endl;
 }
 
 bool ImageMoveFilter::isMoveValid(Point tracer, Move move) const {
     Point finalTracer = tracer + move;
 
-    float width = this->image.getWidth();
-    float height = this->image.getHeight();
-    if (finalTracer.x < 0 || finalTracer.x >= width || finalTracer.y < 0 || finalTracer.y >= height)
+    if (finalTracer.x < 0 || finalTracer.x >= this->width || finalTracer.y < 0 || finalTracer.y >= this->height)
         return false;
 
     ImagePoint imageFinalTracer = {static_cast<std::size_t>(finalTracer.x), static_cast<std::size_t>(finalTracer.y)};
-    Assert(imageFinalTracer.x < width && imageFinalTracer.y < height);
+    Assert(imageFinalTracer.x < this->width && imageFinalTracer.y < this->height);
 
-    // Image y axis starts from left upper corner downwards. We use here lower left upwards instead
-    if (this->image(imageFinalTracer.x, height - 1 - imageFinalTracer.y) != WHITE)
-        return false;
+    return this->isPointValid(imageFinalTracer);
+}
 
-    return true;
+bool ImageMoveFilter::isPointValid(ImagePoint point) const {
+    Expects(point.x < this->width);
+    Expects(point.y < this->height);
+
+    return this->validPointsMap[point.x + point.y * this->width];
+}
+
+ImageMoveFilter::ImagePoint ImageMoveFilter::indexToPoint(std::size_t index) const {
+    Expects(index < this->validPointsMap.size());
+    return {index % this->width, index / this->width};
 }
 
 Point ImageMoveFilter::randomValidPoint() {
-    float randomPixelFloatIndex = this->uniformDistribution(this->randomGenerator) * this->validPoints.size();
+    float randomPixelFloatIndex = this->uniformDistribution(this->randomGenerator) * this->validPointsIndices.size();
     std::size_t randomPixelIndex = static_cast<std::size_t>(randomPixelFloatIndex);
-    Assert(randomPixelIndex < this->validPoints.size());
-    ImagePoint randomValidPoint = this->validPoints[randomPixelIndex];
-
-    // Image y axis starts from left upper corner downwards. We use here lower left upwards instead
-    randomValidPoint.y = this->image.getHeight() - 1 - randomValidPoint.y;
+    Assert(randomPixelIndex < this->validPointsIndices.size());
+    std::size_t randomValidPointIndex = this->validPointsIndices[randomPixelIndex];
+    ImagePoint randomValidPoint = this->indexToPoint(randomValidPointIndex);
 
     float randomPixelOffsetX = this->uniformDistribution(this->randomGenerator);
     float randomPixelOffsetY = this->uniformDistribution(this->randomGenerator);

@@ -22,8 +22,14 @@ private:
 
     std::mt19937 randomGenerator;
     std::uniform_real_distribution<float> uniformDistribution{0.f, 1.f};
-    Image image;
-    std::vector<ImagePoint> validPoints;
+
+    std::size_t width;
+    std::size_t height;
+    std::vector<bool> validPointsMap;
+    std::vector<std::size_t> validPointsIndices;
+
+    bool isPointValid(ImagePoint point) const;
+    ImagePoint indexToPoint(std::size_t index) const;
 
 public:
     ImageMoveFilter(Image image, unsigned int seed);
