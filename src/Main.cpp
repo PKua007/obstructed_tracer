@@ -12,10 +12,16 @@
 #include <iomanip>
 #include <cstdlib>
 #include <fstream>
+#include <random>
 
-#include "Utils.h"
 #include "Parameters.h"
-#include "RandomWalker.h"
+#include "utils/Utils.h"
+#include "random_walker/RandomWalker.h"
+#include "move_generator/GaussianMoveGenerator.h"
+#include "move_generator/CauchyMoveGenerator.h"
+#include "move_filter/DefaultMoveFilter.h"
+#include "move_filter/ImageMoveFilter.h"
+#include "image/PPMImageReader.h"
 
 int main(int argc, char **argv)
 {
@@ -33,10 +39,22 @@ int main(int argc, char **argv)
     parameters.print(std::cout);
     std::cout << std::endl;
 
-    RandomWalker randomWalker(0.f, 0.f, parameters.sigma, parameters.numberOfSteps);
+    std::ifstream imageFile(parameters.imageFile);
+    if (!imageFile)
+        die("[main] Cannot open " + parameters.imageFile + " to load image");
+    PPMImageReader imageReader;
+    Image image = imageReader.read(imageFile);
+    std::cout << "[main] Loaded image " << parameters.imageFile << " (" << image.getWidth() << "px x ";
+    std::cout << image.getHeight() << "px)" << std::endl;
+
+    std::random_device randomSeed;
+    CauchyMoveGenerator moveGenerator(parameters.sigma, randomSeed());
+    ImageMoveFilter moveFilter(image, randomSeed());
+    RandomWalker randomWalker(parameters.numberOfSteps, &moveGenerator, &moveFilter);
     std::cout << "[main] Starting simulation..." << std::endl;
     Trajectory trajectory = randomWalker.run();
-    std::cout << "[main] Finished. Final position: " << trajectory.getLast() << std::endl;
+    std::cout << "[main] Finished. Initial position: " << trajectory.getFirst() << ", accepted steps: ";
+    std::cout << (trajectory.getSize() - 1) << ", final position: " << trajectory.getLast() << std::endl;
 
     std::string outputFilename = argv[2];
     std::ofstream output(outputFilename);

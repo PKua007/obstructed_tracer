@@ -16,6 +16,7 @@ class Parameters {
 public:
     float       sigma           = 1.f;
     std::size_t numberOfSteps   = 1000;
+    std::string imageFile       = "";
 
     Parameters() = default;
     Parameters(std::istream &input);
