@@ -20,7 +20,7 @@ private:
 public:
     GaussianMoveGenerator(float sigma, unsigned int seed);
 
-    Move generateMove();
+    Move generateMove() override;
 };
 
 #endif /* GAUSSIANMOVEGENERATOR_H_ */

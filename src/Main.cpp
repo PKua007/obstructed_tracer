@@ -18,6 +18,7 @@
 #include "utils/Utils.h"
 #include "random_walker/RandomWalker.h"
 #include "move_generator/GaussianMoveGenerator.h"
+#include "move_generator/CauchyMoveGenerator.h"
 #include "move_filter/DefaultMoveFilter.h"
 #include "move_filter/ImageMoveFilter.h"
 #include "image/PPMImageReader.h"
@@ -47,7 +48,7 @@ int main(int argc, char **argv)
     std::cout << image.getHeight() << "px)" << std::endl;
 
     std::random_device randomSeed;
-    GaussianMoveGenerator moveGenerator(parameters.sigma, randomSeed());
+    CauchyMoveGenerator moveGenerator(parameters.sigma, randomSeed());
     ImageMoveFilter moveFilter(image, randomSeed());
     RandomWalker randomWalker(parameters.numberOfSteps, &moveGenerator, &moveFilter);
     std::cout << "[main] Starting simulation..." << std::endl;

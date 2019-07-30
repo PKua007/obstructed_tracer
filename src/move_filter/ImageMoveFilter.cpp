@@ -11,6 +11,20 @@
 #include "../utils/Assertions.h"
 #include "../utils/Utils.h"
 
+
+bool ImageMoveFilter::ImagePoint::operator==(ImageMoveFilter::ImagePoint second) const {
+    return this->x == second.x && this->y == second.y;
+}
+
+bool ImageMoveFilter::ImagePoint::operator!=(ImageMoveFilter::ImagePoint second) const {
+    return !(*this == second);
+}
+
+
+ImageMoveFilter::ImageMove ImageMoveFilter::ImagePoint::operator-(ImagePoint second) const {
+    return {this->x - second.x, this->y - second.y};
+}
+
 ImageMoveFilter::ImageMoveFilter(Image image, unsigned int seed) :
         width{image.getWidth()}, height{image.getHeight()} {
     this->randomGenerator.seed(seed);
@@ -34,51 +48,51 @@ ImageMoveFilter::ImageMoveFilter(Image image, unsigned int seed) :
     std::cout << "[ImageMoveFilter::ImageMoveFilter] Found " << this->validPointsIndices.size();
     std::cout << " valid starting pixels out of " << this->validPointsMap.size() << " total" << std::endl;
 }
-
-bool ImageMoveFilter::isMoveValid(Point tracer, Move move) const {
-    Point finalTracer = tracer + move;
-
-    if (finalTracer.x < 0 || finalTracer.x >= this->width || finalTracer.y < 0 || finalTracer.y >= this->height)
-        return false;
-
-    ImagePoint imageFinalTracer = {static_cast<std::size_t>(finalTracer.x), static_cast<std::size_t>(finalTracer.y)};
-    Assert(imageFinalTracer.x < this->width && imageFinalTracer.y < this->height);
-
-    if (!isPointValid(imageFinalTracer))
-        return false;
-
-    int x1 = tracer.x, x2 = finalTracer.x;
-    int y1 = tracer.y, y2 = finalTracer.y;
-    if (x1==x2 && y1==y2) return true;
-    if (std::abs(x2-x1)>std::abs(y2-y1)){
-        float a = float(y2-y1)/(x2-x1);
-        for(int x=(int)x1; x!=(int)x2; x += sgn(x2-x1)){
-            int y = (int)(y1 + a*(x-x1));
-            if (!this->isPointValid({x, y}))
-                return false;
-        }
-    }else{
-        float a = float(x2-x1)/(y2-y1);
-        for(int y=(int)y1; y!=(int)y2; y += sgn(y2-y1)){
-            int x = (int)(x1 + a*(y-y1));
-            if (!this->isPointValid({x, y}))
-                return false;
-        }
-
-    }
-    return true;
-}
-
 bool ImageMoveFilter::isPointValid(ImagePoint point) const {
-    Expects(point.x < this->width);
-    Expects(point.y < this->height);
+    if (point.x < 0 || point.x >= this->width || point.y < 0 || point.y >= this->height)
+        return false;
 
     return this->validPointsMap[point.x + point.y * this->width];
 }
 
+bool ImageMoveFilter::isLineValid(ImagePoint from, ImagePoint to) const {
+    ImageMove imageMove = to - from;
+    if (std::abs(imageMove.x) > std::abs(imageMove.y)) {
+        float a = float(imageMove.y) / float(imageMove.x);
+        for (int x = from.x; x != to.x; x += sgn(imageMove.x)) {
+            int y = static_cast<int>(from.y + a * (x - from.x));
+            if (!this->isPointValid( { x, y }))
+                return false;
+        }
+    } else {
+        float a = float(imageMove.x) / float(imageMove.y);
+        for (int y = from.y; y != to.y; y += sgn(imageMove.y)) {
+            int x = static_cast<int>(from.x + a * (y - from.y));
+            if (!this->isPointValid( { x, y }))
+                return false;
+        }
+    }
+    return true;
+}
+
 ImageMoveFilter::ImagePoint ImageMoveFilter::indexToPoint(std::size_t index) const {
     Expects(index < this->validPointsMap.size());
-    return {index % this->width, index / this->width};
+    return {static_cast<int>(index % this->width), static_cast<int>(index / this->width)};
+}
+
+
+bool ImageMoveFilter::isMoveValid(Point from, Move move) const {
+    Point to = from + move;
+    ImagePoint imageFrom(from);
+    ImagePoint imageTo(to);
+
+    if (imageFrom == imageTo)
+        return true;
+
+    if (!isPointValid(imageTo))
+        return false;
+
+    return isLineValid(imageFrom, imageTo);
 }
 
 Point ImageMoveFilter::randomValidPoint() {

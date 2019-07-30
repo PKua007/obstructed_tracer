@@ -12,8 +12,8 @@
 
 class DefaultMoveFilter : public MoveFilter {
 public:
-    bool isMoveValid(Point tracer, Move move) const;
-    Point randomValidPoint();
+    bool isMoveValid(Point tracer, Move move) const override;
+    Point randomValidPoint() override;
 };
 
 #endif /* DEFAULTMOVEFILTER_H_ */

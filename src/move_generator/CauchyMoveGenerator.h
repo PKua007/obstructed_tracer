@@ -20,7 +20,7 @@ private:
 public:
     CauchyMoveGenerator(float width, unsigned int seed);
 
-    Move generateMove();
+    Move generateMove() override;
 };
 
 #endif /* CAUCHYMOVEGENERATOR_H_ */
