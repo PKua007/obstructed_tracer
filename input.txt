@@ -1,3 +1,4 @@
 sigma = 1
 numberOfSteps = 100000
+tracerRadius = 0
 imageFile = maze.ppm

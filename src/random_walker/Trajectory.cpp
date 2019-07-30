@@ -30,6 +30,10 @@ void Trajectory::addPoint(Point point) {
     this->data.push_back(point);
 }
 
+void Trajectory::addPoint(Tracer tracer) {
+    this->data.push_back(tracer.getPosition());
+}
+
 std::size_t Trajectory::getSize() const {
     return this->data.size();
 }

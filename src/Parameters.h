@@ -13,9 +13,13 @@
 
 
 class Parameters {
+private:
+    void validateParameters() const;
+
 public:
     float       sigma           = 1.f;
     std::size_t numberOfSteps   = 1000;
+    float       tracerRadius      = 0.f;
     std::string imageFile       = "";
 
     Parameters() = default;

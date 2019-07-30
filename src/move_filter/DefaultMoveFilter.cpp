@@ -7,10 +7,10 @@
 
 #include "DefaultMoveFilter.h"
 
-bool DefaultMoveFilter::isMoveValid(Point tracer, Move move) const {
+bool DefaultMoveFilter::isMoveValid(Tracer tracer, Move move) const {
     return true;
 }
 
-Point DefaultMoveFilter::randomValidPoint() {
-    return {0.f, 0.f};
+Tracer DefaultMoveFilter::randomValidTracer(float radius) {
+    return Tracer({0.f, 0.f}, radius);
 }

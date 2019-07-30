@@ -42,17 +42,23 @@ private:
     std::size_t width;
     std::size_t height;
     std::vector<bool> validPointsMap;
-    std::vector<std::size_t> validPointsIndices;
 
-    bool isPointValid(ImagePoint point) const;
-    bool isLineValid(ImagePoint from, ImagePoint to) const;
+    float radiusForTracerCache = -1.0;
+    std::vector<std::size_t> validTracerIndicesCache;
+
+    void rebuildValidTracersCache(float radius);
+
+    bool isPointValid(ImagePoint point, float pointRadius) const;
+    bool checkValidPointsMap(ImagePoint point) const;
+    bool isLineValid(ImagePoint from, ImagePoint to, float pointRadius) const;
+
     ImagePoint indexToPoint(std::size_t index) const;
 
 public:
     ImageMoveFilter(Image image, unsigned int seed);
 
-    bool isMoveValid(Point tracer, Move move) const override;
-    Point randomValidPoint() override;
+    bool isMoveValid(Tracer tracer, Move move) const override;
+    Tracer randomValidTracer(float radius) override;
 };
 
 #endif /* IMAGEMOVEFILTER_H_ */

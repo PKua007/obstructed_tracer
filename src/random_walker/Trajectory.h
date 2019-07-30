@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "Point.h"
+#include "Tracer.h"
 
 class Trajectory {
 private:
@@ -21,6 +22,7 @@ public:
     Trajectory(std::size_t numberOfPoints);
 
     void addPoint(Point point);
+    void addPoint(Tracer tracer);
 
     std::size_t getSize() const;
     Point operator[](std::size_t index) const;
