@@ -7,7 +7,7 @@
 
 #include "DefaultMoveFilter.h"
 
-bool DefaultMoveFilter::isMoveValid(Point tracer, Move move) const {
+bool DefaultMoveFilter::isMoveValid(Tracer tracer, Move move) const {
     return true;
 }
 

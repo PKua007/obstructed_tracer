@@ -25,9 +25,11 @@ Point Point::operator-(Move move) const {
 Point& Point::operator+=(Move move) {
     this->x += move.x;
     this->y += move.y;
+    return *this;
 }
 
 Point& Point::operator-=(Move move) {
     this->x -= move.x;
     this->y -= move.y;
+    return *this;
 }

@@ -51,7 +51,7 @@ private:
 public:
     ImageMoveFilter(Image image, unsigned int seed);
 
-    bool isMoveValid(Point tracer, Move move) const override;
+    bool isMoveValid(Tracer tracer, Move move) const override;
     Point randomValidPoint() override;
 };
 

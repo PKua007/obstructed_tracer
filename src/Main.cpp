@@ -50,7 +50,7 @@ int main(int argc, char **argv)
     std::random_device randomSeed;
     CauchyMoveGenerator moveGenerator(parameters.sigma, randomSeed());
     ImageMoveFilter moveFilter(image, randomSeed());
-    RandomWalker randomWalker(parameters.numberOfSteps, &moveGenerator, &moveFilter);
+    RandomWalker randomWalker(parameters.numberOfSteps, parameters.tracerRadius, &moveGenerator, &moveFilter);
     std::cout << "[main] Starting simulation..." << std::endl;
     Trajectory trajectory = randomWalker.run();
     std::cout << "[main] Finished. Initial position: " << trajectory.getFirst() << ", accepted steps: ";

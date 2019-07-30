@@ -81,7 +81,8 @@ ImageMoveFilter::ImagePoint ImageMoveFilter::indexToPoint(std::size_t index) con
 }
 
 
-bool ImageMoveFilter::isMoveValid(Point from, Move move) const {
+bool ImageMoveFilter::isMoveValid(Tracer tracer, Move move) const {
+    Point from = tracer.getPosition();
     Point to = from + move;
     ImagePoint imageFrom(from);
     ImagePoint imageTo(to);
