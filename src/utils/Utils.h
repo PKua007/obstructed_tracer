@@ -28,4 +28,8 @@ int lastIndexOf(const std::string &s, char target);
 
 void die(const std::string & reason);
 
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
 #endif /* UTILS_C_ */

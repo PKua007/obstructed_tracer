@@ -9,6 +9,7 @@
 
 #include "ImageMoveFilter.h"
 #include "../utils/Assertions.h"
+#include "../utils/Utils.h"
 
 ImageMoveFilter::ImageMoveFilter(Image image, unsigned int seed) :
         width{image.getWidth()}, height{image.getHeight()} {
@@ -43,7 +44,29 @@ bool ImageMoveFilter::isMoveValid(Point tracer, Move move) const {
     ImagePoint imageFinalTracer = {static_cast<std::size_t>(finalTracer.x), static_cast<std::size_t>(finalTracer.y)};
     Assert(imageFinalTracer.x < this->width && imageFinalTracer.y < this->height);
 
-    return this->isPointValid(imageFinalTracer);
+    if (!isPointValid(imageFinalTracer))
+        return false;
+
+    int x1 = tracer.x, x2 = finalTracer.x;
+    int y1 = tracer.y, y2 = finalTracer.y;
+    if (x1==x2 && y1==y2) return true;
+    if (std::abs(x2-x1)>std::abs(y2-y1)){
+        float a = float(y2-y1)/(x2-x1);
+        for(int x=(int)x1; x!=(int)x2; x += sgn(x2-x1)){
+            int y = (int)(y1 + a*(x-x1));
+            if (!this->isPointValid({x, y}))
+                return false;
+        }
+    }else{
+        float a = float(x2-x1)/(y2-y1);
+        for(int y=(int)y1; y!=(int)y2; y += sgn(y2-y1)){
+            int x = (int)(x1 + a*(y-y1));
+            if (!this->isPointValid({x, y}))
+                return false;
+        }
+
+    }
+    return true;
 }
 
 bool ImageMoveFilter::isPointValid(ImagePoint point) const {
