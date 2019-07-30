@@ -22,8 +22,7 @@ RandomWalker::RandomWalker(std::size_t numberOfSteps, float tracerRadius, MoveGe
 Trajectory RandomWalker::run() {
     Trajectory trajectory(this->numberOfSteps + 1);
 
-    Point initialPosition = this->moveFilter->randomValidPoint();
-    Tracer tracer(initialPosition, this->tracerRadius);
+    Tracer tracer = this->moveFilter->randomValidTracer(this->tracerRadius);
     trajectory.addPoint(tracer);
 
     for (std::size_t i = 0; i < this->numberOfSteps; i++) {

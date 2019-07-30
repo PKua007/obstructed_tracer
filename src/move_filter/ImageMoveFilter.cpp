@@ -25,7 +25,7 @@ ImageMoveFilter::ImageMove ImageMoveFilter::ImagePoint::operator-(ImagePoint sec
     return {this->x - second.x, this->y - second.y};
 }
 
-ImageMoveFilter::ImageMoveFilter(Image image, float tracerRadius, unsigned int seed) :
+ImageMoveFilter::ImageMoveFilter(Image image, unsigned int seed) :
         width{image.getWidth()}, height{image.getHeight()} {
     this->randomGenerator.seed(seed);
     this->validPointsMap.reserve(image.getNumberOfPixels());
@@ -40,18 +40,27 @@ ImageMoveFilter::ImageMoveFilter(Image image, float tracerRadius, unsigned int s
                 this->validPointsMap.push_back(false);
         }
     }
+}
 
+void ImageMoveFilter::rebuildValidTracersCache(float radius) {
+    Expects(radius >= 0.f);
+
+    if (this->radiusForTracerCache == radius)
+        return;
+
+    this->radiusForTracerCache = radius;
+    this->validTracerIndicesCache.clear();
     for (std::size_t i = 0; i < this->validPointsMap.size(); i++)
-        if (this->isPointValid(this->indexToPoint(i), tracerRadius))
-            this->validPointsIndices.push_back(i);
+        if (this->isPointValid(this->indexToPoint(i), radius))
+            this->validTracerIndicesCache.push_back(i);
 
-    if (this->validPointsIndices.empty())
+    if (this->validTracerIndicesCache.empty())
         throw std::runtime_error("No valid points found in a given image");
-    std::cout << "[ImageMoveFilter::ImageMoveFilter] Found " << this->validPointsIndices.size();
+    std::cout << "[ImageMoveFilter::rebuildValidTracersCache] Found " << this->validTracerIndicesCache.size();
     std::cout << " valid starting pixels out of " << this->validPointsMap.size() << " total" << std::endl;
 }
 
-bool ImageMoveFilter::isPointValid(ImagePoint point) const {
+bool ImageMoveFilter::checkValidPointsMap(ImagePoint point) const {
     return this->validPointsMap[point.x + point.y * this->width];
 }
 
@@ -65,14 +74,14 @@ bool ImageMoveFilter::isPointValid(ImagePoint point, float pointRadius) const {
         return false;
 
     if (pointRadius == 0.f)
-        return this->isPointValid(point);
+        return this->checkValidPointsMap(point);
 
     for (int x = -intPointRadius; x <= intPointRadius; x++) {
         for (int y = -intPointRadius; y <= intPointRadius; y++) {
             if (x*x + y*y > pointRadius*pointRadius)
                 continue;
 
-            if (!this->isPointValid({point.x + x, point.y + y}))
+            if (!this->checkValidPointsMap({point.x + x, point.y + y}))
                 return false;
         }
     }
@@ -120,15 +129,19 @@ bool ImageMoveFilter::isMoveValid(Tracer tracer, Move move) const {
     return isLineValid(imageFrom, imageTo, tracer.getRadius());
 }
 
-Point ImageMoveFilter::randomValidPoint() {
-    float randomPixelFloatIndex = this->uniformDistribution(this->randomGenerator) * this->validPointsIndices.size();
-    std::size_t randomPixelIndex = static_cast<std::size_t>(randomPixelFloatIndex);
-    Assert(randomPixelIndex < this->validPointsIndices.size());
-    std::size_t randomValidPointIndex = this->validPointsIndices[randomPixelIndex];
-    ImagePoint randomValidPoint = this->indexToPoint(randomValidPointIndex);
+Tracer ImageMoveFilter::randomValidTracer(float radius) {
+    Expects(radius >= 0.f);
+    this->rebuildValidTracersCache(radius);
 
-    float randomPixelOffsetX = this->uniformDistribution(this->randomGenerator);
-    float randomPixelOffsetY = this->uniformDistribution(this->randomGenerator);
+    float floatCacheIndex = this->uniformDistribution(this->randomGenerator) * this->validTracerIndicesCache.size();
+    std::size_t cacheIndex = static_cast<std::size_t>(floatCacheIndex);
+    Assert(cacheIndex < this->validTracerIndicesCache.size());
+    std::size_t tracerIndex = this->validTracerIndicesCache[cacheIndex];
+    ImagePoint imagePosition = this->indexToPoint(tracerIndex);
 
-    return {randomValidPoint.x + randomPixelOffsetX, randomValidPoint.y + randomPixelOffsetY};
+    float pixelOffsetX = this->uniformDistribution(this->randomGenerator);
+    float pixelOffsetY = this->uniformDistribution(this->randomGenerator);
+
+    Point tracerPosition = {imagePosition.x + pixelOffsetX, imagePosition.y + pixelOffsetY};
+    return Tracer(tracerPosition, radius);
 }
