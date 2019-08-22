@@ -8,27 +8,28 @@
 #include <iostream>
 
 #include "ImageMoveFilter.h"
-#include "../utils/Assertions.h"
-#include "../utils/Utils.h"
+#include "../../utils/Assertions.h"
+#include "../../utils/Utils.h"
 
+namespace {
+    struct ImageMove {
+        int x{};
+        int y{};
 
-bool ImageMoveFilter::ImagePoint::operator==(ImageMoveFilter::ImagePoint second) const {
-    return this->x == second.x && this->y == second.y;
+        ImageMove() = default;
+        ImageMove(int x, int y) : x{x}, y{y} { };
+    };
+
+    ImageMove operator-(ImagePoint p1, ImagePoint p2) {
+        return {p1.x - p2.x, p1.y - p2.y};
+    }
 }
 
-bool ImageMoveFilter::ImagePoint::operator!=(ImageMoveFilter::ImagePoint second) const {
-    return !(*this == second);
-}
-
-
-ImageMoveFilter::ImageMove ImageMoveFilter::ImagePoint::operator-(ImagePoint second) const {
-    return {this->x - second.x, this->y - second.y};
-}
-
-ImageMoveFilter::ImageMoveFilter(Image image, unsigned int seed) :
-        width{image.getWidth()}, height{image.getHeight()} {
+ImageMoveFilter::ImageMoveFilter(Image image, ImageBoundaryConditions *imageBC, unsigned int seed) :
+        width{image.getWidth()}, height{image.getHeight()}, imageBC{imageBC} {
     this->randomGenerator.seed(seed);
     this->validPointsMap.reserve(image.getNumberOfPixels());
+    this->imageBC->installOnImage(image);
 
     // Image y axis starts from left upper corner downwards, so image is scanned from the bottom left, because
     // validPointsMap is in "normal" coordinate system, with (0, 0) in left bottom corner
@@ -56,6 +57,7 @@ void ImageMoveFilter::rebuildValidTracersCache(float radius) {
 }
 
 bool ImageMoveFilter::checkValidPointsMap(ImagePoint point) const {
+    point = this->imageBC->applyOnImagePoint(point);
     return this->validPointsMap[point.x + point.y * this->width];
 }
 
@@ -63,9 +65,7 @@ bool ImageMoveFilter::isPointValid(ImagePoint point, float pointRadius) const {
     Expects(pointRadius >= 0.f);
 
     int intPointRadius = static_cast<int>(pointRadius);
-    if (point.x - intPointRadius < 0 || point.x + intPointRadius >= this->width)
-        return false;
-    if (point.y - intPointRadius < 0 || point.y + intPointRadius >= this->height)
+    if (!this->imageBC->isImagePointInBounds(point, intPointRadius))
         return false;
 
     if (pointRadius == 0.f)
@@ -103,7 +103,7 @@ bool ImageMoveFilter::isLineValid(ImagePoint from, ImagePoint to, float pointRad
     return true;
 }
 
-ImageMoveFilter::ImagePoint ImageMoveFilter::indexToPoint(std::size_t index) const {
+ImagePoint ImageMoveFilter::indexToPoint(std::size_t index) const {
     Expects(index < this->validPointsMap.size());
     return {static_cast<int>(index % this->width), static_cast<int>(index / this->width)};
 }
