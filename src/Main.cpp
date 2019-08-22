@@ -51,10 +51,13 @@ int main(int argc, char **argv)
     CauchyMoveGenerator moveGenerator(parameters.sigma, randomSeed());
     ImageMoveFilter moveFilter(image, randomSeed());
     RandomWalker randomWalker(parameters.numberOfSteps, parameters.tracerRadius, &moveGenerator, &moveFilter);
+
+    std::cout << "[main] Found " << moveFilter.getNumberOfValidTracers(parameters.tracerRadius) << " valid starting ";
+    std::cout << "points out of " << moveFilter.getNumberOfAllPoints() << std::endl;
     std::cout << "[main] Starting simulation..." << std::endl;
     Trajectory trajectory = randomWalker.run();
     std::cout << "[main] Finished. Initial position: " << trajectory.getFirst() << ", accepted steps: ";
-    std::cout << (trajectory.getSize() - 1) << ", final position: " << trajectory.getLast() << std::endl;
+    std::cout << trajectory.getNumberOfAcceptedSteps() << ", final position: " << trajectory.getLast() << std::endl;
 
     std::string outputFilename = argv[2];
     std::ofstream output(outputFilename);

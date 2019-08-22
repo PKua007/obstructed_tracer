@@ -53,11 +53,6 @@ void ImageMoveFilter::rebuildValidTracersCache(float radius) {
     for (std::size_t i = 0; i < this->validPointsMap.size(); i++)
         if (this->isPointValid(this->indexToPoint(i), radius))
             this->validTracerIndicesCache.push_back(i);
-
-    if (this->validTracerIndicesCache.empty())
-        throw std::runtime_error("No valid points found in a given image");
-    std::cout << "[ImageMoveFilter::rebuildValidTracersCache] Found " << this->validTracerIndicesCache.size();
-    std::cout << " valid starting pixels out of " << this->validPointsMap.size() << " total" << std::endl;
 }
 
 bool ImageMoveFilter::checkValidPointsMap(ImagePoint point) const {
@@ -131,7 +126,10 @@ bool ImageMoveFilter::isMoveValid(Tracer tracer, Move move) const {
 
 Tracer ImageMoveFilter::randomValidTracer(float radius) {
     Expects(radius >= 0.f);
+
     this->rebuildValidTracersCache(radius);
+    if (this->validTracerIndicesCache.empty())
+        throw std::runtime_error("No valid points found in a given image");
 
     float floatCacheIndex = this->uniformDistribution(this->randomGenerator) * this->validTracerIndicesCache.size();
     std::size_t cacheIndex = static_cast<std::size_t>(floatCacheIndex);
@@ -144,4 +142,13 @@ Tracer ImageMoveFilter::randomValidTracer(float radius) {
 
     Point tracerPosition = {imagePosition.x + pixelOffsetX, imagePosition.y + pixelOffsetY};
     return Tracer(tracerPosition, radius);
+}
+
+std::size_t ImageMoveFilter::getNumberOfAllPoints() const {
+    return this->validPointsMap.size();
+}
+
+std::size_t ImageMoveFilter::getNumberOfValidTracers(float radius) {
+    this->rebuildValidTracersCache(radius);
+    return this->validTracerIndicesCache.size();
 }
