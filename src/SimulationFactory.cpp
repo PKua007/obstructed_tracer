@@ -18,65 +18,80 @@
 #include "image/PPMImageReader.h"
 #include "utils/Assertions.h"
 
-SimulationFactory::SimulationFactory(Parameters parameters, std::ostream &logger) {
-
-    std::random_device randomSeed;
-
+std::unique_ptr<MoveGenerator> SimulationFactory::createMoveGenerator(const Parameters& parameters) {
     std::istringstream moveGeneratorStream(parameters.moveGenerator);
     std::string moveGeneratorType;
     float sigma;
     moveGeneratorStream >> moveGeneratorType >> sigma;
     if (!moveGeneratorStream)
         throw std::runtime_error("Malformed MoveGenerator parameters");
-    Validate(sigma >= 0.f);
 
+    Validate(sigma >= 0.f);
     if (moveGeneratorType == "GaussianMoveGenerator")
-        this->moveGenerator = std::unique_ptr<MoveGenerator>(new GaussianMoveGenerator(sigma, randomSeed()));
+        return std::unique_ptr<MoveGenerator>(new GaussianMoveGenerator(sigma, this->randomSeed()));
     else if (moveGeneratorType == "CauchyMoveGenerator")
-        this->moveGenerator = std::unique_ptr<MoveGenerator>(new CauchyMoveGenerator(sigma, randomSeed()));
+        return std::unique_ptr<MoveGenerator>(new CauchyMoveGenerator(sigma, this->randomSeed()));
     else
         throw std::runtime_error("Unknown MoveGenerator: " + moveGeneratorType);
+}
 
+std::unique_ptr<ImageBoundaryConditions>
+SimulationFactory::createImageBoundaryConditions(std::istringstream& moveFilterStream) {
+    std::string imageBCType;
+    moveFilterStream >> imageBCType;
+    if (!moveFilterStream)
+        throw std::runtime_error("Malformed ImageMoveFilter parameters");
+
+    if (imageBCType == "WallBoundaryConditions")
+        return std::unique_ptr<ImageBoundaryConditions>(new WallBoundaryConditions());
+    else if (imageBCType == "PeriodicBoundaryConditions")
+        return std::unique_ptr<ImageBoundaryConditions>(new PeriodicBoundaryConditions());
+    else
+        throw std::runtime_error("Unknown ImageBoundaryConditions: " + imageBCType);
+}
+
+std::unique_ptr<MoveFilter> SimulationFactory::createImageMoveFilter(const Parameters& parameters,
+                                                                     std::istringstream& moveFilterStream,
+                                                                     std::ostream& logger) {
+    std::string imageFilename;
+    moveFilterStream >> imageFilename;
+    if (!moveFilterStream)
+        throw std::runtime_error("Malformed ImageMoveFilter parameters");
+
+    std::ifstream imageFile(imageFilename);
+    if (!imageFile)
+        throw std::runtime_error("Cannot open " + imageFilename + " to load image");
+
+    PPMImageReader imageReader;
+    Image image = imageReader.read(imageFile);
+    logger << "[SimulationFactory] Loaded image " << imageFilename << " (" << image.getWidth() << "px x ";
+    logger << image.getHeight() << "px)" << std::endl;
+
+    this->imageBC = createImageBoundaryConditions(moveFilterStream);
+
+    auto imageMoveFilter = new ImageMoveFilter(image, this->imageBC.get(), randomSeed());
+    logger << "[SimulationFactory] Found " << imageMoveFilter->getNumberOfValidTracers(parameters.tracerRadius);
+    logger << " valid starting points out of " << imageMoveFilter->getNumberOfAllPoints() << std::endl;
+    return std::unique_ptr<MoveFilter>(imageMoveFilter);
+}
+
+std::unique_ptr<MoveFilter> SimulationFactory::createMoveFilter(const Parameters& parameters, std::ostream& logger) {
     std::istringstream moveFilterStream(parameters.moveFilter);
     std::string moveFilterType;
     moveFilterStream >> moveFilterType;
-
-    if (moveFilterType == "DefaultMoveFilter") {
-        this->moveFilter = std::unique_ptr<MoveFilter>(new DefaultMoveFilter());
-    } else if (moveFilterType == "ImageMoveFilter") {
-        std::string imageFilename;
-        std::string imageBCType;
-        moveFilterStream >> imageFilename >> imageBCType;
-        if (!moveFilterStream)
-            throw std::runtime_error("Malformed ImageMoveFilter parameters");
-
-        std::ifstream imageFile(imageFilename);
-        if (!imageFile)
-            throw std::runtime_error("Cannot open " + imageFilename + " to load image");
-
-        PPMImageReader imageReader;
-        Image image = imageReader.read(imageFile);
-        logger << "[SimulationFactory] Loaded image " << imageFilename << " (" << image.getWidth() << "px x ";
-        logger << image.getHeight() << "px)" << std::endl;
-
-        if (imageBCType == "WallBoundaryConditions")
-            this->imageBC = std::unique_ptr<ImageBoundaryConditions>(new WallBoundaryConditions());
-        else if (imageBCType == "PeriodicBoundaryConditions")
-            this->imageBC = std::unique_ptr<PeriodicBoundaryConditions>(new PeriodicBoundaryConditions());
-        else
-            throw std::runtime_error("Unknown ImageBoundaryConditions: " + imageBCType);
-
-        auto imageMoveFilter = new ImageMoveFilter(image, this->imageBC.get(), randomSeed());
-        this->moveFilter = std::unique_ptr<MoveFilter>(imageMoveFilter);
-
-        logger << "[SimulationFactory] Found ";
-        logger << imageMoveFilter->getNumberOfValidTracers(parameters.tracerRadius) << " valid starting points out of ";
-        logger << imageMoveFilter->getNumberOfAllPoints() << std::endl;
-    } else {
+    if (moveFilterType == "DefaultMoveFilter")
+        return std::unique_ptr<MoveFilter>(new DefaultMoveFilter());
+    else if (moveFilterType == "ImageMoveFilter")
+        return createImageMoveFilter(parameters, moveFilterStream, logger);
+    else
         throw std::runtime_error("Unknown MoveFilter: " + moveFilterType);
-    }
+}
 
+SimulationFactory::SimulationFactory(const Parameters &parameters, std::ostream &logger) {
+    this->moveGenerator = createMoveGenerator(parameters);
+    this->moveFilter = createMoveFilter(parameters, logger);
     Move drift = {parameters.driftX, parameters.driftY};
+
     this->randomWalker = std::unique_ptr<RandomWalker>(
         new RandomWalker(parameters.numberOfSteps, parameters.tracerRadius, drift, this->moveGenerator.get(),
                          this->moveFilter.get())
