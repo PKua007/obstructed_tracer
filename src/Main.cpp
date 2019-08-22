@@ -16,13 +16,7 @@
 
 #include "Parameters.h"
 #include "utils/Utils.h"
-#include "random_walker/RandomWalker.h"
-#include "move_generator/GaussianMoveGenerator.h"
-#include "move_generator/CauchyMoveGenerator.h"
-#include "move_filter/DefaultMoveFilter.h"
-#include "move_filter/image_move_filter/ImageMoveFilter.h"
-#include "move_filter/image_move_filter/WallBoundaryConditions.h"
-#include "image/PPMImageReader.h"
+#include "SimulationFactory.h"
 
 int main(int argc, char **argv)
 {
@@ -40,25 +34,10 @@ int main(int argc, char **argv)
     parameters.print(std::cout);
     std::cout << std::endl;
 
-    std::ifstream imageFile(parameters.imageFile);
-    if (!imageFile)
-        die("[main] Cannot open " + parameters.imageFile + " to load image");
-    PPMImageReader imageReader;
-    Image image = imageReader.read(imageFile);
-    std::cout << "[main] Loaded image " << parameters.imageFile << " (" << image.getWidth() << "px x ";
-    std::cout << image.getHeight() << "px)" << std::endl;
+    SimulationFactory simulationFactory(parameters, std::cout);
 
-    std::random_device randomSeed;
-    CauchyMoveGenerator moveGenerator(parameters.sigma, randomSeed());
-    WallBoundaryConditions wallBC;
-    ImageMoveFilter moveFilter(image, &wallBC, randomSeed());
-    Move drift = {parameters.driftX, parameters.driftY};
-    RandomWalker randomWalker(parameters.numberOfSteps, parameters.tracerRadius, drift, &moveGenerator, &moveFilter);
-
-    std::cout << "[main] Found " << moveFilter.getNumberOfValidTracers(parameters.tracerRadius) << " valid starting ";
-    std::cout << "points out of " << moveFilter.getNumberOfAllPoints() << std::endl;
     std::cout << "[main] Starting simulation..." << std::endl;
-    Trajectory trajectory = randomWalker.run();
+    Trajectory trajectory = simulationFactory.getRandomWalker().run();
     std::cout << "[main] Finished. Initial position: " << trajectory.getFirst() << ", accepted steps: ";
     std::cout << trajectory.getNumberOfAcceptedSteps() << ", final position: " << trajectory.getLast() << std::endl;
 
