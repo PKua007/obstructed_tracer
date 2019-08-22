@@ -40,8 +40,20 @@ bool ImageMoveFilter::WallBoundaryConditions::isImagePointInBounds(ImagePoint im
 }
 
 ImageMoveFilter::ImagePoint ImageMoveFilter::WallBoundaryConditions::applyOnImagePoint(ImagePoint imagePoint) const {
-    //return {mod(imagePoint.x, this->width), mod(imagePoint.y, this->height)};
     return imagePoint;
+}
+
+void ImageMoveFilter::PeriodicBoundaryConditions::installOnImage(const Image& image) {
+    this->width = image.getWidth();
+    this->height = image.getHeight();
+}
+
+bool ImageMoveFilter::PeriodicBoundaryConditions::isImagePointInBounds(ImagePoint imagePoint, int radius) const {
+    return true;
+}
+
+ImageMoveFilter::ImagePoint ImageMoveFilter::PeriodicBoundaryConditions::applyOnImagePoint(ImagePoint imagePoint) const {
+    return {mod(imagePoint.x, this->width), mod(imagePoint.y, this->height)};
 }
 
 ImageMoveFilter::ImageMoveFilter(Image image, ImageBoundaryConditions *imageBC, unsigned int seed) :
