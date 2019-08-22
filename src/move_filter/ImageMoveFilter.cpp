@@ -88,14 +88,14 @@ bool ImageMoveFilter::isLineValid(ImagePoint from, ImagePoint to, float pointRad
     if (std::abs(imageMove.x) > std::abs(imageMove.y)) {
         float a = float(imageMove.y) / float(imageMove.x);
         for (int x = from.x; x != to.x; x += sgn(imageMove.x)) {
-            int y = static_cast<int>(from.y + a * (x - from.x));
+            int y = static_cast<int>(std::round(from.y + a * (x - from.x)));
             if (!this->isPointValid({ x, y }, pointRadius))
                 return false;
         }
     } else {
         float a = float(imageMove.x) / float(imageMove.y);
         for (int y = from.y; y != to.y; y += sgn(imageMove.y)) {
-            int x = static_cast<int>(from.x + a * (y - from.y));
+            int x = static_cast<int>(std::round(from.x + a * (y - from.y)));
             if (!this->isPointValid({ x, y }, pointRadius))
                 return false;
         }
