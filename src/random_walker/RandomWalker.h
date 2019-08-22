@@ -18,13 +18,15 @@
 
 class RandomWalker {
 private:
-    std::size_t numberOfSteps{};
-    float tracerRadius{};
-    MoveGenerator *moveGenerator{};
-    MoveFilter *moveFilter{};
+    std::size_t     numberOfSteps{};
+    float           tracerRadius{};
+    Move            drift{};
+    MoveGenerator   *moveGenerator{};
+    MoveFilter      *moveFilter{};
 
 public:
-    RandomWalker(std::size_t numberOfSteps, float tracerRadius, MoveGenerator *moveGenerator, MoveFilter *moveFilter);
+    RandomWalker(std::size_t numberOfSteps, float tracerRadius, Move drift, MoveGenerator *moveGenerator,
+                 MoveFilter *moveFilter);
 
     Trajectory run();
 };

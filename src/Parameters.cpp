@@ -23,6 +23,10 @@ Parameters::Parameters(std::istream& input) {
             this->tracerRadius = config.getFloat(key);
         else if (key == "imageFile")
             this->imageFile = config.getString(key);
+        else if (key == "driftX")
+            this->driftX = config.getFloat(key);
+        else if (key == "driftY")
+            this->driftY = config.getFloat(key);
         else
             std::cerr << "[Parameters::Parameters] Warning: unknown parameter " << key << std::endl;
     }

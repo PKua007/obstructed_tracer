@@ -50,7 +50,8 @@ int main(int argc, char **argv)
     std::random_device randomSeed;
     CauchyMoveGenerator moveGenerator(parameters.sigma, randomSeed());
     ImageMoveFilter moveFilter(image, randomSeed());
-    RandomWalker randomWalker(parameters.numberOfSteps, parameters.tracerRadius, &moveGenerator, &moveFilter);
+    Move drift = {parameters.driftX, parameters.driftY};
+    RandomWalker randomWalker(parameters.numberOfSteps, parameters.tracerRadius, drift, &moveGenerator, &moveFilter);
 
     std::cout << "[main] Found " << moveFilter.getNumberOfValidTracers(parameters.tracerRadius) << " valid starting ";
     std::cout << "points out of " << moveFilter.getNumberOfAllPoints() << std::endl;

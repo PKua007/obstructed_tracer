@@ -19,8 +19,10 @@ private:
 public:
     float       sigma           = 1.f;
     std::size_t numberOfSteps   = 1000;
-    float       tracerRadius      = 0.f;
+    float       tracerRadius    = 0.f;
     std::string imageFile       = "";
+    float       driftX          = 0.f;
+    float       driftY          = 0.f;
 
     Parameters() = default;
     Parameters(std::istream &input);
