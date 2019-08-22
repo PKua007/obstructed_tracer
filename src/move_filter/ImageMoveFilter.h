@@ -38,11 +38,24 @@ public:
 
     class ImageBoundaryConditions {
     public:
-        virtual ~ImageBoundaryConditions();
+        virtual ~ImageBoundaryConditions() = default;
 
         virtual void installOnImage(const Image &image) = 0;
-        virtual bool isImagePointInBounds(ImagePoint imagePoint) = 0;
-        virtual ImagePoint applyOnImagePoint(ImagePoint imagePoint) = 0;
+        virtual bool isImagePointInBounds(ImagePoint imagePoint, int radius) const = 0;
+        virtual ImagePoint applyOnImagePoint(ImagePoint imagePoint) const = 0;
+    };
+
+    class WallBoundaryConditions : public ImageBoundaryConditions {
+    private:
+        std::size_t width{};
+        std::size_t height{};
+
+        //int mod(int a, int b) const { return (a % b + b) % b; }
+
+    public:
+        void installOnImage(const Image &image) override;
+        bool isImagePointInBounds(ImagePoint imagePoint, int radius) const override;
+        ImagePoint applyOnImagePoint(ImagePoint imagePoint) const override;
     };
 
 private:
@@ -51,6 +64,7 @@ private:
 
     std::size_t width;
     std::size_t height;
+    ImageBoundaryConditions *imageBC;
     std::vector<bool> validPointsMap;
 
     float radiusForTracerCache = -1.0;
@@ -65,7 +79,7 @@ private:
     ImagePoint indexToPoint(std::size_t index) const;
 
 public:
-    ImageMoveFilter(Image image, unsigned int seed);
+    ImageMoveFilter(Image image, ImageBoundaryConditions *imageBC, unsigned int seed);
 
     bool isMoveValid(Tracer tracer, Move move) const override;
     Tracer randomValidTracer(float radius) override;

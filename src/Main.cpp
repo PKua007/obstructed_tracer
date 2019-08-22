@@ -49,7 +49,8 @@ int main(int argc, char **argv)
 
     std::random_device randomSeed;
     CauchyMoveGenerator moveGenerator(parameters.sigma, randomSeed());
-    ImageMoveFilter moveFilter(image, randomSeed());
+    ImageMoveFilter::WallBoundaryConditions wallBC;
+    ImageMoveFilter moveFilter(image, &wallBC, randomSeed());
     Move drift = {parameters.driftX, parameters.driftY};
     RandomWalker randomWalker(parameters.numberOfSteps, parameters.tracerRadius, drift, &moveGenerator, &moveFilter);
 
