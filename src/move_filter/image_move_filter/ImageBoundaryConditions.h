@@ -9,7 +9,7 @@
 #define IMAGEBOUNDARYCONDITIONS_H_
 
 #include "ImagePoint.h"
-#include "../image/Image.h"
+#include "../../image/Image.h"
 
 class ImageBoundaryConditions {
 public:

@@ -20,8 +20,8 @@
 #include "move_generator/GaussianMoveGenerator.h"
 #include "move_generator/CauchyMoveGenerator.h"
 #include "move_filter/DefaultMoveFilter.h"
-#include "move_filter/ImageMoveFilter.h"
-#include "move_filter/WallBoundaryConditions.h"
+#include "move_filter/image_move_filter/ImageMoveFilter.h"
+#include "move_filter/image_move_filter/WallBoundaryConditions.h"
 #include "image/PPMImageReader.h"
 
 int main(int argc, char **argv)
