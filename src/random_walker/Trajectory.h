@@ -16,15 +16,17 @@
 class Trajectory {
 private:
     std::vector<Point> data;
+    std::size_t acceptedSteps{};
 
 public:
     Trajectory() = default;
     Trajectory(std::size_t numberOfPoints);
 
-    void addPoint(Point point);
-    void addPoint(Tracer tracer);
+    void stayStill();
+    void moveToPoint(Tracer tracer);
 
     std::size_t getSize() const;
+    std::size_t getNumberOfAcceptedSteps() const;
     Point operator[](std::size_t index) const;
     Point getFirst() const;
     Point getLast() const;

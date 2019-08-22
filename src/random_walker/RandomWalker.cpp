@@ -23,13 +23,15 @@ Trajectory RandomWalker::run() {
     Trajectory trajectory(this->numberOfSteps + 1);
 
     Tracer tracer = this->moveFilter->randomValidTracer(this->tracerRadius);
-    trajectory.addPoint(tracer);
+    trajectory.moveToPoint(tracer);
 
     for (std::size_t i = 0; i < this->numberOfSteps; i++) {
         Move move = this->moveGenerator->generateMove();
         if (this->moveFilter->isMoveValid(tracer, move)) {
             tracer += move;
-            trajectory.addPoint(tracer);
+            trajectory.moveToPoint(tracer);
+        } else {
+            trajectory.stayStill();
         }
     }
 
