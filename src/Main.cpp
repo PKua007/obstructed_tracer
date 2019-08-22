@@ -21,6 +21,7 @@
 #include "move_generator/CauchyMoveGenerator.h"
 #include "move_filter/DefaultMoveFilter.h"
 #include "move_filter/ImageMoveFilter.h"
+#include "move_filter/WallBoundaryConditions.h"
 #include "image/PPMImageReader.h"
 
 int main(int argc, char **argv)
@@ -49,7 +50,7 @@ int main(int argc, char **argv)
 
     std::random_device randomSeed;
     CauchyMoveGenerator moveGenerator(parameters.sigma, randomSeed());
-    ImageMoveFilter::PeriodicBoundaryConditions wallBC;
+    WallBoundaryConditions wallBC;
     ImageMoveFilter moveFilter(image, &wallBC, randomSeed());
     Move drift = {parameters.driftX, parameters.driftY};
     RandomWalker randomWalker(parameters.numberOfSteps, parameters.tracerRadius, drift, &moveGenerator, &moveFilter);

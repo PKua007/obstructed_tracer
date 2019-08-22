@@ -25,37 +25,6 @@ ImageMoveFilter::ImageMove ImageMoveFilter::ImagePoint::operator-(ImagePoint sec
     return {this->x - second.x, this->y - second.y};
 }
 
-void ImageMoveFilter::WallBoundaryConditions::installOnImage(const Image& image) {
-    this->width = image.getWidth();
-    this->height = image.getHeight();
-}
-
-bool ImageMoveFilter::WallBoundaryConditions::isImagePointInBounds(ImagePoint imagePoint, int radius) const {
-    if (imagePoint.x - radius < 0 || imagePoint.x + radius >= this->width)
-        return false;
-    else if (imagePoint.y - radius < 0 || imagePoint.y + radius >= this->height)
-        return false;
-    else
-        return true;
-}
-
-ImageMoveFilter::ImagePoint ImageMoveFilter::WallBoundaryConditions::applyOnImagePoint(ImagePoint imagePoint) const {
-    return imagePoint;
-}
-
-void ImageMoveFilter::PeriodicBoundaryConditions::installOnImage(const Image& image) {
-    this->width = image.getWidth();
-    this->height = image.getHeight();
-}
-
-bool ImageMoveFilter::PeriodicBoundaryConditions::isImagePointInBounds(ImagePoint imagePoint, int radius) const {
-    return true;
-}
-
-ImageMoveFilter::ImagePoint ImageMoveFilter::PeriodicBoundaryConditions::applyOnImagePoint(ImagePoint imagePoint) const {
-    return {mod(imagePoint.x, this->width), mod(imagePoint.y, this->height)};
-}
-
 ImageMoveFilter::ImageMoveFilter(Image image, ImageBoundaryConditions *imageBC, unsigned int seed) :
         width{image.getWidth()}, height{image.getHeight()}, imageBC{imageBC} {
     this->randomGenerator.seed(seed);

@@ -45,30 +45,6 @@ public:
         virtual ImagePoint applyOnImagePoint(ImagePoint imagePoint) const = 0;
     };
 
-    class WallBoundaryConditions : public ImageBoundaryConditions {
-    private:
-        std::size_t width{};
-        std::size_t height{};
-
-    public:
-        void installOnImage(const Image &image) override;
-        bool isImagePointInBounds(ImagePoint imagePoint, int radius) const override;
-        ImagePoint applyOnImagePoint(ImagePoint imagePoint) const override;
-    };
-
-    class PeriodicBoundaryConditions : public ImageBoundaryConditions {
-    private:
-        std::size_t width{};
-        std::size_t height{};
-
-        int mod(int a, int b) const { return (a % b + b) % b; }
-
-    public:
-        void installOnImage(const Image &image) override;
-        bool isImagePointInBounds(ImagePoint imagePoint, int radius) const override;
-        ImagePoint applyOnImagePoint(ImagePoint imagePoint) const override;
-    };
-
 private:
     std::mt19937 randomGenerator;
     std::uniform_real_distribution<float> uniformDistribution{0.f, 1.f};
