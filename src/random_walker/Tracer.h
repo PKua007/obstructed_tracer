@@ -24,7 +24,10 @@ public:
     float getRadius() const { return radius; }
     void setRadius(float radius) { this->radius = radius; }
 
-    Tracer &operator+=(Move move);
+    Tracer &operator+=(Move move) {
+        this->position += move;
+        return *this;
+    }
 };
 
 #endif /* TRACER_H_ */
