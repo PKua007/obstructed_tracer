@@ -39,6 +39,8 @@ void Parameters::print(std::ostream& out) {
     out << "numberOfSteps : " << this->numberOfSteps << std::endl;
     out << "tracerRadius  : " << this->tracerRadius << std::endl;
     out << "imageFile     : " << this->imageFile << std::endl;
+    out << "driftX        : " << this->driftX << std::endl;
+    out << "driftY        : " << this->driftY << std::endl;
 }
 
 void Parameters::validateParameters() const {
