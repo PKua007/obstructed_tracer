@@ -12,10 +12,10 @@ void PeriodicBoundaryConditions::installOnImage(const Image& image) {
     this->height = image.getHeight();
 }
 
-bool PeriodicBoundaryConditions::isImagePointInBounds(ImageMoveFilter::ImagePoint imagePoint, int radius) const {
+bool PeriodicBoundaryConditions::isImagePointInBounds(ImagePoint imagePoint, int radius) const {
     return true;
 }
 
-ImageMoveFilter::ImagePoint PeriodicBoundaryConditions::applyOnImagePoint(ImageMoveFilter::ImagePoint imagePoint) const {
+ImagePoint PeriodicBoundaryConditions::applyOnImagePoint(ImagePoint imagePoint) const {
     return {mod(imagePoint.x, this->width), mod(imagePoint.y, this->height)};
 }

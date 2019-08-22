@@ -11,18 +11,18 @@
 #include "../utils/Assertions.h"
 #include "../utils/Utils.h"
 
+namespace {
+    struct ImageMove {
+        int x{};
+        int y{};
 
-bool ImageMoveFilter::ImagePoint::operator==(ImageMoveFilter::ImagePoint second) const {
-    return this->x == second.x && this->y == second.y;
-}
+        ImageMove() = default;
+        ImageMove(int x, int y) : x{x}, y{y} { };
+    };
 
-bool ImageMoveFilter::ImagePoint::operator!=(ImageMoveFilter::ImagePoint second) const {
-    return !(*this == second);
-}
-
-
-ImageMoveFilter::ImageMove ImageMoveFilter::ImagePoint::operator-(ImagePoint second) const {
-    return {this->x - second.x, this->y - second.y};
+    ImageMove operator-(ImagePoint p1, ImagePoint p2) {
+        return {p1.x - p2.x, p1.y - p2.y};
+    }
 }
 
 ImageMoveFilter::ImageMoveFilter(Image image, ImageBoundaryConditions *imageBC, unsigned int seed) :
@@ -103,7 +103,7 @@ bool ImageMoveFilter::isLineValid(ImagePoint from, ImagePoint to, float pointRad
     return true;
 }
 
-ImageMoveFilter::ImagePoint ImageMoveFilter::indexToPoint(std::size_t index) const {
+ImagePoint ImageMoveFilter::indexToPoint(std::size_t index) const {
     Expects(index < this->validPointsMap.size());
     return {static_cast<int>(index % this->width), static_cast<int>(index / this->width)};
 }

@@ -12,7 +12,7 @@ void WallBoundaryConditions::installOnImage(const Image& image) {
     this->height = image.getHeight();
 }
 
-bool WallBoundaryConditions::isImagePointInBounds(ImageMoveFilter::ImagePoint imagePoint, int radius) const {
+bool WallBoundaryConditions::isImagePointInBounds(ImagePoint imagePoint, int radius) const {
     if (imagePoint.x - radius < 0 || imagePoint.x + radius >= this->width)
         return false;
     else if (imagePoint.y - radius < 0 || imagePoint.y + radius >= this->height)
@@ -21,6 +21,6 @@ bool WallBoundaryConditions::isImagePointInBounds(ImageMoveFilter::ImagePoint im
         return true;
 }
 
-ImageMoveFilter::ImagePoint WallBoundaryConditions::applyOnImagePoint(ImageMoveFilter::ImagePoint imagePoint) const {
+ImagePoint WallBoundaryConditions::applyOnImagePoint(ImagePoint imagePoint) const {
     return imagePoint;
 }

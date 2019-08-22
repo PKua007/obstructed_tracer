@@ -8,9 +8,9 @@
 #ifndef PERIODICBOUNDARYCONDITIONS_H_
 #define PERIODICBOUNDARYCONDITIONS_H_
 
-#include "ImageMoveFilter.h"
+#include "ImageBoundaryConditions.h"
 
-class PeriodicBoundaryConditions : public ImageMoveFilter::ImageBoundaryConditions {
+class PeriodicBoundaryConditions : public ImageBoundaryConditions {
 private:
     std::size_t width{};
     std::size_t height{};
@@ -19,8 +19,8 @@ private:
 
 public:
     void installOnImage(const Image &image) override;
-    bool isImagePointInBounds(ImageMoveFilter::ImagePoint imagePoint, int radius) const override;
-    ImageMoveFilter::ImagePoint applyOnImagePoint(ImageMoveFilter::ImagePoint imagePoint) const override;
+    bool isImagePointInBounds(ImagePoint imagePoint, int radius) const override;
+    ImagePoint applyOnImagePoint(ImagePoint imagePoint) const override;
 };
 
 #endif /* PERIODICBOUNDARYCONDITIONS_H_ */
