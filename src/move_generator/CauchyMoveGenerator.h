@@ -9,6 +9,7 @@
 #define CAUCHYMOVEGENERATOR_H_
 
 #include <random>
+#include <cmath>
 
 #include "../random_walker/MoveGenerator.h"
 
@@ -16,6 +17,7 @@ class CauchyMoveGenerator : public MoveGenerator {
 private:
     std::mt19937 randomGenerator;
     std::cauchy_distribution<float> cauchyDistribution;
+    std::uniform_real_distribution<float> uniformAngleDistribution;
 
 public:
     CauchyMoveGenerator(float width, unsigned int seed);

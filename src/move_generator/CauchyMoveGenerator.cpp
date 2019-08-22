@@ -5,13 +5,19 @@
  *      Author: pkua
  */
 
+#include <cmath>
+
 #include "CauchyMoveGenerator.h"
 
 CauchyMoveGenerator::CauchyMoveGenerator(float width, unsigned int seed) {
     this->randomGenerator.seed(seed);
     this->cauchyDistribution = std::cauchy_distribution<float>(0.f, width);
+    this->uniformAngleDistribution = std::uniform_real_distribution<float>(0.f, 2*M_PI);
 }
 
 Move CauchyMoveGenerator::generateMove() {
-    return {this->cauchyDistribution(this->randomGenerator), this->cauchyDistribution(this->randomGenerator)};
+    float radius = this->cauchyDistribution(this->randomGenerator);
+    float angle = this->uniformAngleDistribution(this->randomGenerator);
+
+    return {radius * std::cos(angle), radius * std::sin(angle)};
 }
