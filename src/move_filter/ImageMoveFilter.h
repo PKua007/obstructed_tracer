@@ -14,7 +14,7 @@
 #include "../image/Image.h"
 
 class ImageMoveFilter: public MoveFilter {
-private:
+public:
     struct ImageMove {
         int x{};
         int y{};
@@ -36,6 +36,16 @@ private:
         ImageMove operator-(ImagePoint second) const;
     };
 
+    class ImageBoundaryConditions {
+    public:
+        virtual ~ImageBoundaryConditions();
+
+        virtual void installOnImage(const Image &image) = 0;
+        virtual bool isImagePointInBounds(ImagePoint imagePoint) = 0;
+        virtual ImagePoint applyOnImagePoint(ImagePoint imagePoint) = 0;
+    };
+
+private:
     std::mt19937 randomGenerator;
     std::uniform_real_distribution<float> uniformDistribution{0.f, 1.f};
 
