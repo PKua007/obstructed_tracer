@@ -59,6 +59,9 @@ public:
 
     bool isMoveValid(Tracer tracer, Move move) const override;
     Tracer randomValidTracer(float radius) override;
+
+    std::size_t getNumberOfAllPoints() const;
+    std::size_t getNumberOfValidTracers(float radius);
 };
 
 #endif /* IMAGEMOVEFILTER_H_ */

@@ -21,17 +21,22 @@ Point Trajectory::getLast() const {
     return this->data.back();
 }
 
+std::size_t Trajectory::getNumberOfAcceptedSteps() const {
+    return this->acceptedSteps;
+}
+
+void Trajectory::stayStill() {
+    this->data.push_back(this->data.back());
+}
+
 void Trajectory::store(std::ostream& out) const {
     for (auto point : this->data)
         out << point.x << " " << point.y << "\n";
 }
 
-void Trajectory::addPoint(Point point) {
-    this->data.push_back(point);
-}
-
-void Trajectory::addPoint(Tracer tracer) {
+void Trajectory::moveToPoint(Tracer tracer) {
     this->data.push_back(tracer.getPosition());
+    this->acceptedSteps++;
 }
 
 std::size_t Trajectory::getSize() const {
