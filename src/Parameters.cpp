@@ -31,6 +31,8 @@ Parameters::Parameters(std::istream& input) {
             this->numberOfWalks = config.getUnsignedLong(key);
         else if (key == "storeTrajectories")
             this->storeTrajectories = (config.getString(key) == "true" ? true : false);
+        else if (key == "seed")
+            this->seed = config.getString(key);
         else
             std::cerr << "[Parameters::Parameters] Warning: unknown parameter " << key << std::endl;
     }
@@ -39,13 +41,15 @@ Parameters::Parameters(std::istream& input) {
 }
 
 void Parameters::print(std::ostream& out) {
-    out << "numberOfSteps : " << this->numberOfSteps << std::endl;
-    out << "tracerRadius  : " << this->tracerRadius << std::endl;
-    out << "moveGenerator : " << this->moveGenerator << std::endl;
-    out << "moveFilter    : " << this->moveFilter << std::endl;
-    out << "driftX        : " << this->driftX << std::endl;
-    out << "driftY        : " << this->driftY << std::endl;
-    out << "numberOfWalks : " << this->numberOfWalks << std::endl;
+    out << "numberOfSteps     : " << this->numberOfSteps << std::endl;
+    out << "tracerRadius      : " << this->tracerRadius << std::endl;
+    out << "moveGenerator     : " << this->moveGenerator << std::endl;
+    out << "moveFilter        : " << this->moveFilter << std::endl;
+    out << "driftX            : " << this->driftX << std::endl;
+    out << "driftY            : " << this->driftY << std::endl;
+    out << "numberOfWalks     : " << this->numberOfWalks << std::endl;
+    out << "storeTrajectories : " << (this->storeTrajectories ? "true" : "false") << std::endl;
+    out << "seed              : " << this->seed << std::endl;
 }
 
 void Parameters::validateParameters() const {

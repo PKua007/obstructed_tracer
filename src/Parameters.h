@@ -25,6 +25,7 @@ public:
     float       driftY        = 0.f;
     std::size_t numberOfWalks = 10;
     bool        storeTrajectories = false;
+    std::string seed = "random";
 
     Parameters() = default;
     Parameters(std::istream &input);

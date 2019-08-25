@@ -6,3 +6,4 @@ driftX = 0
 driftY = 0
 numberOfWalks = 10
 storeTrajectories = true
+seed = random
