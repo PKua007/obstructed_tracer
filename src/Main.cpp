@@ -15,7 +15,7 @@
 
 #include "Parameters.h"
 #include "utils/Utils.h"
-#include "SimulationFactory.h"
+#include "random_walker/CPUSimulationFactory.h"
 #include "MSDData.h"
 
 namespace {
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
     parameters.print(std::cout);
     std::cout << std::endl;
 
-    SimulationFactory simulationFactory(parameters, std::cout);
+    CPUSimulationFactory simulationFactory(parameters, std::cout);
     RandomWalker &randomWalker = simulationFactory.getRandomWalker();
     randomWalker.run(std::cout);
 

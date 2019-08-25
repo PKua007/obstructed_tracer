@@ -40,7 +40,7 @@ CPUTrajectory CPURandomWalker::runSingleTrajectory() {
 
 void CPURandomWalker::run(std::ostream &logger) {
     for (std::size_t i = 0; i < this->trajectories.size(); i++) {
-        logger << "[RandomWalker::run] Starting walk " << i << "... " << std::flush;
+        logger << "[CPURandomWalker::run] Starting walk " << i << "... " << std::flush;
 
         auto start = std::chrono::high_resolution_clock::now();
         this->trajectories[i] = this->runSingleTrajectory();
