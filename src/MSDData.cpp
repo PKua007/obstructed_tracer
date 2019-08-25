@@ -42,4 +42,5 @@ void MSDData::store(std::ostream &out) const {
 
 std::ostream &operator<<(std::ostream &out, MSDData::Entry entry) {
     out << entry.x2 << " " << entry.y2 << " " << entry.xy;
+    return out;
 }

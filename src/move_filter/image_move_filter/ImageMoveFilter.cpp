@@ -8,8 +8,8 @@
 #include <iostream>
 
 #include "ImageMoveFilter.h"
-#include "../../utils/Assertions.h"
-#include "../../utils/Utils.h"
+#include "utils/Assertions.h"
+#include "utils/Utils.h"
 
 namespace {
     struct ImageMove {

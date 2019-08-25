@@ -1,5 +1,5 @@
 /*
- * SimulationFactory.cpp
+ * CPUSimulationFactory.cpp
  *
  *  Created on: 22 sie 2019
  *      Author: pkua
@@ -8,7 +8,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "SimulationFactory.h"
+#include "CPUSimulationFactory.h"
 #include "move_generator/GaussianMoveGenerator.h"
 #include "move_generator/CauchyMoveGenerator.h"
 #include "move_filter/DefaultMoveFilter.h"
@@ -18,7 +18,7 @@
 #include "image/PPMImageReader.h"
 #include "utils/Assertions.h"
 
-std::unique_ptr<MoveGenerator> SimulationFactory::createMoveGenerator(const Parameters& parameters) {
+std::unique_ptr<MoveGenerator> CPUSimulationFactory::createMoveGenerator(const Parameters& parameters) {
     std::istringstream moveGeneratorStream(parameters.moveGenerator);
     std::string moveGeneratorType;
     float sigma;
@@ -36,7 +36,7 @@ std::unique_ptr<MoveGenerator> SimulationFactory::createMoveGenerator(const Para
 }
 
 std::unique_ptr<ImageBoundaryConditions>
-SimulationFactory::createImageBoundaryConditions(std::istringstream& moveFilterStream) {
+CPUSimulationFactory::createImageBoundaryConditions(std::istringstream& moveFilterStream) {
     std::string imageBCType;
     moveFilterStream >> imageBCType;
     if (!moveFilterStream)
@@ -50,9 +50,9 @@ SimulationFactory::createImageBoundaryConditions(std::istringstream& moveFilterS
         throw std::runtime_error("Unknown ImageBoundaryConditions: " + imageBCType);
 }
 
-std::unique_ptr<MoveFilter> SimulationFactory::createImageMoveFilter(const Parameters& parameters,
-                                                                     std::istringstream& moveFilterStream,
-                                                                     std::ostream& logger) {
+std::unique_ptr<MoveFilter> CPUSimulationFactory::createImageMoveFilter(const Parameters& parameters,
+                                                                        std::istringstream& moveFilterStream,
+                                                                        std::ostream& logger) {
     std::string imageFilename;
     moveFilterStream >> imageFilename;
     if (!moveFilterStream)
@@ -64,18 +64,18 @@ std::unique_ptr<MoveFilter> SimulationFactory::createImageMoveFilter(const Param
 
     PPMImageReader imageReader;
     Image image = imageReader.read(imageFile);
-    logger << "[SimulationFactory] Loaded image " << imageFilename << " (" << image.getWidth() << "px x ";
+    logger << "[CPUSimulationFactory] Loaded image " << imageFilename << " (" << image.getWidth() << "px x ";
     logger << image.getHeight() << "px)" << std::endl;
 
     this->imageBC = createImageBoundaryConditions(moveFilterStream);
 
     auto imageMoveFilter = new ImageMoveFilter(image, this->imageBC.get(), this->seedGenerator());
-    logger << "[SimulationFactory] Found " << imageMoveFilter->getNumberOfValidTracers(parameters.tracerRadius);
+    logger << "[CPUSimulationFactory] Found " << imageMoveFilter->getNumberOfValidTracers(parameters.tracerRadius);
     logger << " valid starting points out of " << imageMoveFilter->getNumberOfAllPoints() << std::endl;
     return std::unique_ptr<MoveFilter>(imageMoveFilter);
 }
 
-std::unique_ptr<MoveFilter> SimulationFactory::createMoveFilter(const Parameters& parameters, std::ostream& logger) {
+std::unique_ptr<MoveFilter> CPUSimulationFactory::createMoveFilter(const Parameters& parameters, std::ostream& logger) {
     std::istringstream moveFilterStream(parameters.moveFilter);
     std::string moveFilterType;
     moveFilterStream >> moveFilterType;
@@ -87,11 +87,11 @@ std::unique_ptr<MoveFilter> SimulationFactory::createMoveFilter(const Parameters
         throw std::runtime_error("Unknown MoveFilter: " + moveFilterType);
 }
 
-SimulationFactory::SimulationFactory(const Parameters &parameters, std::ostream &logger) {
+CPUSimulationFactory::CPUSimulationFactory(const Parameters &parameters, std::ostream &logger) {
     if (parameters.seed == "random") {
         unsigned long randomSeed = std::random_device()();
         this->seedGenerator.seed(randomSeed);
-        logger << "[SimulationFactory] Using random seed: " << randomSeed << std::endl;
+        logger << "[CPUSimulationFactory] Using random seed: " << randomSeed << std::endl;
     } else {
         this->seedGenerator.seed(std::stoul(parameters.seed));
     }
@@ -101,11 +101,11 @@ SimulationFactory::SimulationFactory(const Parameters &parameters, std::ostream 
     Move drift = {parameters.driftX, parameters.driftY};
 
     this->randomWalker = std::unique_ptr<RandomWalker>(
-        new RandomWalker(parameters.numberOfWalks, parameters.numberOfSteps, parameters.tracerRadius, drift,
-                         this->moveGenerator.get(), this->moveFilter.get())
+        new CPURandomWalker(parameters.numberOfWalks, parameters.numberOfSteps, parameters.tracerRadius, drift,
+                            this->moveGenerator.get(), this->moveFilter.get())
     );
 }
 
-RandomWalker& SimulationFactory::getRandomWalker() {
+RandomWalker &CPUSimulationFactory::getRandomWalker() {
     return *this->randomWalker;
 }

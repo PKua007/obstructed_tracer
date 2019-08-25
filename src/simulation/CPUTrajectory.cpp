@@ -1,48 +1,48 @@
 /*
- * Trajectory.cpp
+ * CPUTrajectory.cpp
  *
  *  Created on: 28 lip 2019
  *      Author: pkua
  */
 
-#include "Trajectory.h"
+#include "CPUTrajectory.h"
 
 #include <ostream>
 
-Trajectory::Trajectory(std::size_t numberOfPoints) {
+CPUTrajectory::CPUTrajectory(std::size_t numberOfPoints) {
     this->data.reserve(numberOfPoints);
 }
 
-Point Trajectory::getFirst() const {
+Point CPUTrajectory::getFirst() const {
     return this->data.front();
 }
 
-Point Trajectory::getLast() const {
+Point CPUTrajectory::getLast() const {
     return this->data.back();
 }
 
-std::size_t Trajectory::getNumberOfAcceptedSteps() const {
+std::size_t CPUTrajectory::getNumberOfAcceptedSteps() const {
     return this->acceptedSteps;
 }
 
-void Trajectory::stayStill() {
+void CPUTrajectory::stayStill() {
     this->data.push_back(this->data.back());
 }
 
-void Trajectory::store(std::ostream& out) const {
+void CPUTrajectory::store(std::ostream& out) const {
     for (auto point : this->data)
         out << point.x << " " << point.y << "\n";
 }
 
-void Trajectory::moveToPoint(Tracer tracer) {
+void CPUTrajectory::moveToPoint(Tracer tracer) {
     this->data.push_back(tracer.getPosition());
     this->acceptedSteps++;
 }
 
-std::size_t Trajectory::getSize() const {
+std::size_t CPUTrajectory::getSize() const {
     return this->data.size();
 }
 
-Point Trajectory::operator[](std::size_t index) const {
+Point CPUTrajectory::operator[](std::size_t index) const {
     return this->data[index];
 }

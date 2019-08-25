@@ -9,7 +9,9 @@
 #define MSDDATA_H_
 
 #include <iosfwd>
-#include "random_walker/RandomWalker.h"
+#include <vector>
+
+#include "RandomWalker.h"
 
 class MSDData {
 private:

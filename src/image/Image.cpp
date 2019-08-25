@@ -9,7 +9,7 @@
 #include <iomanip>
 
 #include "Image.h"
-#include "../utils/Assertions.h"
+#include "utils/Assertions.h"
 
 
 Image::Image(std::size_t width, std::size_t height) :
