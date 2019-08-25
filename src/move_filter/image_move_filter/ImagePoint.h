@@ -8,7 +8,7 @@
 #ifndef IMAGEPOINT_H_
 #define IMAGEPOINT_H_
 
-#include "../../random_walker/Point.h"
+#include "../../Point.h"
 
 struct ImagePoint {
     int x{};

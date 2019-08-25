@@ -14,7 +14,8 @@
 #include "random_walker/MoveGenerator.h"
 #include "random_walker/MoveFilter.h"
 #include "move_filter/image_move_filter/ImageBoundaryConditions.h"
-#include "random_walker/RandomWalker.h"
+#include "RandomWalker.h"
+#include "random_walker/CPURandomWalker.h"
 #include "Parameters.h"
 
 class SimulationFactory {

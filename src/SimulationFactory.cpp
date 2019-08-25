@@ -101,11 +101,11 @@ SimulationFactory::SimulationFactory(const Parameters &parameters, std::ostream 
     Move drift = {parameters.driftX, parameters.driftY};
 
     this->randomWalker = std::unique_ptr<RandomWalker>(
-        new RandomWalker(parameters.numberOfWalks, parameters.numberOfSteps, parameters.tracerRadius, drift,
-                         this->moveGenerator.get(), this->moveFilter.get())
+        new CPURandomWalker(parameters.numberOfWalks, parameters.numberOfSteps, parameters.tracerRadius, drift,
+                            this->moveGenerator.get(), this->moveFilter.get())
     );
 }
 
-RandomWalker& SimulationFactory::getRandomWalker() {
+RandomWalker &SimulationFactory::getRandomWalker() {
     return *this->randomWalker;
 }
