@@ -25,8 +25,8 @@ std::unique_ptr<MoveGenerator> SimulationFactory::createMoveGenerator(const Para
     moveGeneratorStream >> moveGeneratorType >> sigma;
     if (!moveGeneratorStream)
         throw std::runtime_error("Malformed MoveGenerator parameters");
-
     Validate(sigma >= 0.f);
+
     if (moveGeneratorType == "GaussianMoveGenerator")
         return std::unique_ptr<MoveGenerator>(new GaussianMoveGenerator(sigma, this->randomSeed()));
     else if (moveGeneratorType == "CauchyMoveGenerator")
@@ -93,8 +93,8 @@ SimulationFactory::SimulationFactory(const Parameters &parameters, std::ostream 
     Move drift = {parameters.driftX, parameters.driftY};
 
     this->randomWalker = std::unique_ptr<RandomWalker>(
-        new RandomWalker(parameters.numberOfSteps, parameters.tracerRadius, drift, this->moveGenerator.get(),
-                         this->moveFilter.get())
+        new RandomWalker(parameters.numberOfWalks, parameters.numberOfSteps, parameters.tracerRadius, drift,
+                         this->moveGenerator.get(), this->moveFilter.get())
     );
 }
 

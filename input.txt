@@ -1,4 +1,7 @@
-sigma = 1
 numberOfSteps = 100000
-tracerRadius = 0
-imageFile = maze.ppm
+tracerRadius = 4
+moveGenerator = GaussianMoveGenerator 3
+moveFilter = ImageMoveFilter rsa.ppm WallBoundaryConditions
+driftX = 0
+driftY = 0
+numberOfWalks = 100

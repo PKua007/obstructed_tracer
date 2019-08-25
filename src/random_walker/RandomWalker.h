@@ -23,12 +23,17 @@ private:
     Move            drift{};
     MoveGenerator   *moveGenerator{};
     MoveFilter      *moveFilter{};
+    std::vector<Trajectory> trajectories;
+
+    Trajectory runSingleTrajectory();
 
 public:
-    RandomWalker(std::size_t numberOfSteps, float tracerRadius, Move drift, MoveGenerator *moveGenerator,
-                 MoveFilter *moveFilter);
+    RandomWalker(std::size_t numberOfWalks, std::size_t numberOfSteps, float tracerRadius, Move drift,
+                 MoveGenerator *moveGenerator, MoveFilter *moveFilter);
 
-    Trajectory run();
+    void run(std::ostream &logger);
+    std::size_t getNumberOfTrajectories() const;
+    const Trajectory &getTrajectory(std::size_t index) const;
 };
 
 #endif /* RANDOMWALKER_H_ */

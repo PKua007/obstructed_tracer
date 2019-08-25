@@ -35,20 +35,22 @@ int main(int argc, char **argv)
     std::cout << std::endl;
 
     SimulationFactory simulationFactory(parameters, std::cout);
+    RandomWalker &randomWalker = simulationFactory.getRandomWalker();
+    randomWalker.run(std::cout);
 
-    std::cout << "[main] Starting simulation..." << std::endl;
+    /*std::cout << "[main] Starting simulation " << i << "... " << std::flush;
     Trajectory trajectory = simulationFactory.getRandomWalker().run();
-    std::cout << "[main] Finished. Initial position: " << trajectory.getFirst() << ", accepted steps: ";
-    std::cout << trajectory.getNumberOfAcceptedSteps() << ", final position: " << trajectory.getLast() << std::endl;
+    std::cout << "Finished. Initial position: " << trajectory.getFirst() << ", accepted steps: ";
+    std::cout << trajectory.getNumberOfAcceptedSteps() << ", final position: " << trajectory.getLast() << std::endl;*/
 
-    std::string outputFilename = argv[2];
+    /*std::string outputFilename = argv[2];
     std::ofstream output(outputFilename);
     if (!output)
         die("[main] Cannot open " + inputFilename + " to store trajectory");
 
     output << std::fixed << std::setprecision(6);
     trajectory.store(output);
-    std::cout << "[main] Trajectory stored to " << outputFilename << std::endl;
+    std::cout << "[main] Trajectory stored to " << outputFilename << std::endl;*/
 
     return EXIT_SUCCESS;
 }
