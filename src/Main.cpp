@@ -81,13 +81,20 @@ int main(int argc, char **argv)
     std::copy(msdDatas.begin(), msdDatas.end(), std::ostream_iterator<MSDData>(msdFile, "\n"));
     std::cout << "[main] Mean square displacement data stored to " + msdFilename << std::endl;
 
-    /*std::ofstream output(outputFilename);
-    if (!output)
-        die("[main] Cannot open " + inputFilename + " to store trajectory");
+    if (parameters.storeTrajectories) {
+        for (std::size_t i = 0; i < numberOfTrajectories; i++) {
+            auto &trajectory = randomWalker.getTrajectory(i);
 
-    output << std::fixed << std::setprecision(6);
-    trajectory.store(output);
-    std::cout << "[main] Trajectory stored to " << outputFilename << std::endl;*/
+            std::string trajectoryFilename = outputFilePrefix + "_" + std::to_string(i) + ".txt";
+            std::ofstream trajectoryFile(trajectoryFilename);
+            if (!trajectoryFile)
+                die("[main] Cannot open " + trajectoryFilename + " to store trajectory");
+
+            trajectoryFile << std::fixed << std::setprecision(6);
+            trajectory.store(trajectoryFile);
+            std::cout << "[main] Trajectory stored to " << trajectoryFilename << std::endl;
+        }
+    }
 
     return EXIT_SUCCESS;
 }

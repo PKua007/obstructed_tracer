@@ -24,6 +24,7 @@ public:
     float       driftX        = 0.f;
     float       driftY        = 0.f;
     std::size_t numberOfWalks = 10;
+    bool        storeTrajectories = false;
 
     Parameters() = default;
     Parameters(std::istream &input);

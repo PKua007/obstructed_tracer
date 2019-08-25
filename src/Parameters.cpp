@@ -29,6 +29,8 @@ Parameters::Parameters(std::istream& input) {
             this->driftY = config.getFloat(key);
         else if (key == "numberOfWalks")
             this->numberOfWalks = config.getUnsignedLong(key);
+        else if (key == "storeTrajectories")
+            this->storeTrajectories = (config.getString(key) == "true" ? true : false);
         else
             std::cerr << "[Parameters::Parameters] Warning: unknown parameter " << key << std::endl;
     }

@@ -1,7 +1,8 @@
 numberOfSteps = 100000
 tracerRadius = 4
 moveGenerator = GaussianMoveGenerator 3
-moveFilter = ImageMoveFilter rsa.ppm WallBoundaryConditions
+moveFilter = ImageMoveFilter rsa.ppm PeriodicBoundaryConditions
 driftX = 0
 driftY = 0
-numberOfWalks = 100
+numberOfWalks = 10
+storeTrajectories = true
