@@ -29,59 +29,46 @@ namespace {
     std::ostream &operator<<(std::ostream &out, MSDData msdData) {
         out << msdData.x2 << " " << msdData.y2 << " " << msdData.xy;
     }
-}
 
-int main(int argc, char **argv)
-{
-    std::string command = argv[0];
-    if (argc < 3)
-        die("[main] Usage: " + command + " [input file] [output file prefix]");
+    std::vector<MSDData> calculateMSDData(const RandomWalker &randomWalker) {
+        std::size_t numberOfTrajectories = randomWalker.getNumberOfTrajectories();
+        std::vector<MSDData> msdDatas(randomWalker.getTrajectory(0).getSize());
+        for (std::size_t i = 0; i < numberOfTrajectories; i++) {
+            auto &trajectory = randomWalker.getTrajectory(i);
 
-    std::string inputFilename = argv[1];
-    std::ifstream input(inputFilename);
-    if (!input)
-        die("[main] Cannot open " + inputFilename + " to read parameters");
-
-    Parameters parameters(input);
-    std::cout << "[main] Parameters loaded from " + inputFilename << ":" << std::endl;
-    parameters.print(std::cout);
-    std::cout << std::endl;
-
-    SimulationFactory simulationFactory(parameters, std::cout);
-    RandomWalker &randomWalker = simulationFactory.getRandomWalker();
-    randomWalker.run(std::cout);
-
-    std::string outputFilePrefix = argv[2];
-    std::size_t numberOfTrajectories = randomWalker.getNumberOfTrajectories();
-    std::vector<MSDData> msdDatas(randomWalker.getTrajectory(0).getSize());
-    for (std::size_t i = 0; i < numberOfTrajectories; i++) {
-        auto &trajectory = randomWalker.getTrajectory(i);
-
-        float startX = trajectory[0].x;
-        float startY = trajectory[0].y;
-        for (std::size_t j = 0; j < trajectory.getSize(); j++) {
-            float x = trajectory[j].x - startX;
-            float y = trajectory[j].y - startY;
-            msdDatas[j].x2 += x*x;
-            msdDatas[j].y2 += y*y;
-            msdDatas[j].xy += x*y;
+            float startX = trajectory[0].x;
+            float startY = trajectory[0].y;
+            for (std::size_t j = 0; j < trajectory.getSize(); j++) {
+                float x = trajectory[j].x - startX;
+                float y = trajectory[j].y - startY;
+                msdDatas[j].x2 += x*x;
+                msdDatas[j].y2 += y*y;
+                msdDatas[j].xy += x*y;
+            }
         }
+
+        for (auto& msdData : msdDatas) {
+            msdData.x2 /= numberOfTrajectories;
+            msdData.y2 /= numberOfTrajectories;
+            msdData.xy /= numberOfTrajectories;
+        }
+
+        return msdDatas;
     }
 
-    for (auto &msdData : msdDatas) {
-        msdData.x2 /= numberOfTrajectories;
-        msdData.y2 /= numberOfTrajectories;
-        msdData.xy /= numberOfTrajectories;
+    void storeMSDData(std::vector<MSDData> msdDatas, const std::string &outputFilePrefix, std::ostream &logger) {
+        std::string msdFilename = outputFilePrefix + "_msd.txt";
+        std::ofstream msdFile(msdFilename);
+        if (!msdFile)
+            die("[main] Cannot open " + msdFilename + " to store mean square displacement data");
+
+        std::copy(msdDatas.begin(), msdDatas.end(), std::ostream_iterator<MSDData>(msdFile, "\n"));
+        logger << "[main] Mean square displacement data stored to " + msdFilename << std::endl;
     }
 
-    std::string msdFilename = outputFilePrefix + "_msd.txt";
-    std::ofstream msdFile(msdFilename);
-    if (!msdFile)
-        die("[main] Cannot open " + msdFilename + " to store mean square displacement data");
-    std::copy(msdDatas.begin(), msdDatas.end(), std::ostream_iterator<MSDData>(msdFile, "\n"));
-    std::cout << "[main] Mean square displacement data stored to " + msdFilename << std::endl;
-
-    if (parameters.storeTrajectories) {
+    void storeTrajectories(const RandomWalker &randomWalker, const std::string &outputFilePrefix,
+                           std::ostream &logger) {
+        std::size_t numberOfTrajectories = randomWalker.getNumberOfTrajectories();
         for (std::size_t i = 0; i < numberOfTrajectories; i++) {
             auto &trajectory = randomWalker.getTrajectory(i);
 
@@ -92,10 +79,40 @@ int main(int argc, char **argv)
 
             trajectoryFile << std::fixed << std::setprecision(6);
             trajectory.store(trajectoryFile);
-            std::cout << "[main] Trajectory stored to " << trajectoryFilename << std::endl;
+            logger << "[main] Trajectory " << i << " stored to " << trajectoryFilename << std::endl;
         }
     }
+}
 
+int main(int argc, char **argv)
+{
+    std::string command = argv[0];
+    if (argc < 3)
+        die("[main] Usage: " + command + " [input file] [output file prefix]");
+
+    std::string inputFilename = argv[1];
+    std::ifstream inputFile(inputFilename);
+    if (!inputFile)
+        die("[main] Cannot open " + inputFilename + " to read parameters");
+
+    Parameters parameters(inputFile);
+    std::cout << "[main] Parameters loaded from " + inputFilename << ":" << std::endl;
+    parameters.print(std::cout);
+    std::cout << std::endl;
+
+    SimulationFactory simulationFactory(parameters, std::cout);
+    RandomWalker &randomWalker = simulationFactory.getRandomWalker();
+    randomWalker.run(std::cout);
+
+    std::string outputFilePrefix = argv[2];
+
+    std::vector<MSDData> msdDatas = calculateMSDData(randomWalker);
+    storeMSDData(msdDatas, outputFilePrefix, std::cout);
+
+    if (parameters.storeTrajectories)
+        storeTrajectories(randomWalker, outputFilePrefix, std::cout);
+
+    std::cout << "[main] Run finished." << std::endl;
     return EXIT_SUCCESS;
 }
 
