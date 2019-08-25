@@ -19,7 +19,7 @@
 
 class SimulationFactory {
 private:
-    std::random_device randomSeed;
+    std::mt19937 seedGenerator;
     std::unique_ptr<MoveGenerator> moveGenerator;
     std::unique_ptr<ImageBoundaryConditions> imageBC;
     std::unique_ptr<MoveFilter> moveFilter;

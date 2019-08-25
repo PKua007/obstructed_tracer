@@ -28,9 +28,9 @@ std::unique_ptr<MoveGenerator> SimulationFactory::createMoveGenerator(const Para
     Validate(sigma >= 0.f);
 
     if (moveGeneratorType == "GaussianMoveGenerator")
-        return std::unique_ptr<MoveGenerator>(new GaussianMoveGenerator(sigma, this->randomSeed()));
+        return std::unique_ptr<MoveGenerator>(new GaussianMoveGenerator(sigma, this->seedGenerator()));
     else if (moveGeneratorType == "CauchyMoveGenerator")
-        return std::unique_ptr<MoveGenerator>(new CauchyMoveGenerator(sigma, this->randomSeed()));
+        return std::unique_ptr<MoveGenerator>(new CauchyMoveGenerator(sigma, this->seedGenerator()));
     else
         throw std::runtime_error("Unknown MoveGenerator: " + moveGeneratorType);
 }
@@ -69,7 +69,7 @@ std::unique_ptr<MoveFilter> SimulationFactory::createImageMoveFilter(const Param
 
     this->imageBC = createImageBoundaryConditions(moveFilterStream);
 
-    auto imageMoveFilter = new ImageMoveFilter(image, this->imageBC.get(), randomSeed());
+    auto imageMoveFilter = new ImageMoveFilter(image, this->imageBC.get(), this->seedGenerator());
     logger << "[SimulationFactory] Found " << imageMoveFilter->getNumberOfValidTracers(parameters.tracerRadius);
     logger << " valid starting points out of " << imageMoveFilter->getNumberOfAllPoints() << std::endl;
     return std::unique_ptr<MoveFilter>(imageMoveFilter);
@@ -88,6 +88,14 @@ std::unique_ptr<MoveFilter> SimulationFactory::createMoveFilter(const Parameters
 }
 
 SimulationFactory::SimulationFactory(const Parameters &parameters, std::ostream &logger) {
+    if (parameters.seed == "random") {
+        unsigned long randomSeed = std::random_device()();
+        this->seedGenerator.seed(randomSeed);
+        logger << "[SimulationFactory] Using random seed: " << randomSeed << std::endl;
+    } else {
+        this->seedGenerator.seed(std::stoul(parameters.seed));
+    }
+
     this->moveGenerator = createMoveGenerator(parameters);
     this->moveFilter = createMoveFilter(parameters, logger);
     Move drift = {parameters.driftX, parameters.driftY};
