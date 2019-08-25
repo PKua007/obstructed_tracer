@@ -27,6 +27,10 @@ Parameters::Parameters(std::istream& input) {
             this->driftX = config.getFloat(key);
         else if (key == "driftY")
             this->driftY = config.getFloat(key);
+        else if (key == "numberOfWalks")
+            this->numberOfWalks = config.getUnsignedLong(key);
+        else if (key == "storeTrajectories")
+            this->storeTrajectories = (config.getString(key) == "true" ? true : false);
         else
             std::cerr << "[Parameters::Parameters] Warning: unknown parameter " << key << std::endl;
     }
@@ -41,9 +45,11 @@ void Parameters::print(std::ostream& out) {
     out << "moveFilter    : " << this->moveFilter << std::endl;
     out << "driftX        : " << this->driftX << std::endl;
     out << "driftY        : " << this->driftY << std::endl;
+    out << "numberOfWalks : " << this->numberOfWalks << std::endl;
 }
 
 void Parameters::validateParameters() const {
-    Validate(numberOfSteps > 0);
-    Validate(tracerRadius >= 0.f);
+    Validate(this->numberOfSteps > 0);
+    Validate(this->tracerRadius >= 0.f);
+    Validate(this->numberOfWalks > 0);
 }
