@@ -13,10 +13,23 @@
 #include <cstdlib>
 #include <fstream>
 #include <random>
+#include <iterator>
 
 #include "Parameters.h"
 #include "utils/Utils.h"
 #include "SimulationFactory.h"
+
+namespace {
+    struct MSDData {
+        float x2{};
+        float y2{};
+        float xy{};
+    };
+
+    std::ostream &operator<<(std::ostream &out, MSDData msdData) {
+        out << msdData.x2 << " " << msdData.y2 << " " << msdData.xy;
+    }
+}
 
 int main(int argc, char **argv)
 {
@@ -38,13 +51,37 @@ int main(int argc, char **argv)
     RandomWalker &randomWalker = simulationFactory.getRandomWalker();
     randomWalker.run(std::cout);
 
-    /*std::cout << "[main] Starting simulation " << i << "... " << std::flush;
-    Trajectory trajectory = simulationFactory.getRandomWalker().run();
-    std::cout << "Finished. Initial position: " << trajectory.getFirst() << ", accepted steps: ";
-    std::cout << trajectory.getNumberOfAcceptedSteps() << ", final position: " << trajectory.getLast() << std::endl;*/
+    std::string outputFilePrefix = argv[2];
+    std::size_t numberOfTrajectories = randomWalker.getNumberOfTrajectories();
+    std::vector<MSDData> msdDatas(randomWalker.getTrajectory(0).getSize());
+    for (std::size_t i = 0; i < numberOfTrajectories; i++) {
+        auto &trajectory = randomWalker.getTrajectory(i);
 
-    /*std::string outputFilename = argv[2];
-    std::ofstream output(outputFilename);
+        float startX = trajectory[0].x;
+        float startY = trajectory[0].y;
+        for (std::size_t j = 0; j < trajectory.getSize(); j++) {
+            float x = trajectory[j].x - startX;
+            float y = trajectory[j].y - startY;
+            msdDatas[j].x2 += x*x;
+            msdDatas[j].y2 += y*y;
+            msdDatas[j].xy += x*y;
+        }
+    }
+
+    for (auto &msdData : msdDatas) {
+        msdData.x2 /= numberOfTrajectories;
+        msdData.y2 /= numberOfTrajectories;
+        msdData.xy /= numberOfTrajectories;
+    }
+
+    std::string msdFilename = outputFilePrefix + "_msd.txt";
+    std::ofstream msdFile(msdFilename);
+    if (!msdFile)
+        die("[main] Cannot open " + msdFilename + " to store mean square displacement data");
+    std::copy(msdDatas.begin(), msdDatas.end(), std::ostream_iterator<MSDData>(msdFile, "\n"));
+    std::cout << "[main] Mean square displacement data stored to " + msdFilename << std::endl;
+
+    /*std::ofstream output(outputFilename);
     if (!output)
         die("[main] Cannot open " + inputFilename + " to store trajectory");
 
