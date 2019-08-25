@@ -10,7 +10,7 @@
 
 #include <random>
 
-#include "../../random_walker/MoveFilter.h"
+#include "../../simulation/MoveFilter.h"
 #include "../../image/Image.h"
 #include "ImageBoundaryConditions.h"
 #include "ImagePoint.h"

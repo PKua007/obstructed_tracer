@@ -15,7 +15,7 @@
 
 #include "Parameters.h"
 #include "utils/Utils.h"
-#include "random_walker/CPUSimulationFactory.h"
+#include "simulation/CPUSimulationFactory.h"
 #include "MSDData.h"
 
 namespace {
