@@ -37,13 +37,7 @@ MSDData::MSDData(const RandomWalker &randomWalker) {
 }
 
 void MSDData::store(std::ostream &out) const {
-    std::string msdFilename = outputFilePrefix + "_msd.txt";
-    std::ofstream msdFile(msdFilename);
-    if (!msdFile)
-        die("[main] Cannot open " + msdFilename + " to store mean square displacement data");
-
-    std::copy(this->data.begin(), this->data.end(), std::ostream_iterator<Entry>(msdFile, "\n"));
-    logger << "[main] Mean square displacement data stored to " + msdFilename << std::endl;
+    std::copy(this->data.begin(), this->data.end(), std::ostream_iterator<Entry>(out, "\n"));
 }
 
 std::ostream &operator<<(std::ostream &out, MSDData::Entry entry) {

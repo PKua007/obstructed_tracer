@@ -66,7 +66,7 @@ int main(int argc, char **argv)
     if (!msdFile)
         die("[main] Cannot open " + msdFilename + " to store mean square displacement data");
     msdData.store(msdFile);
-    logger << "[main] Mean square displacement data stored to " + msdFilename << std::endl;
+    std::cout << "[main] Mean square displacement data stored to " + msdFilename << std::endl;
 
     if (parameters.storeTrajectories)
         storeTrajectories(randomWalker, outputFilePrefix, std::cout);
