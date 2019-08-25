@@ -47,7 +47,9 @@ void RandomWalker::run(std::ostream &logger) {
         auto finish = std::chrono::high_resolution_clock::now();
 
         auto mus = std::chrono::duration_cast<std::chrono::microseconds>(finish - start).count();
-        logger << " Finished after " << mus << " microseconds" << std::endl;
+        logger << " Finished after " << mus << " microseconds. Initial position: " << this->trajectories[i].getFirst();
+        logger << ", accepted steps: " << this->trajectories[i].getNumberOfAcceptedSteps() << ", final position: ";
+        logger << this->trajectories[i].getLast() << std::endl;
     }
 }
 

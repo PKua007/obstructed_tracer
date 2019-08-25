@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 {
     std::string command = argv[0];
     if (argc < 3)
-        die("[main] Usage: " + command + " [input file] [output file]");
+        die("[main] Usage: " + command + " [input file] [output file prefix]");
 
     std::string inputFilename = argv[1];
     std::ifstream input(inputFilename);
