@@ -10,8 +10,8 @@
 
 #include <random>
 
-#include "../../simulation/MoveFilter.h"
-#include "../../image/Image.h"
+#include "simulation/MoveFilter.h"
+#include "image/Image.h"
 #include "ImageBoundaryConditions.h"
 #include "ImagePoint.h"
 

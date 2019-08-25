@@ -11,11 +11,11 @@
 #include <memory>
 #include <iosfwd>
 
-#include "../Parameters.h"
-#include "../SimulationFactory.h"
+#include "Parameters.h"
+#include "SimulationFactory.h"
 #include "MoveGenerator.h"
 #include "MoveFilter.h"
-#include "../move_filter/image_move_filter/ImageBoundaryConditions.h"
+#include "move_filter/image_move_filter/ImageBoundaryConditions.h"
 #include "CPURandomWalker.h"
 
 class CPUSimulationFactory : public SimulationFactory {

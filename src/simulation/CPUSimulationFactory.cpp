@@ -9,14 +9,14 @@
 #include <sstream>
 
 #include "CPUSimulationFactory.h"
-#include "../move_generator/GaussianMoveGenerator.h"
-#include "../move_generator/CauchyMoveGenerator.h"
-#include "../move_filter/DefaultMoveFilter.h"
-#include "../move_filter/image_move_filter/ImageMoveFilter.h"
-#include "../move_filter/image_move_filter/WallBoundaryConditions.h"
-#include "../move_filter/image_move_filter/PeriodicBoundaryConditions.h"
-#include "../image/PPMImageReader.h"
-#include "../utils/Assertions.h"
+#include "move_generator/GaussianMoveGenerator.h"
+#include "move_generator/CauchyMoveGenerator.h"
+#include "move_filter/DefaultMoveFilter.h"
+#include "move_filter/image_move_filter/ImageMoveFilter.h"
+#include "move_filter/image_move_filter/WallBoundaryConditions.h"
+#include "move_filter/image_move_filter/PeriodicBoundaryConditions.h"
+#include "image/PPMImageReader.h"
+#include "utils/Assertions.h"
 
 std::unique_ptr<MoveGenerator> CPUSimulationFactory::createMoveGenerator(const Parameters& parameters) {
     std::istringstream moveGeneratorStream(parameters.moveGenerator);

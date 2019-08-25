@@ -10,7 +10,7 @@
 #include <chrono>
 
 #include "CPURandomWalker.h"
-#include "../utils/Assertions.h"
+#include "utils/Assertions.h"
 
 CPURandomWalker::CPURandomWalker(std::size_t numberOfTrajectories, std::size_t numberOfSteps, float tracerRadius,
                                  Move drift, MoveGenerator *moveGenerator, MoveFilter *moveFilter)

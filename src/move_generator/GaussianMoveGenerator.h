@@ -10,7 +10,7 @@
 
 #include <random>
 
-#include "../simulation/MoveGenerator.h"
+#include "simulation/MoveGenerator.h"
 
 class GaussianMoveGenerator : public MoveGenerator {
 private:

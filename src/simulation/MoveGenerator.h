@@ -8,7 +8,7 @@
 #ifndef MOVEGENERATOR_H_
 #define MOVEGENERATOR_H_
 
-#include "../Move.h"
+#include "Move.h"
 
 class MoveGenerator {
 public:

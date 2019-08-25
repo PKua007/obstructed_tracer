@@ -10,8 +10,8 @@
 
 #include <vector>
 
-#include "../Trajectory.h"
-#include "../Point.h"
+#include "Trajectory.h"
+#include "Point.h"
 #include "Tracer.h"
 
 class CPUTrajectory : public Trajectory {
