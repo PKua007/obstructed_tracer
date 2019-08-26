@@ -100,10 +100,9 @@ CPUSimulationFactory::CPUSimulationFactory(const Parameters &parameters, std::os
     this->moveFilter = createMoveFilter(parameters, logger);
     Move drift = {parameters.driftX, parameters.driftY};
 
-    this->randomWalker = std::unique_ptr<RandomWalker>(
-        new CPURandomWalker(parameters.numberOfWalks, parameters.numberOfSteps, parameters.tracerRadius, drift,
-                            this->moveGenerator.get(), this->moveFilter.get())
-    );
+    this->randomWalker.reset(new CPURandomWalker(parameters.numberOfWalks, parameters.numberOfSteps,
+                                                 parameters.tracerRadius, drift, this->moveGenerator.get(),
+                                                 this->moveFilter.get()));
 }
 
 RandomWalker &CPUSimulationFactory::getRandomWalker() {
