@@ -11,13 +11,14 @@
 #include <iosfwd>
 
 #include "Move.h"
+#include "utils/CudaQualifiers.h"
 
 struct Point  {
     float x{};
     float y{};
 
-    Point() = default;
-    Point(float x, float y) : x{x}, y{y} { }
+    CUDA_HOSTDEV Point() = default;
+    CUDA_HOSTDEV Point(float x, float y) : x{x}, y{y} { }
 
     Point operator+(Move move) const;
     Point operator-(Move move) const;

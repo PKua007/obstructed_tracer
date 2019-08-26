@@ -13,7 +13,13 @@
 
 MSDData::MSDData(const RandomWalker &randomWalker) {
     std::size_t numberOfTrajectories = randomWalker.getNumberOfTrajectories();
+    if (numberOfTrajectories == 0)
+        return;
+
     std::size_t trajectorySize = randomWalker.getTrajectory(0).getSize();
+    if (trajectorySize == 0)
+        return;
+
     this->data = std::vector<Entry>(trajectorySize);
     for (std::size_t i = 0; i < numberOfTrajectories; i++) {
         auto &trajectory = randomWalker.getTrajectory(i);
