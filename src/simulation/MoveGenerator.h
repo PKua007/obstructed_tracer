@@ -12,9 +12,9 @@
 
 class MoveGenerator {
 public:
-    virtual ~MoveGenerator() = default;
+    CUDA_HOSTDEV virtual ~MoveGenerator() = default;
 
-    virtual Move generateMove() = 0;
+    CUDA_HOSTDEV virtual Move generateMove() = 0;
 };
 
 #endif /* MOVEGENERATOR_H_ */
