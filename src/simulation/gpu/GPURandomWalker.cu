@@ -67,6 +67,7 @@ void GPURandomWalker::run(std::ostream& logger) {
     gpu_random_walk<<<numberOfBlocks, blockSize>>>(numberOfTrajectories, this->numberOfSteps, this->tracerRadius,
                                                    this->drift, this->moveGenerator, this->moveFilter, gpuTrajectories,
                                                    gpuAcceptedSteps);
+
     cudaCheck( cudaPeekAtLastError() );
 
     logger << "completed." << std::endl;

@@ -9,6 +9,7 @@
 #define GPUSIMULATIONFACTORY_H_
 
 #include <memory>
+#include <random>
 
 #include "Parameters.h"
 #include "SimulationFactory.h"
@@ -16,10 +17,14 @@
 
 class GPUSimulationFactory: public SimulationFactory {
 private:
+    std::mt19937 seedGenerator;
+    MoveGenerator *moveGenerator;
+    MoveFilter *moveFilter;
     std::unique_ptr<GPURandomWalker> randomWalker;
 
 public:
     GPUSimulationFactory(const Parameters &parameters, std::ostream &logger);
+    ~GPUSimulationFactory();
 
     RandomWalker &getRandomWalker() override;
 };
