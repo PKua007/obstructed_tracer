@@ -13,16 +13,27 @@
 #include "utils/CudaCheck.h"
 
 __global__
-void gpu_random_walk(size_t numberOfTrajectories, size_t numberOfSteps, Point **trajectories, size_t *acceptedSteps)
+void gpu_random_walk(size_t numberOfTrajectories, size_t numberOfSteps, float tracerRadius, Move drift,
+                     MoveGenerator* moveGenerator, MoveFilter* moveFilter, Point **trajectories, size_t *acceptedSteps)
 {
     int i = blockIdx.x*blockDim.x + threadIdx.x;
     if (i >= numberOfTrajectories)
         return;
 
-    float offset = (numberOfSteps + 1) * i;
-    acceptedSteps[i] = offset;
-    for (size_t j = 0; j <= numberOfSteps; j++)
-        trajectories[i][j] = {offset + j, offset + (numberOfSteps - j)};
+    Tracer tracer = moveFilter->randomValidTracer(tracerRadius);
+    trajectories[i][0] = tracer.getPosition();
+
+    acceptedSteps[i] = 0;
+    for (size_t step = 1; step <= numberOfSteps; step++) {
+        Move move = moveGenerator->generateMove() + drift;
+        if (moveFilter->isMoveValid(tracer, move)) {
+            tracer += move;
+            trajectories[i][step] = tracer.getPosition();
+            acceptedSteps[i]++;
+        } else {
+            trajectories[i][step] = tracer.getPosition();
+        }
+    }
 }
 
 GPURandomWalker::GPURandomWalker(std::size_t numberOfTrajectories, std::size_t numberOfSteps, float tracerRadius,
@@ -53,7 +64,8 @@ void GPURandomWalker::run(std::ostream& logger) {
 
     int blockSize = 32;
     int numberOfBlocks = (numberOfTrajectories + blockSize - 1) / blockSize;
-    gpu_random_walk<<<numberOfBlocks, blockSize>>>(numberOfTrajectories, numberOfSteps, gpuTrajectories,
+    gpu_random_walk<<<numberOfBlocks, blockSize>>>(numberOfTrajectories, this->numberOfSteps, this->tracerRadius,
+                                                   this->drift, this->moveGenerator, this->moveFilter, gpuTrajectories,
                                                    gpuAcceptedSteps);
     cudaCheck( cudaPeekAtLastError() );
 
