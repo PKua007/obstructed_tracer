@@ -12,11 +12,11 @@
 
 class ImageBoundaryConditions {
 public:
-    virtual ~ImageBoundaryConditions() = default;
+    CUDA_HOSTDEV virtual ~ImageBoundaryConditions() = default;
 
-    virtual void setupDimensions(size_t width, size_t height) = 0;
-    virtual bool isImagePointInBounds(ImagePoint imagePoint, int radius) const = 0;
-    virtual ImagePoint applyOnImagePoint(ImagePoint imagePoint) const = 0;
+    CUDA_HOSTDEV virtual void setupDimensions(size_t width, size_t height) = 0;
+    CUDA_HOSTDEV virtual bool isImagePointInBounds(ImagePoint imagePoint, int radius) const = 0;
+    CUDA_HOSTDEV virtual ImagePoint applyOnImagePoint(ImagePoint imagePoint) const = 0;
 };
 
 #endif /* IMAGEBOUNDARYCONDITIONS_H_ */

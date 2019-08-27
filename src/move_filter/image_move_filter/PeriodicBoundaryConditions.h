@@ -15,12 +15,12 @@ private:
     size_t width{};
     size_t height{};
 
-    int mod(int a, int b) const { return (a % b + b) % b; }
+    CUDA_HOSTDEV int mod(int a, int b) const { return (a % b + b) % b; }
 
 public:
-    void setupDimensions(size_t width, size_t height) override;
-    bool isImagePointInBounds(ImagePoint imagePoint, int radius) const override;
-    ImagePoint applyOnImagePoint(ImagePoint imagePoint) const override;
+    CUDA_HOSTDEV void setupDimensions(size_t width, size_t height) override;
+    CUDA_HOSTDEV bool isImagePointInBounds(ImagePoint imagePoint, int radius) const override;
+    CUDA_HOSTDEV ImagePoint applyOnImagePoint(ImagePoint imagePoint) const override;
 };
 
 #endif /* PERIODICBOUNDARYCONDITIONS_H_ */

@@ -71,7 +71,7 @@ std::unique_ptr<MoveFilter> CPUSimulationFactory::createImageMoveFilter(const Pa
     this->imageBC = createImageBoundaryConditions(moveFilterStream);
 
     auto imageMoveFilter = new ImageMoveFilter(imageData.data(), image.getWidth(), image.getHeight(),
-                                               this->imageBC.get(), this->seedGenerator());
+                                               this->imageBC.get(), this->seedGenerator(), parameters.numberOfWalks);
     logger << "[CPUSimulationFactory] Found " << imageMoveFilter->getNumberOfValidTracers(parameters.tracerRadius);
     logger << " valid starting points out of " << imageMoveFilter->getNumberOfAllPoints() << std::endl;
     return std::unique_ptr<MoveFilter>(imageMoveFilter);
