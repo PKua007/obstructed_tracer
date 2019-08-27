@@ -23,24 +23,23 @@ namespace {
     ImageMove operator-(ImagePoint p1, ImagePoint p2) {
         return {p1.x - p2.x, p1.y - p2.y};
     }
-
-
 }
 
-ImageMoveFilter::ImageMoveFilter(Image image, ImageBoundaryConditions *imageBC, unsigned int seed) :
-        width{image.getWidth()}, height{image.getHeight()}, imageBC{imageBC} {
+ImageMoveFilter::ImageMoveFilter(unsigned int *intImageData, size_t width, size_t height,
+                                 ImageBoundaryConditions *imageBC, unsigned long seed) :
+        width{width}, height{height}, imageBC{imageBC} {
     this->randomGenerator.seed(seed);
-    this->validPointsMapSize = image.getNumberOfPixels();
+    this->validPointsMapSize = this->width * this->height;
     this->validPointsMap = new bool[this->validPointsMapSize];
     this->validTracerIndicesCache = new size_t[this->validPointsMapSize];
-    this->imageBC->installOnImage(image);
+    this->imageBC->setupDimensions(this->width, this->height);
 
     // Image y axis starts from left upper corner downwards, so image is scanned from the bottom left, because
     // validPointsMap is in "normal" coordinate system, with (0, 0) in left bottom corner
     size_t i = 0;
     for (size_t y = 0; y < this->height; y++) {
         for (size_t x = 0; x < this->width; x++) {
-            if (image(x, this->height - y - 1) == WHITE)
+            if (intImageData[this->pointToIndex({x, this->height - y - 1})] == 0xffffffff)
                 this->validPointsMap[i] = true;
             else
                 this->validPointsMap[i] = false;
@@ -73,7 +72,7 @@ void ImageMoveFilter::rebuildValidTracersCache(float radius) {
 
 bool ImageMoveFilter::checkValidPointsMap(ImagePoint point) const {
     point = this->imageBC->applyOnImagePoint(point);
-    return this->validPointsMap[point.x + point.y * this->width];
+    return this->validPointsMap[this->pointToIndex(point)];
 }
 
 bool ImageMoveFilter::isPointValid(ImagePoint point, float pointRadius) const {
@@ -123,6 +122,9 @@ ImagePoint ImageMoveFilter::indexToPoint(size_t index) const {
     return {static_cast<int>(index % this->width), static_cast<int>(index / this->width)};
 }
 
+size_t ImageMoveFilter::pointToIndex(ImagePoint point) const {
+    return point.x + this->width * point.y;
+}
 
 bool ImageMoveFilter::isMoveValid(Tracer tracer, Move move) const {
     Point from = tracer.getPosition();

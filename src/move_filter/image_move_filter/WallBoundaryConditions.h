@@ -16,7 +16,7 @@ private:
     std::size_t height{};
 
 public:
-    void installOnImage(const Image &image) override;
+    void setupDimensions(size_t width, size_t height) override;
     bool isImagePointInBounds(ImagePoint imagePoint, int radius) const override;
     ImagePoint applyOnImagePoint(ImagePoint imagePoint) const override;
 };

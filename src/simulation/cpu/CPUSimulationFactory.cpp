@@ -64,12 +64,14 @@ std::unique_ptr<MoveFilter> CPUSimulationFactory::createImageMoveFilter(const Pa
 
     PPMImageReader imageReader;
     Image image = imageReader.read(imageFile);
+    auto imageData = image.getIntData();
     logger << "[CPUSimulationFactory] Loaded image " << imageFilename << " (" << image.getWidth() << "px x ";
     logger << image.getHeight() << "px)" << std::endl;
 
     this->imageBC = createImageBoundaryConditions(moveFilterStream);
 
-    auto imageMoveFilter = new ImageMoveFilter(image, this->imageBC.get(), this->seedGenerator());
+    auto imageMoveFilter = new ImageMoveFilter(imageData.data(), image.getWidth(), image.getHeight(),
+                                               this->imageBC.get(), this->seedGenerator());
     logger << "[CPUSimulationFactory] Found " << imageMoveFilter->getNumberOfValidTracers(parameters.tracerRadius);
     logger << " valid starting points out of " << imageMoveFilter->getNumberOfAllPoints() << std::endl;
     return std::unique_ptr<MoveFilter>(imageMoveFilter);

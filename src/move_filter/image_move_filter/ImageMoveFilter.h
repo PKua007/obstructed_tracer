@@ -11,7 +11,6 @@
 #include <random>
 
 #include "simulation/MoveFilter.h"
-#include "image/Image.h"
 #include "ImageBoundaryConditions.h"
 #include "ImagePoint.h"
 
@@ -37,9 +36,11 @@ private:
     bool checkValidPointsMap(ImagePoint point) const;
     bool isLineValid(ImagePoint from, ImagePoint to, float pointRadius) const;
     ImagePoint indexToPoint(std::size_t index) const;
+    size_t pointToIndex(ImagePoint point) const;
 
 public:
-    ImageMoveFilter(Image image, ImageBoundaryConditions *imageBC, unsigned int seed);
+    ImageMoveFilter(unsigned int *intImageData, size_t width, size_t height, ImageBoundaryConditions *imageBC,
+                    unsigned long seed);
     ~ImageMoveFilter();
 
     bool isMoveValid(Tracer tracer, Move move) const override;

@@ -12,13 +12,13 @@
 
 class PeriodicBoundaryConditions : public ImageBoundaryConditions {
 private:
-    std::size_t width{};
-    std::size_t height{};
+    size_t width{};
+    size_t height{};
 
     int mod(int a, int b) const { return (a % b + b) % b; }
 
 public:
-    void installOnImage(const Image &image) override;
+    void setupDimensions(size_t width, size_t height) override;
     bool isImagePointInBounds(ImagePoint imagePoint, int radius) const override;
     ImagePoint applyOnImagePoint(ImagePoint imagePoint) const override;
 };

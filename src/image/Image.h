@@ -16,6 +16,8 @@ struct Color {
     uint8_t r;
     uint8_t g;
     uint8_t b;
+
+    operator uint32_t() const { return (this->r << 24) | (this->g << 16) | (this->b << 8) | 0xff; }
 };
 
 #define WHITE Color{uint8_t{255}, uint8_t{255}, uint8_t{255}}
@@ -37,8 +39,7 @@ public:
     std::size_t getHeight() const;
     std::size_t getWidth() const;
     std::size_t getNumberOfPixels() const;
-    Color *getData();
-    const Color *getData() const;
+    std::vector<uint32_t> getIntData() const;
     Color &operator()(std::size_t x, std::size_t y);
     Color operator()(std::size_t x, std::size_t y) const;
 };

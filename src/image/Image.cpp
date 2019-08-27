@@ -31,12 +31,9 @@ std::size_t Image::getNumberOfPixels() const {
     return this->width * this->height;
 }
 
-Color* Image::getData() {
-    return this->data.data();
-}
 
-const Color* Image::getData() const {
-    return this->data.data();
+std::vector<uint32_t> Image::getIntData() const {
+    return std::vector<uint32_t>(this->data.begin(), this->data.end());
 }
 
 Color& Image::operator()(std::size_t x, std::size_t y) {
@@ -52,7 +49,7 @@ Color Image::operator()(std::size_t x, std::size_t y) const {
 }
 
 std::ostream& operator<<(std::ostream& out, Color color) {
-    uint32_t hexColor = (color.r << 16) | (color.g << 8) | color.b;
+    uint32_t hexColor = static_cast<uint32_t>(color);
     std::ostringstream sStream;
     sStream << "0x" << std::setfill('0') << std::setw(6) << std::hex << hexColor;
     out << sStream.str();
