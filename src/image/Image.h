@@ -34,6 +34,7 @@ private:
     std::vector<Color> data;
 
 public:
+    Image() : Image{0, 0} { }
     Image(std::size_t width, std::size_t height);
 
     std::size_t getHeight() const;

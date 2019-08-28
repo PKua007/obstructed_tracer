@@ -14,8 +14,6 @@
 
 Image::Image(std::size_t width, std::size_t height) :
         width{width}, height{height} {
-    Expects(width > 0);
-    Expects(height > 0);
     this->data.resize(width * height, WHITE);
 }
 

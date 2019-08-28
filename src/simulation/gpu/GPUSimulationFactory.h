@@ -14,12 +14,14 @@
 #include "Parameters.h"
 #include "SimulationFactory.h"
 #include "GPURandomWalker.h"
+#include "move_filter/image_move_filter/ImageBoundaryConditions.h"
 
 class GPUSimulationFactory: public SimulationFactory {
 private:
     std::mt19937 seedGenerator;
     MoveGenerator *moveGenerator;
     MoveFilter *moveFilter;
+    ImageBoundaryConditions *imageBoundaryConditions;
     std::unique_ptr<GPURandomWalker> randomWalker;
 
 public:

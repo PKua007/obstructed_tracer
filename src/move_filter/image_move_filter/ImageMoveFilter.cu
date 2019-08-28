@@ -75,6 +75,12 @@ ImageMoveFilter::~ImageMoveFilter() {
 void ImageMoveFilter::rebuildValidTracersCache(float radius) {
     Expects(radius >= 0.f);
 
+    #ifdef __CUDA_ARCH__
+        int i = blockIdx.x*blockDim.x + threadIdx.x;
+        if (i != 0)
+            return;
+    #endif
+
     if (this->radiusForTracerCache == radius)
         return;
 
@@ -151,7 +157,7 @@ float ImageMoveFilter::randomUniformNumber() {
         int i = blockIdx.x*blockDim.x + threadIdx.x;
 
         // 1 minus curand_normal, because it samples from (0, 1], and we want [0, 1)
-        return 1.f - curand_normal(&(this->states[i]));
+        return 1.f - curand_uniform(&(this->states[i]));
     #else
         return this->uniformDistribution(this->randomGenerator);
     #endif
@@ -177,10 +183,10 @@ Tracer ImageMoveFilter::randomValidTracer(float radius) {
 
     this->rebuildValidTracersCache(radius);
 
-#ifndef __CUDA_ARCH__
-    if (this->validTracerIndicesCacheSize == 0)
-        throw std::runtime_error("No valid points found in a given image");
-#endif
+    #ifndef __CUDA_ARCH__
+        if (this->validTracerIndicesCacheSize == 0)
+            throw std::runtime_error("No valid points found in a given image");
+    #endif
 
     float floatCacheIndex = this->randomUniformNumber() * this->validTracerIndicesCacheSize;
     size_t cacheIndex = static_cast<size_t>(floatCacheIndex);

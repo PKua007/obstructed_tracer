@@ -39,7 +39,6 @@ private:
 
     CUDA_HOSTDEV ImageMoveFilter(const ImageMoveFilter &other) { }
 
-    CUDA_HOSTDEV void rebuildValidTracersCache(float radius);
     CUDA_HOSTDEV bool isPointValid(ImagePoint point, float pointRadius) const;
     CUDA_HOSTDEV bool checkValidPointsMap(ImagePoint point) const;
     CUDA_HOSTDEV bool isLineValid(ImagePoint from, ImagePoint to, float pointRadius) const;
@@ -57,6 +56,7 @@ public:
 
     CUDA_HOSTDEV size_t getNumberOfAllPoints() const;
     CUDA_HOSTDEV size_t getNumberOfValidTracers(float radius);
+    CUDA_HOSTDEV void rebuildValidTracersCache(float radius);
 };
 
 #endif /* IMAGEMOVEFILTER_H_ */

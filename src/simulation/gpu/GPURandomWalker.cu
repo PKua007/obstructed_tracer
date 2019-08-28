@@ -62,13 +62,13 @@ void GPURandomWalker::run(std::ostream& logger) {
 
     logger << "[GPURandomWalker::run] Starting simulation... " << std::flush;
 
-    int blockSize = 32;
+    int blockSize = 512;
     int numberOfBlocks = (numberOfTrajectories + blockSize - 1) / blockSize;
     gpu_random_walk<<<numberOfBlocks, blockSize>>>(numberOfTrajectories, this->numberOfSteps, this->tracerRadius,
                                                    this->drift, this->moveGenerator, this->moveFilter, gpuTrajectories,
                                                    gpuAcceptedSteps);
 
-    cudaCheck( cudaPeekAtLastError() );
+    cudaCheck( cudaDeviceSynchronize() );
 
     logger << "completed." << std::endl;
 
