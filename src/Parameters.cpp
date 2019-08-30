@@ -33,6 +33,8 @@ Parameters::Parameters(std::istream& input) {
             this->storeTrajectories = (config.getString(key) == "true" ? true : false);
         else if (key == "seed")
             this->seed = config.getString(key);
+        else if (key == "device")
+            this->device = config.getString(key);
         else
             std::cerr << "[Parameters::Parameters] Warning: unknown parameter " << key << std::endl;
     }
@@ -50,6 +52,7 @@ void Parameters::print(std::ostream& out) {
     out << "numberOfWalks     : " << this->numberOfWalks << std::endl;
     out << "storeTrajectories : " << (this->storeTrajectories ? "true" : "false") << std::endl;
     out << "seed              : " << this->seed << std::endl;
+    out << "device            : " << this->device << std::endl;
 }
 
 void Parameters::validateParameters() const {

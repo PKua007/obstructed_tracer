@@ -12,8 +12,8 @@
 
 class DefaultMoveFilter : public MoveFilter {
 public:
-    bool isMoveValid(Tracer tracer, Move move) const override;
-    Tracer randomValidTracer(float radius) override;
+    CUDA_HOSTDEV bool isMoveValid(Tracer tracer, Move move) const override;
+    CUDA_HOSTDEV Tracer randomValidTracer(float radius) override;
 };
 
 #endif /* DEFAULTMOVEFILTER_H_ */

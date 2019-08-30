@@ -9,39 +9,54 @@
 #define IMAGEMOVEFILTER_H_
 
 #include <random>
+#include <curand_kernel.h>
 
 #include "simulation/MoveFilter.h"
-#include "image/Image.h"
 #include "ImageBoundaryConditions.h"
 #include "ImagePoint.h"
 
 class ImageMoveFilter: public MoveFilter {
 private:
+
+#if CUDA_DEVICE_COMPILATION
+    curandState *states;
+    size_t numberOfStates;
+#else // CUDA_HOST_COMPILATION
     std::mt19937 randomGenerator;
     std::uniform_real_distribution<float> uniformDistribution{0.f, 1.f};
+#endif
 
-    std::size_t width;
-    std::size_t height;
-    ImageBoundaryConditions *imageBC;
-    std::vector<bool> validPointsMap;
+    size_t width{};
+    size_t height{};
+    ImageBoundaryConditions *imageBC{};
+    bool* validPointsMap{};
+    size_t validPointsMapSize{};
 
     float radiusForTracerCache = -1.0;
-    std::vector<std::size_t> validTracerIndicesCache;
+    size_t *validTracerIndicesCache{};
+    size_t validTracerIndicesCacheSize{};
 
-    void rebuildValidTracersCache(float radius);
-    bool isPointValid(ImagePoint point, float pointRadius) const;
-    bool checkValidPointsMap(ImagePoint point) const;
-    bool isLineValid(ImagePoint from, ImagePoint to, float pointRadius) const;
-    ImagePoint indexToPoint(std::size_t index) const;
+    CUDA_HOSTDEV bool isPointValid(ImagePoint point, float pointRadius) const;
+    CUDA_HOSTDEV bool checkValidPointsMap(ImagePoint point) const;
+    CUDA_HOSTDEV bool isLineValid(ImagePoint from, ImagePoint to, float pointRadius) const;
+    CUDA_HOSTDEV ImagePoint indexToPoint(std::size_t index) const;
+    CUDA_HOSTDEV size_t pointToIndex(ImagePoint point) const;
+    CUDA_HOSTDEV float randomUniformNumber();
 
 public:
-    ImageMoveFilter(Image image, ImageBoundaryConditions *imageBC, unsigned int seed);
+    CUDA_HOSTDEV ImageMoveFilter(unsigned int *intImageData, size_t width, size_t height,
+                                 ImageBoundaryConditions *imageBC, unsigned long seed, size_t numberOfTrajectories);
 
-    bool isMoveValid(Tracer tracer, Move move) const override;
-    Tracer randomValidTracer(float radius) override;
+    CUDA_HOSTDEV ImageMoveFilter(const ImageMoveFilter &other) = delete;
+    CUDA_HOSTDEV ImageMoveFilter operator=(ImageMoveFilter other) = delete;
+    CUDA_HOSTDEV ~ImageMoveFilter();
 
-    std::size_t getNumberOfAllPoints() const;
-    std::size_t getNumberOfValidTracers(float radius);
+    CUDA_HOSTDEV bool isMoveValid(Tracer tracer, Move move) const override;
+    CUDA_HOSTDEV Tracer randomValidTracer(float radius) override;
+
+    CUDA_HOSTDEV size_t getNumberOfAllPoints() const;
+    CUDA_HOSTDEV size_t getNumberOfValidTracers(float radius);
+    CUDA_HOSTDEV void rebuildValidTracersCache(float radius);
 };
 
 #endif /* IMAGEMOVEFILTER_H_ */

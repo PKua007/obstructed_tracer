@@ -9,6 +9,7 @@
 #define TRACER_H_
 
 #include "Point.h"
+#include "utils/CudaDefines.h"
 
 class Tracer {
 private:
@@ -16,15 +17,15 @@ private:
     float radius{};
 
 public:
-    Tracer() = default;
-    Tracer(Point position, float radius) : position{position}, radius{radius} { }
+    CUDA_HOSTDEV Tracer() = default;
+    CUDA_HOSTDEV Tracer(Point position, float radius) : position{position}, radius{radius} { }
 
-    Point getPosition() const { return position; }
-    void setPosition(Point position) { this->position = position; }
-    float getRadius() const { return radius; }
-    void setRadius(float radius) { this->radius = radius; }
+    CUDA_HOSTDEV Point getPosition() const { return position; }
+    CUDA_HOSTDEV void setPosition(Point position) { this->position = position; }
+    CUDA_HOSTDEV float getRadius() const { return radius; }
+    CUDA_HOSTDEV void setRadius(float radius) { this->radius = radius; }
 
-    Tracer &operator+=(Move move) {
+    CUDA_HOSTDEV Tracer &operator+=(Move move) {
         this->position += move;
         return *this;
     }

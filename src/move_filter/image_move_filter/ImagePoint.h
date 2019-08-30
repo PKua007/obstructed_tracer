@@ -14,12 +14,12 @@ struct ImagePoint {
     int x{};
     int y{};
 
-    ImagePoint() = default;
-    ImagePoint(int x, int y) : x{x}, y{y} { };
-    ImagePoint(Point point) : x{static_cast<int>(point.x)}, y{static_cast<int>(point.y)} { };
+    CUDA_HOSTDEV ImagePoint() = default;
+    CUDA_HOSTDEV ImagePoint(int x, int y) : x{x}, y{y} { };
+    CUDA_HOSTDEV ImagePoint(Point point) : x{static_cast<int>(point.x)}, y{static_cast<int>(point.y)} { };
 
-    bool operator==(ImagePoint second) const { return this->x == second.x && this->y == second.y; }
-    bool operator!=(ImagePoint second) const { return !(*this == second); }
+    CUDA_HOSTDEV bool operator==(ImagePoint second) const { return this->x == second.x && this->y == second.y; }
+    CUDA_HOSTDEV bool operator!=(ImagePoint second) const { return !(*this == second); }
 };
 
 #endif /* IMAGEPOINT_H_ */

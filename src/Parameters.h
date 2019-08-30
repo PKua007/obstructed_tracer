@@ -17,15 +17,16 @@ private:
     void validateParameters() const;
 
 public:
-    std::size_t numberOfSteps = 1000;
-    float       tracerRadius  = 0.f;
-    std::string moveGenerator = "GaussianMoveGenerator";
-    std::string moveFilter    = "DefaultMoveFilter";
-    float       driftX        = 0.f;
-    float       driftY        = 0.f;
-    std::size_t numberOfWalks = 10;
+    std::size_t numberOfSteps     = 1000;
+    float       tracerRadius      = 0.f;
+    std::string moveGenerator     = "GaussianMoveGenerator";
+    std::string moveFilter        = "DefaultMoveFilter";
+    float       driftX            = 0.f;
+    float       driftY            = 0.f;
+    std::size_t numberOfWalks     = 10;
     bool        storeTrajectories = false;
-    std::string seed = "random";
+    std::string seed              = "random";
+    std::string device            = "gpu";
 
     Parameters() = default;
     Parameters(std::istream &input);

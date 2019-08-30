@@ -7,9 +7,9 @@
 
 #include "PeriodicBoundaryConditions.h"
 
-void PeriodicBoundaryConditions::installOnImage(const Image& image) {
-    this->width = image.getWidth();
-    this->height = image.getHeight();
+void PeriodicBoundaryConditions::setupDimensions(size_t width, size_t height) {
+    this->width = width;
+    this->height = height;
 }
 
 bool PeriodicBoundaryConditions::isImagePointInBounds(ImagePoint imagePoint, int radius) const {

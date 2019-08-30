@@ -14,8 +14,8 @@
 
 #include "RandomWalker.h"
 #include "CPUTrajectory.h"
-#include "MoveGenerator.h"
-#include "MoveFilter.h"
+#include "../MoveGenerator.h"
+#include "../MoveFilter.h"
 
 class CPURandomWalker : public RandomWalker {
 private:

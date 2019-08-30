@@ -9,8 +9,8 @@
 #include <sstream>
 
 #include "CPUSimulationFactory.h"
-#include "move_generator/GaussianMoveGenerator.h"
-#include "move_generator/CauchyMoveGenerator.h"
+#include "move_generator/cpu/CPUGaussianMoveGenerator.h"
+#include "move_generator/cpu/CPUCauchyMoveGenerator.h"
 #include "move_filter/DefaultMoveFilter.h"
 #include "move_filter/image_move_filter/ImageMoveFilter.h"
 #include "move_filter/image_move_filter/WallBoundaryConditions.h"
@@ -28,9 +28,9 @@ std::unique_ptr<MoveGenerator> CPUSimulationFactory::createMoveGenerator(const P
     Validate(sigma >= 0.f);
 
     if (moveGeneratorType == "GaussianMoveGenerator")
-        return std::unique_ptr<MoveGenerator>(new GaussianMoveGenerator(sigma, this->seedGenerator()));
+        return std::unique_ptr<MoveGenerator>(new CPUGaussianMoveGenerator(sigma, this->seedGenerator()));
     else if (moveGeneratorType == "CauchyMoveGenerator")
-        return std::unique_ptr<MoveGenerator>(new CauchyMoveGenerator(sigma, this->seedGenerator()));
+        return std::unique_ptr<MoveGenerator>(new CPUCauchyMoveGenerator(sigma, this->seedGenerator()));
     else
         throw std::runtime_error("Unknown MoveGenerator: " + moveGeneratorType);
 }
@@ -64,12 +64,14 @@ std::unique_ptr<MoveFilter> CPUSimulationFactory::createImageMoveFilter(const Pa
 
     PPMImageReader imageReader;
     Image image = imageReader.read(imageFile);
+    auto imageData = image.getIntData();
     logger << "[CPUSimulationFactory] Loaded image " << imageFilename << " (" << image.getWidth() << "px x ";
     logger << image.getHeight() << "px)" << std::endl;
 
     this->imageBC = createImageBoundaryConditions(moveFilterStream);
 
-    auto imageMoveFilter = new ImageMoveFilter(image, this->imageBC.get(), this->seedGenerator());
+    auto imageMoveFilter = new ImageMoveFilter(imageData.data(), image.getWidth(), image.getHeight(),
+                                               this->imageBC.get(), this->seedGenerator(), parameters.numberOfWalks);
     logger << "[CPUSimulationFactory] Found " << imageMoveFilter->getNumberOfValidTracers(parameters.tracerRadius);
     logger << " valid starting points out of " << imageMoveFilter->getNumberOfAllPoints() << std::endl;
     return std::unique_ptr<MoveFilter>(imageMoveFilter);
@@ -100,10 +102,9 @@ CPUSimulationFactory::CPUSimulationFactory(const Parameters &parameters, std::os
     this->moveFilter = createMoveFilter(parameters, logger);
     Move drift = {parameters.driftX, parameters.driftY};
 
-    this->randomWalker = std::unique_ptr<RandomWalker>(
-        new CPURandomWalker(parameters.numberOfWalks, parameters.numberOfSteps, parameters.tracerRadius, drift,
-                            this->moveGenerator.get(), this->moveFilter.get())
-    );
+    this->randomWalker.reset(new CPURandomWalker(parameters.numberOfWalks, parameters.numberOfSteps,
+                                                 parameters.tracerRadius, drift, this->moveGenerator.get(),
+                                                 this->moveFilter.get()));
 }
 
 RandomWalker &CPUSimulationFactory::getRandomWalker() {

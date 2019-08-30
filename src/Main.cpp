@@ -15,7 +15,8 @@
 
 #include "Parameters.h"
 #include "utils/Utils.h"
-#include "simulation/CPUSimulationFactory.h"
+#include "simulation/cpu/CPUSimulationFactory.h"
+#include "simulation/gpu/GPUSimulationFactory.h"
 #include "MSDData.h"
 
 namespace {
@@ -53,8 +54,15 @@ int main(int argc, char **argv)
     parameters.print(std::cout);
     std::cout << std::endl;
 
-    CPUSimulationFactory simulationFactory(parameters, std::cout);
-    RandomWalker &randomWalker = simulationFactory.getRandomWalker();
+    std::unique_ptr<SimulationFactory> simulationFactory;
+    if (parameters.device == "cpu")
+        simulationFactory.reset(new CPUSimulationFactory(parameters, std::cout));
+    else if (parameters.device == "gpu")
+        simulationFactory.reset(new GPUSimulationFactory(parameters, std::cout));
+    else
+        die("[main] Unknown device: " + parameters.device);
+
+    RandomWalker &randomWalker = simulationFactory->getRandomWalker();
     randomWalker.run(std::cout);
 
     std::string outputFilePrefix = argv[2];
