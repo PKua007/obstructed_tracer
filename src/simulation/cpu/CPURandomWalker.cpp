@@ -25,12 +25,12 @@ CPURandomWalker::CPURandomWalker(std::size_t numberOfTrajectories, std::size_t n
 CPUTrajectory CPURandomWalker::runSingleTrajectory() {
     CPUTrajectory trajectory(this->numberOfSteps + 1);
     Tracer tracer = this->moveFilter->randomValidTracer(this->tracerRadius);
-    trajectory.moveToPoint(tracer);
+    trajectory.moveToPoint(tracer.getPosition());
     for (std::size_t i = 0; i < this->numberOfSteps; i++) {
         Move move = this->moveGenerator->generateMove() + drift;
         if (this->moveFilter->isMoveValid(tracer, move)) {
             tracer += move;
-            trajectory.moveToPoint(tracer);
+            trajectory.moveToPoint(tracer.getPosition());
         } else {
             trajectory.stayStill();
         }

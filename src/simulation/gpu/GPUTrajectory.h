@@ -10,23 +10,11 @@
 
 #include <vector>
 
-#include "Trajectory.h"
+#include "../TrajectoryBase.h"
 
-class GPUTrajectory: public Trajectory {
-private:
-    std::vector<Point> trajectory;
-    std::size_t acceptedSteps;
-
+class GPUTrajectory: public TrajectoryBase {
 public:
     void moveGPUData(Point *gpuData, std::size_t size, std::size_t acceptedSteps);
-
-    std::size_t getSize() const override;
-    std::size_t getNumberOfAcceptedSteps() const override;
-    Point operator[](std::size_t index) const override;
-    Point getFirst() const override;
-    Point getLast() const override;
-
-    void store(std::ostream &out) const override;
 };
 
 #endif /* GPUTRAJECTORY_H_ */

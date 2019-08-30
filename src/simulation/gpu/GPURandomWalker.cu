@@ -72,11 +72,11 @@ void GPURandomWalker::run(std::ostream& logger) {
 
     logger << "completed." << std::endl;
 
-    cudaCheck( cudaFree(gpuTrajectories) );
-
     std::vector<size_t> cpuAcceptedSteps(numberOfTrajectories);
     cudaCheck( cudaMemcpy(cpuAcceptedSteps.data(), gpuAcceptedSteps, numberOfTrajectories*sizeof(size_t),
                           cudaMemcpyDeviceToHost) );
+
+    cudaCheck( cudaFree(gpuTrajectories) );
     cudaCheck( cudaFree(gpuAcceptedSteps) );
 
     for (std::size_t i = 0; i < numberOfTrajectories; i++)

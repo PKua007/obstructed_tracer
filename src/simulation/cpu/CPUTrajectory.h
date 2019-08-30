@@ -10,29 +10,15 @@
 
 #include <vector>
 
-#include "Trajectory.h"
-#include "Point.h"
-#include "../Tracer.h"
+#include "../TrajectoryBase.h"
 
-class CPUTrajectory : public Trajectory {
-private:
-    std::vector<Point> data;
-    std::size_t acceptedSteps{};
-
+class CPUTrajectory : public TrajectoryBase {
 public:
     CPUTrajectory() = default;
     CPUTrajectory(std::size_t numberOfPoints);
 
     void stayStill();
-    void moveToPoint(Tracer tracer);
-
-    std::size_t getSize() const override;
-    std::size_t getNumberOfAcceptedSteps() const override;
-    Point operator[](std::size_t index) const override;
-    Point getFirst() const override;
-    Point getLast() const override;
-
-    void store(std::ostream &out) const override;
+    void moveToPoint(Point point);
 };
 
 #endif /* CPUTRAJECTORY_H_ */

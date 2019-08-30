@@ -36,38 +36,6 @@ namespace {
     };
 
     __global__
-    void create_move_filter(unsigned long seed, size_t numberOfTrajectories, MoveFilterType moveFilterType,
-                            uint32_t *intImageData, size_t width, size_t height,
-                            BoundaryConditionsType boundaryConditionsType, MoveFilter **moveFilter,
-                            ImageBoundaryConditions **boundaryConditions)
-    {
-        int i = blockIdx.x*blockDim.x + threadIdx.x;
-        if (i != 0)
-            return;
-
-        if (moveFilterType == IMAGE) {
-            if (boundaryConditionsType == WALL)
-                (*boundaryConditions) = new WallBoundaryConditions();
-            else if (boundaryConditionsType == PERIODIC)
-                (*boundaryConditions) = new PeriodicBoundaryConditions();
-            else
-                (*boundaryConditions) = nullptr;
-        } else {
-            (*boundaryConditions) = nullptr;
-        }
-
-        if (moveFilterType == DEFAULT)
-            (*moveFilter) = new DefaultMoveFilter();
-        else if (moveFilterType == IMAGE)
-            (*moveFilter) = new ImageMoveFilter(intImageData, width, height, *boundaryConditions, seed,
-                                                numberOfTrajectories);
-        else
-            (*moveFilter) = nullptr;
-    }
-
-
-
-    __global__
     void create_move_generator(unsigned long seed, float sigma, size_t numberOfTrajectories,
                                MoveGeneratorType moveGeneratorType, MoveGenerator **moveGenerator)
     {
@@ -118,6 +86,36 @@ namespace {
             cudaCheck( cudaFree(moveGeneratorPlaceholder) );
         }
     };
+
+    __global__
+    void create_move_filter(unsigned long seed, size_t numberOfTrajectories, MoveFilterType moveFilterType,
+                            uint32_t *intImageData, size_t width, size_t height,
+                            BoundaryConditionsType boundaryConditionsType, MoveFilter **moveFilter,
+                            ImageBoundaryConditions **boundaryConditions)
+    {
+        int i = blockIdx.x*blockDim.x + threadIdx.x;
+        if (i != 0)
+            return;
+
+        if (moveFilterType == IMAGE) {
+            if (boundaryConditionsType == WALL)
+                (*boundaryConditions) = new WallBoundaryConditions();
+            else if (boundaryConditionsType == PERIODIC)
+                (*boundaryConditions) = new PeriodicBoundaryConditions();
+            else
+                (*boundaryConditions) = nullptr;
+        } else {
+            (*boundaryConditions) = nullptr;
+        }
+
+        if (moveFilterType == DEFAULT)
+            (*moveFilter) = new DefaultMoveFilter();
+        else if (moveFilterType == IMAGE)
+            (*moveFilter) = new ImageMoveFilter(intImageData, width, height, *boundaryConditions, seed,
+                                                numberOfTrajectories);
+        else
+            (*moveFilter) = nullptr;
+    }
 
     class MoveFilterOnGPU {
     private:
@@ -211,8 +209,7 @@ namespace {
 
 
 __global__
-void delete_objects(MoveGenerator *moveGenerator, MoveFilter *moveFilter, ImageBoundaryConditions *boundaryConditions)
-{
+void delete_objects(MoveGenerator *moveGenerator, MoveFilter *moveFilter, ImageBoundaryConditions *boundaryConditions) {
     int i = blockIdx.x*blockDim.x + threadIdx.x;
     if (i != 0)
         return;
