@@ -9,8 +9,8 @@
 #include <sstream>
 
 #include "CPUSimulationFactory.h"
-#include "move_generator/GaussianMoveGenerator.h"
-#include "move_generator/CauchyMoveGenerator.h"
+#include "move_generator/cpu/CPUGaussianMoveGenerator.h"
+#include "move_generator/cpu/CPUCauchyMoveGenerator.h"
 #include "move_filter/DefaultMoveFilter.h"
 #include "move_filter/image_move_filter/ImageMoveFilter.h"
 #include "move_filter/image_move_filter/WallBoundaryConditions.h"
@@ -28,9 +28,9 @@ std::unique_ptr<MoveGenerator> CPUSimulationFactory::createMoveGenerator(const P
     Validate(sigma >= 0.f);
 
     if (moveGeneratorType == "GaussianMoveGenerator")
-        return std::unique_ptr<MoveGenerator>(new GaussianMoveGenerator(sigma, this->seedGenerator()));
+        return std::unique_ptr<MoveGenerator>(new CPUGaussianMoveGenerator(sigma, this->seedGenerator()));
     else if (moveGeneratorType == "CauchyMoveGenerator")
-        return std::unique_ptr<MoveGenerator>(new CauchyMoveGenerator(sigma, this->seedGenerator()));
+        return std::unique_ptr<MoveGenerator>(new CPUCauchyMoveGenerator(sigma, this->seedGenerator()));
     else
         throw std::runtime_error("Unknown MoveGenerator: " + moveGeneratorType);
 }

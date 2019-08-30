@@ -1,6 +1,6 @@
-numberOfSteps = 5000
+numberOfSteps = 1000
 tracerRadius = 4
-moveGenerator = GaussianMoveGenerator 3
+moveGenerator = CauchyMoveGenerator 3
 #moveFilter = DefaultMoveFilter
 moveFilter = ImageMoveFilter rsa.ppm PeriodicBoundaryConditions
 driftX = 0

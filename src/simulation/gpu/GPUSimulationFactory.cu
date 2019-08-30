@@ -11,7 +11,8 @@
 
 #include "GPUSimulationFactory.h"
 #include "utils/CudaCheck.h"
-#include "move_generator/GPUGaussianMoveGenerator.h"
+#include "move_generator/gpu/GPUGaussianMoveGenerator.h"
+#include "move_generator/gpu/GPUCauchyMoveGenerator.h"
 #include "move_filter/DefaultMoveFilter.h"
 #include "move_filter/image_move_filter/ImageMoveFilter.h"
 #include "move_filter/image_move_filter/WallBoundaryConditions.h"
@@ -46,7 +47,7 @@ namespace {
         if (moveGeneratorType == GAUSSIAN)
             (*moveGenerator) = new GPUGaussianMoveGenerator(sigma, seed, numberOfTrajectories);
         else if (moveGeneratorType == CAUCHY)
-            (*moveGenerator) = nullptr;
+            (*moveGenerator) = new GPUCauchyMoveGenerator(sigma, seed, numberOfTrajectories);
         else
             (*moveGenerator) = nullptr;
     }

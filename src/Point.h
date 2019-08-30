@@ -37,7 +37,7 @@ struct Point  {
 };
 
 inline std::ostream &operator<<(std::ostream& out, Point point) {
-    out << "{" << point.x << ", " << point.y << "}";
+    out << point.x << " " << point.y;
     return out;
 }
 

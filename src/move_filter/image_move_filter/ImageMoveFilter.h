@@ -37,8 +37,6 @@ private:
     size_t *validTracerIndicesCache{};
     size_t validTracerIndicesCacheSize{};
 
-    CUDA_HOSTDEV ImageMoveFilter(const ImageMoveFilter &other) { }
-
     CUDA_HOSTDEV bool isPointValid(ImagePoint point, float pointRadius) const;
     CUDA_HOSTDEV bool checkValidPointsMap(ImagePoint point) const;
     CUDA_HOSTDEV bool isLineValid(ImagePoint from, ImagePoint to, float pointRadius) const;
@@ -49,6 +47,9 @@ private:
 public:
     CUDA_HOSTDEV ImageMoveFilter(unsigned int *intImageData, size_t width, size_t height,
                                  ImageBoundaryConditions *imageBC, unsigned long seed, size_t numberOfTrajectories);
+
+    CUDA_HOSTDEV ImageMoveFilter(const ImageMoveFilter &other) = delete;
+    CUDA_HOSTDEV ImageMoveFilter operator=(ImageMoveFilter other) = delete;
     CUDA_HOSTDEV ~ImageMoveFilter();
 
     CUDA_HOSTDEV bool isMoveValid(Tracer tracer, Move move) const override;
