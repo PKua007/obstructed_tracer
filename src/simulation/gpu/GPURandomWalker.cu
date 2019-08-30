@@ -16,7 +16,7 @@ __global__
 void gpu_random_walk(size_t numberOfTrajectories, size_t numberOfSteps, float tracerRadius, Move drift,
                      MoveGenerator* moveGenerator, MoveFilter* moveFilter, Point **trajectories, size_t *acceptedSteps)
 {
-    int i = blockIdx.x*blockDim.x + threadIdx.x;
+    int i = CUDA_THREAD_IDX;
     if (i >= numberOfTrajectories)
         return;
 

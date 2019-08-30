@@ -40,8 +40,7 @@ namespace {
     void create_move_generator(unsigned long seed, float sigma, size_t numberOfTrajectories,
                                MoveGeneratorType moveGeneratorType, MoveGenerator **moveGenerator)
     {
-        int i = blockIdx.x*blockDim.x + threadIdx.x;
-        if (i != 0)
+        if (!CUDA_IS_IT_FIRST_THREAD)
             return;
 
         if (moveGeneratorType == GAUSSIAN)
@@ -94,8 +93,7 @@ namespace {
                             BoundaryConditionsType boundaryConditionsType, MoveFilter **moveFilter,
                             ImageBoundaryConditions **boundaryConditions)
     {
-        int i = blockIdx.x*blockDim.x + threadIdx.x;
-        if (i != 0)
+        if (!CUDA_IS_IT_FIRST_THREAD)
             return;
 
         if (moveFilterType == IMAGE) {
@@ -211,8 +209,7 @@ namespace {
 
 __global__
 void delete_objects(MoveGenerator *moveGenerator, MoveFilter *moveFilter, ImageBoundaryConditions *boundaryConditions) {
-    int i = blockIdx.x*blockDim.x + threadIdx.x;
-    if (i != 0)
+    if (!CUDA_IS_IT_FIRST_THREAD)
         return;
 
     delete moveGenerator;

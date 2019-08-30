@@ -9,7 +9,7 @@
 #define TRACER_H_
 
 #include "Point.h"
-#include "utils/CudaQualifiers.h"
+#include "utils/CudaDefines.h"
 
 class Tracer {
 private:

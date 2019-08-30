@@ -21,17 +21,13 @@ CUDA_DEV GPUCauchyMoveGenerator::~GPUCauchyMoveGenerator() {
 }
 
 CUDA_DEV float GPUCauchyMoveGenerator::randomCauchy() {
-    int i = blockIdx.x*blockDim.x + threadIdx.x;
-
-    float uniform = curand_uniform(&(this->states[i]));
+    float uniform = curand_uniform(&(this->states[CUDA_THREAD_IDX]));
     return this->sigma * tanf(CUDART_PI_F * (uniform - 0.5f));
 }
 
 CUDA_DEV Move GPUCauchyMoveGenerator::generateMove() {
-    int i = blockIdx.x*blockDim.x + threadIdx.x;
-
     float radius = this->randomCauchy();
-    float angle = 2 * CUDART_PI_F * curand_uniform(&(this->states[i]));
+    float angle = 2 * CUDART_PI_F * curand_uniform(&(this->states[CUDA_THREAD_IDX]));
 
     return {radius * cosf(angle), radius * sinf(angle)};
 }

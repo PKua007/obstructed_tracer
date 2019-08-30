@@ -11,7 +11,7 @@
 #include <ostream>
 
 #include "Move.h"
-#include "utils/CudaQualifiers.h"
+#include "utils/CudaDefines.h"
 
 struct Point  {
     float x{};

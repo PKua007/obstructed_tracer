@@ -20,7 +20,7 @@ CUDA_DEV GPUGaussianMoveGenerator::~GPUGaussianMoveGenerator() {
 }
 
 CUDA_DEV Move GPUGaussianMoveGenerator::generateMove() {
-    int i = blockIdx.x*blockDim.x + threadIdx.x;
+    int i = CUDA_THREAD_IDX;
 
     return {curand_normal(&(this->states[i])) * this->sigma, curand_normal(&(this->states[i])) * this->sigma};
 }

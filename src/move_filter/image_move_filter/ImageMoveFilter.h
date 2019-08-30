@@ -14,15 +14,14 @@
 #include "simulation/MoveFilter.h"
 #include "ImageBoundaryConditions.h"
 #include "ImagePoint.h"
-#include "utils/CudaQualifiers.h"
 
 class ImageMoveFilter: public MoveFilter {
 private:
 
-#ifdef __CUDA_ARCH__
+#if CUDA_DEVICE_COMPILATION
     curandState *states;
     size_t numberOfStates;
-#else
+#else // CUDA_HOST_COMPILATION
     std::mt19937 randomGenerator;
     std::uniform_real_distribution<float> uniformDistribution{0.f, 1.f};
 #endif

@@ -9,7 +9,6 @@
 #define DEFAULTMOVEFILTER_H_
 
 #include "simulation/MoveFilter.h"
-#include "utils/CudaQualifiers.h"
 
 class DefaultMoveFilter : public MoveFilter {
 public:

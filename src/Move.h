@@ -8,7 +8,7 @@
 #ifndef MOVE_H_
 #define MOVE_H_
 
-#include "utils/CudaQualifiers.h"
+#include "utils/CudaDefines.h"
 
 struct Move {
     float x;

@@ -35,11 +35,11 @@ namespace {
 ImageMoveFilter::ImageMoveFilter(unsigned int *intImageData, size_t width, size_t height,
                                  ImageBoundaryConditions *imageBC, unsigned long seed, size_t numberOfTrajectories) :
         width{width}, height{height}, imageBC{imageBC} {
-    #ifdef __CUDA_ARCH__
+    #if CUDA_DEVICE_COMPILATION
         this->states = new curandState[numberOfTrajectories];
         for (size_t i = 0; i < numberOfTrajectories; i++)
             curand_init(seed, i, 0, &(this->states[i]));
-    #else
+    #else // CUDA_HOST_COMPILATION
         this->randomGenerator.seed(seed);
     #endif
 
@@ -67,7 +67,7 @@ ImageMoveFilter::ImageMoveFilter(unsigned int *intImageData, size_t width, size_
 ImageMoveFilter::~ImageMoveFilter() {
     delete [] this->validPointsMap;
     delete [] this->validTracerIndicesCache;
-    #ifdef __CUDA_ARCH__
+    #if CUDA_DEVICE_COMPILATION
         delete [] this->states;
     #endif
 }
@@ -75,9 +75,8 @@ ImageMoveFilter::~ImageMoveFilter() {
 void ImageMoveFilter::rebuildValidTracersCache(float radius) {
     Expects(radius >= 0.f);
 
-    #ifdef __CUDA_ARCH__
-        int i = blockIdx.x*blockDim.x + threadIdx.x;
-        if (i != 0)
+    #if CUDA_DEVICE_COMPILATION
+        if (!CUDA_IS_IT_FIRST_THREAD)
             return;
     #endif
 
@@ -153,12 +152,10 @@ size_t ImageMoveFilter::pointToIndex(ImagePoint point) const {
 #pragma nv_exec_check_disable
 
 float ImageMoveFilter::randomUniformNumber() {
-    #ifdef __CUDA_ARCH__
-        int i = blockIdx.x*blockDim.x + threadIdx.x;
-
+    #if CUDA_DEVICE_COMPILATION
         // 1 minus curand_normal, because it samples from (0, 1], and we want [0, 1)
-        return 1.f - curand_uniform(&(this->states[i]));
-    #else
+        return 1.f - curand_uniform(&(this->states[CUDA_THREAD_IDX]));
+    #else // CUDA_HOST_COMPILATION
         return this->uniformDistribution(this->randomGenerator);
     #endif
 }
@@ -183,7 +180,7 @@ Tracer ImageMoveFilter::randomValidTracer(float radius) {
 
     this->rebuildValidTracersCache(radius);
 
-    #ifndef __CUDA_ARCH__
+    #if CUDA_HOST_COMPILATION
         if (this->validTracerIndicesCacheSize == 0)
             throw std::runtime_error("No valid points found in a given image");
     #endif
