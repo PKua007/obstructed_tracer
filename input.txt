@@ -1,4 +1,4 @@
-numberOfSteps = 7000
+numberOfSteps = 5000
 tracerRadius = 4
 moveGenerator = GaussianMoveGenerator 3
 #moveFilter = DefaultMoveFilter
