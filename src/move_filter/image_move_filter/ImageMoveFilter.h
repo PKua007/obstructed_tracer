@@ -35,12 +35,14 @@ private:
     bool* validPointsMap{};
     size_t validPointsMapSize{};
 
+    CUDA_HOSTDEV void initializeGenerators(unsigned long seed, size_t numberOfTrajectories);
     CUDA_HOSTDEV bool isPointValid(ImagePoint point, float pointRadius) const;
     CUDA_HOSTDEV bool checkValidPointsMap(ImagePoint point) const;
     CUDA_HOSTDEV bool isLineValid(ImagePoint from, ImagePoint to, float pointRadius) const;
-    CUDA_HOSTDEV ImagePoint indexToPoint(std::size_t index) const;
+    CUDA_HOSTDEV ImagePoint indexToImagePoint(std::size_t index) const;
     CUDA_HOSTDEV size_t pointToIndex(ImagePoint point) const;
     CUDA_HOSTDEV float randomUniformNumber();
+    CUDA_HOSTDEV ImagePoint randomTracerImagePosition(float radius);
 
 #if CUDA_HOST_COMPILATION
     void rebuildValidTracersCache(float radius);
