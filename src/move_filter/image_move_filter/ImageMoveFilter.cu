@@ -35,17 +35,10 @@ namespace {
 ImageMoveFilter::ImageMoveFilter(unsigned int *intImageData, size_t width, size_t height,
                                  ImageBoundaryConditions *imageBC, unsigned long seed, size_t numberOfTrajectories) :
         width{width}, height{height}, imageBC{imageBC} {
-    #if CUDA_DEVICE_COMPILATION
-        this->states = new curandState[numberOfTrajectories];
-        for (size_t i = 0; i < numberOfTrajectories; i++)
-            curand_init(seed, i, 0, &(this->states[i]));
-    #else // CUDA_HOST_COMPILATION
-        this->randomGenerator.seed(seed);
-    #endif
+    this->initializeGenerators(seed, numberOfTrajectories);
 
     this->validPointsMapSize = this->width * this->height;
     this->validPointsMap = new bool[this->validPointsMapSize];
-    this->validTracerIndicesCache = new size_t[this->validPointsMapSize];
     this->imageBC->setupDimensions(this->width, this->height);
 
     // Image y axis starts from left upper corner downwards, so image is scanned from the bottom left, because
@@ -66,32 +59,28 @@ ImageMoveFilter::ImageMoveFilter(unsigned int *intImageData, size_t width, size_
 
 ImageMoveFilter::~ImageMoveFilter() {
     delete [] this->validPointsMap;
-    delete [] this->validTracerIndicesCache;
     #if CUDA_DEVICE_COMPILATION
         delete [] this->states;
     #endif
 }
 
-void ImageMoveFilter::rebuildValidTracersCache(float radius) {
-    Expects(radius >= 0.f);
 
-    #if CUDA_DEVICE_COMPILATION
-        if (!CUDA_IS_IT_FIRST_THREAD)
-            return;
-    #endif
+#if CUDA_DEVICE_COMPILATION
 
-    if (this->radiusForTracerCache == radius)
-        return;
-
-    this->radiusForTracerCache = radius;
-    this->validTracerIndicesCacheSize = 0;
-    for (size_t i = 0; i < this->validPointsMapSize; i++) {
-        if (this->isPointValid(this->indexToPoint(i), radius)) {
-            this->validTracerIndicesCache[this->validTracerIndicesCacheSize] = i;
-            this->validTracerIndicesCacheSize++;
-        }
+    void ImageMoveFilter::initializeGenerators(unsigned long seed, size_t numberOfTrajectories) {
+        this->states = new curandState[numberOfTrajectories];
+        for (size_t i = 0; i < numberOfTrajectories; i++)
+            curand_init(seed, i, 0, &(this->states[i]));
     }
-}
+
+#else // CUDA_HOST_COMPILATION
+
+    void ImageMoveFilter::initializeGenerators(unsigned long seed, size_t numberOfTrajectories) {
+        this->randomGenerator.seed(seed);
+    }
+
+#endif
+
 
 bool ImageMoveFilter::checkValidPointsMap(ImagePoint point) const {
     point = this->imageBC->applyOnImagePoint(point);
@@ -140,7 +129,7 @@ bool ImageMoveFilter::isLineValid(ImagePoint from, ImagePoint to, float pointRad
     return true;
 }
 
-ImagePoint ImageMoveFilter::indexToPoint(size_t index) const {
+ImagePoint ImageMoveFilter::indexToImagePoint(size_t index) const {
     Expects(index < this->validPointsMapSize);
     return {static_cast<int>(index % this->width), static_cast<int>(index / this->width)};
 }
@@ -149,16 +138,48 @@ size_t ImageMoveFilter::pointToIndex(ImagePoint point) const {
     return point.x + this->width * point.y;
 }
 
-#pragma nv_exec_check_disable
+#if CUDA_DEVICE_COMPILATION
 
-float ImageMoveFilter::randomUniformNumber() {
-    #if CUDA_DEVICE_COMPILATION
+    float ImageMoveFilter::randomUniformNumber() {
         // 1 minus curand_normal, because it samples from (0, 1], and we want [0, 1)
         return 1.f - curand_uniform(&(this->states[CUDA_THREAD_IDX]));
-    #else // CUDA_HOST_COMPILATION
+    }
+
+#else // CUDA_HOST_COMPILATION
+
+    float ImageMoveFilter::randomUniformNumber() {
         return this->uniformDistribution(this->randomGenerator);
-    #endif
-}
+    }
+
+#endif
+
+#if CUDA_DEVICE_COMPILATION
+
+    ImagePoint ImageMoveFilter::randomTracerImagePosition(float radius) {
+        ImagePoint imagePosition;
+        do {
+            float floatMapIndex = this->randomUniformNumber() * this->validPointsMapSize;
+            size_t mapIndex = static_cast<size_t>(floatMapIndex);
+            imagePosition = this->indexToImagePoint(mapIndex);
+        } while(!this->isPointValid(imagePosition, radius));
+        return imagePosition;
+    }
+
+#else // CUDA_HOST_COMPILATION
+
+    ImagePoint ImageMoveFilter::randomTracerImagePosition(float radius) {
+        this->rebuildValidTracersCache(radius);
+        if (this->validTracerIndicesCache.empty())
+            throw std::runtime_error("No valid points found in a given image");
+
+        float floatCacheIndex = this->randomUniformNumber() * this->validTracerIndicesCache.size();
+        size_t cacheIndex = static_cast<size_t>(floatCacheIndex);
+        Assert(cacheIndex < this->validTracerIndicesCacheSize);
+        size_t tracerIndex = this->validTracerIndicesCache[cacheIndex];
+        return this->indexToImagePoint(tracerIndex);
+    }
+
+#endif
 
 bool ImageMoveFilter::isMoveValid(Tracer tracer, Move move) const {
     Point from = tracer.getPosition();
@@ -175,22 +196,11 @@ bool ImageMoveFilter::isMoveValid(Tracer tracer, Move move) const {
     return isLineValid(imageFrom, imageTo, tracer.getRadius());
 }
 
+#pragma nv_exec_check_disable
 Tracer ImageMoveFilter::randomValidTracer(float radius) {
     Expects(radius >= 0.f);
 
-    this->rebuildValidTracersCache(radius);
-
-    #if CUDA_HOST_COMPILATION
-        if (this->validTracerIndicesCacheSize == 0)
-            throw std::runtime_error("No valid points found in a given image");
-    #endif
-
-    float floatCacheIndex = this->randomUniformNumber() * this->validTracerIndicesCacheSize;
-    size_t cacheIndex = static_cast<size_t>(floatCacheIndex);
-    Assert(cacheIndex < this->validTracerIndicesCacheSize);
-    size_t tracerIndex = this->validTracerIndicesCache[cacheIndex];
-    ImagePoint imagePosition = this->indexToPoint(tracerIndex);
-
+    ImagePoint imagePosition = this->randomTracerImagePosition(radius);
     float pixelOffsetX = this->randomUniformNumber();
     float pixelOffsetY = this->randomUniformNumber();
 
@@ -202,7 +212,24 @@ size_t ImageMoveFilter::getNumberOfAllPoints() const {
     return this->validPointsMapSize;
 }
 
-size_t ImageMoveFilter::getNumberOfValidTracers(float radius) {
-    this->rebuildValidTracersCache(radius);
-    return this->validTracerIndicesCacheSize;
-}
+#if CUDA_HOST_COMPILATION
+
+    void ImageMoveFilter::rebuildValidTracersCache(float radius) {
+        Expects(radius >= 0.f);
+
+        if (this->radiusForTracerCache == radius)
+            return;
+
+        this->radiusForTracerCache = radius;
+        this->validTracerIndicesCache.clear();
+        for (size_t i = 0; i < this->validPointsMapSize; i++)
+            if (this->isPointValid(this->indexToImagePoint(i), radius))
+                this->validTracerIndicesCache.push_back(i);
+    }
+
+    size_t ImageMoveFilter::getNumberOfValidTracers(float radius) {
+        this->rebuildValidTracersCache(radius);
+        return this->validTracerIndicesCache.size();
+    }
+
+#endif /* HOST_COMPILATION */

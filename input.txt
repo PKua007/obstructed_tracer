@@ -1,6 +1,6 @@
 numberOfSteps = 1000
 tracerRadius = 4
-moveGenerator = CauchyMoveGenerator 3
+moveGenerator = GaussianMoveGenerator 3
 #moveFilter = DefaultMoveFilter
 moveFilter = ImageMoveFilter rsa.ppm PeriodicBoundaryConditions
 driftX = 0
@@ -8,4 +8,4 @@ driftY = 0
 numberOfWalks = 10
 storeTrajectories = true
 seed = random
-device = gpu
+device = cpu

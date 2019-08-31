@@ -24,6 +24,7 @@
 #endif
 
 #define CUDA_THREAD_IDX         (blockIdx.x*blockDim.x + threadIdx.x)
+#define CUDA_NUM_THREADS        (gridDim.x*blockDim.x)
 #define CUDA_IS_IT_FIRST_THREAD (CUDA_THREAD_IDX == 0)
 
 #endif /* CUDADEFINES_H_ */
