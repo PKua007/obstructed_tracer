@@ -45,7 +45,6 @@ ImageMoveFilter::ImageMoveFilter(unsigned int *intImageData, size_t width, size_
 
     this->validPointsMapSize = this->width * this->height;
     this->validPointsMap = new bool[this->validPointsMapSize];
-    this->validTracerIndicesCache = new size_t[this->validPointsMapSize];
     this->imageBC->setupDimensions(this->width, this->height);
 
     // Image y axis starts from left upper corner downwards, so image is scanned from the bottom left, because
@@ -66,31 +65,9 @@ ImageMoveFilter::ImageMoveFilter(unsigned int *intImageData, size_t width, size_
 
 ImageMoveFilter::~ImageMoveFilter() {
     delete [] this->validPointsMap;
-    delete [] this->validTracerIndicesCache;
     #if CUDA_DEVICE_COMPILATION
         delete [] this->states;
     #endif
-}
-
-void ImageMoveFilter::rebuildValidTracersCache(float radius) {
-    Expects(radius >= 0.f);
-
-    #if CUDA_DEVICE_COMPILATION
-        if (!CUDA_IS_IT_FIRST_THREAD)
-            return;
-    #endif
-
-    if (this->radiusForTracerCache == radius)
-        return;
-
-    this->radiusForTracerCache = radius;
-    this->validTracerIndicesCacheSize = 0;
-    for (size_t i = 0; i < this->validPointsMapSize; i++) {
-        if (this->isPointValid(this->indexToPoint(i), radius)) {
-            this->validTracerIndicesCache[this->validTracerIndicesCacheSize] = i;
-            this->validTracerIndicesCacheSize++;
-        }
-    }
 }
 
 bool ImageMoveFilter::checkValidPointsMap(ImagePoint point) const {
@@ -150,7 +127,6 @@ size_t ImageMoveFilter::pointToIndex(ImagePoint point) const {
 }
 
 #pragma nv_exec_check_disable
-
 float ImageMoveFilter::randomUniformNumber() {
     #if CUDA_DEVICE_COMPILATION
         // 1 minus curand_normal, because it samples from (0, 1], and we want [0, 1)
@@ -175,21 +151,29 @@ bool ImageMoveFilter::isMoveValid(Tracer tracer, Move move) const {
     return isLineValid(imageFrom, imageTo, tracer.getRadius());
 }
 
+#pragma nv_exec_check_disable
 Tracer ImageMoveFilter::randomValidTracer(float radius) {
     Expects(radius >= 0.f);
 
-    this->rebuildValidTracersCache(radius);
+    ImagePoint imagePosition;
 
-    #if CUDA_HOST_COMPILATION
-        if (this->validTracerIndicesCacheSize == 0)
+    #if CUDA_DEVICE_COMPILATION
+        do {
+            float floatMapIndex = this->randomUniformNumber() * this->validPointsMapSize;
+            size_t mapIndex = static_cast<size_t>(floatMapIndex);
+            imagePosition = this->indexToPoint(mapIndex);
+        } while(!this->isPointValid(imagePosition, radius));
+    #else // CUDA_HOST_COMPILATION
+        this->rebuildValidTracersCache(radius);
+        if (this->validTracerIndicesCache.empty())
             throw std::runtime_error("No valid points found in a given image");
-    #endif
 
-    float floatCacheIndex = this->randomUniformNumber() * this->validTracerIndicesCacheSize;
-    size_t cacheIndex = static_cast<size_t>(floatCacheIndex);
-    Assert(cacheIndex < this->validTracerIndicesCacheSize);
-    size_t tracerIndex = this->validTracerIndicesCache[cacheIndex];
-    ImagePoint imagePosition = this->indexToPoint(tracerIndex);
+        float floatCacheIndex = this->randomUniformNumber() * this->validTracerIndicesCache.size();
+        size_t cacheIndex = static_cast<size_t>(floatCacheIndex);
+        Assert(cacheIndex < this->validTracerIndicesCacheSize);
+        size_t tracerIndex = this->validTracerIndicesCache[cacheIndex];
+        imagePosition = this->indexToPoint(tracerIndex);
+    #endif
 
     float pixelOffsetX = this->randomUniformNumber();
     float pixelOffsetY = this->randomUniformNumber();
@@ -202,7 +186,25 @@ size_t ImageMoveFilter::getNumberOfAllPoints() const {
     return this->validPointsMapSize;
 }
 
+
+#if CUDA_HOST_COMPILATION
+
+void ImageMoveFilter::rebuildValidTracersCache(float radius) {
+    Expects(radius >= 0.f);
+
+    if (this->radiusForTracerCache == radius)
+        return;
+
+    this->radiusForTracerCache = radius;
+    this->validTracerIndicesCache.clear();
+    for (size_t i = 0; i < this->validPointsMapSize; i++)
+        if (this->isPointValid(this->indexToPoint(i), radius))
+            this->validTracerIndicesCache.push_back(i);
+}
+
 size_t ImageMoveFilter::getNumberOfValidTracers(float radius) {
     this->rebuildValidTracersCache(radius);
-    return this->validTracerIndicesCacheSize;
+    return this->validTracerIndicesCache.size();
 }
+
+#endif /* HOST_COMPILATION */
