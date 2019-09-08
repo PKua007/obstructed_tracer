@@ -98,11 +98,17 @@
 								<option id="nvcc.compiler.ptxasoptions.2088696263" name="ptaxas options (-Xptxas)" superClass="nvcc.compiler.ptxasoptions"/>
 								<option id="com.nvidia.cuda.ide.build.option1.1027166000" name="Compiler Path (-ccbin)" superClass="com.nvidia.cuda.ide.build.option1" value="/opt/gcc-5.3.0/bin" valueType="string"/>
 								<option id="nvcc.compiler.def.symbols.1895179010" name="Defined symbols (-D)" superClass="nvcc.compiler.def.symbols"/>
+								<option id="nvcc.compiler.compileroptions.46813032" name="Preprocessor options (-Xcompiler)" superClass="nvcc.compiler.compileroptions" valueType="stringList">
+									<listOptionValue builtIn="false" value="-fopenmp"/>
+								</option>
 								<inputType id="nvcc.compiler.input.cu.716101612" superClass="nvcc.compiler.input.cu"/>
 								<inputType id="nvcc.compiler.input.cpp.1701386446" superClass="nvcc.compiler.input.cpp"/>
 								<inputType id="nvcc.compiler.input.c.1201317287" superClass="nvcc.compiler.input.c"/>
 							</tool>
 							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX} ${OUTPUT} ${INPUTS}" id="nvcc.linker.base.576565351" name="NVCC Linker" superClass="nvcc.linker.base">
+								<option id="nvcc.linker.option.libs.1115073211" superClass="nvcc.linker.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="gomp"/>
+								</option>
 								<inputType id="nvcc.linker.input.1680779527" superClass="nvcc.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
