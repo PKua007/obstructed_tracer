@@ -11,6 +11,7 @@
 
 #include "CPURandomWalker.h"
 #include "utils/Assertions.h"
+#include "utils/OMPDefines.h"
 
 CPURandomWalker::CPURandomWalker(std::size_t numberOfTrajectories, std::size_t numberOfSteps, float tracerRadius,
                                  Move drift, MoveGenerator *moveGenerator, MoveFilter *moveFilter)
@@ -39,19 +40,28 @@ CPUTrajectory CPURandomWalker::runSingleTrajectory() {
 }
 
 void CPURandomWalker::run(std::ostream &logger) {
+    logger << "[CPURandomWalker::run] Preparing MoveFilter... " << std::flush;
     this->moveFilter->setupForTracerRadius(this->tracerRadius);
+    logger << "done." << std::endl;
+
+    logger << "[CPURandomWalker::run] Using up to " << _OMP_MAXTHREADS << " OpenMP threads." << std::endl;
+    logger << "[CPURandomWalker::run] Simulating: " << std::flush;
+
+    auto start = std::chrono::high_resolution_clock::now();
+    _OMP_PARALLEL_FOR
     for (std::size_t i = 0; i < this->trajectories.size(); i++) {
-        logger << "[CPURandomWalker::run] Starting walk " << i << "... " << std::flush;
-
-        auto start = std::chrono::high_resolution_clock::now();
         this->trajectories[i] = this->runSingleTrajectory();
-        auto finish = std::chrono::high_resolution_clock::now();
 
-        auto mus = std::chrono::duration_cast<std::chrono::microseconds>(finish - start).count();
-        logger << " Finished after " << mus << " microseconds. Initial position: " << this->trajectories[i].getFirst();
-        logger << ", accepted steps: " << this->trajectories[i].getNumberOfAcceptedSteps() << ", final position: ";
-        logger << this->trajectories[i].getLast() << std::endl;
+        _OMP_CRITICAL(stdout)
+        logger << "." << std::flush;
     }
+    auto finish = std::chrono::high_resolution_clock::now();
+    logger << std::endl;
+
+    auto simulationTimeInMus = std::chrono::duration_cast<std::chrono::microseconds>(finish - start).count();
+    auto singleRunTimeInMus = simulationTimeInMus / this->trajectories.size();
+    logger << "[CPURandomWalker::run] Finished after " << simulationTimeInMus << " μs, which gives ";
+    logger << singleRunTimeInMus << " μs per simulation on average." << std::endl;
 }
 
 std::size_t CPURandomWalker::getNumberOfTrajectories() const {

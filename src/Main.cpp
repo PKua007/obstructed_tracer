@@ -65,6 +65,13 @@ int main(int argc, char **argv)
     RandomWalker &randomWalker = simulationFactory->getRandomWalker();
     randomWalker.run(std::cout);
 
+    for (std::size_t i = 0; i < randomWalker.getNumberOfTrajectories(); i++) {
+        const auto &trajectory = randomWalker.getTrajectory(i);
+        std::cout << "[main] Trajectory " << i << ": initial position: " << trajectory.getFirst();
+        std::cout << ", accepted steps: " << trajectory.getNumberOfAcceptedSteps();
+        std::cout << ", final position: " << trajectory.getLast() << std::endl;
+    }
+
     std::string outputFilePrefix = argv[2];
 
     std::cout << "[main] Calculating mean square displacement data... " << std::flush;
