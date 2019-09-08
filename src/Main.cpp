@@ -20,7 +20,7 @@
 #include "MSDData.h"
 
 namespace {
-    void storeTrajectories(const RandomWalker &randomWalker, const std::string &outputFilePrefix,
+    void store_trajectories(const RandomWalker &randomWalker, const std::string &outputFilePrefix,
                            std::ostream &logger) {
         std::size_t numberOfTrajectories = randomWalker.getNumberOfTrajectories();
         for (std::size_t i = 0; i < numberOfTrajectories; i++) {
@@ -33,10 +33,15 @@ namespace {
 
             trajectoryFile << std::fixed << std::setprecision(6);
             trajectory.store(trajectoryFile);
-            logger << "[main] Trajectory " << i << " stored to " << trajectoryFilename << std::endl;
+
+            logger << "[main] Trajectory " << i << " stored to " << trajectoryFilename;
+            logger << ". Initial position: " << trajectory.getFirst();
+            logger << ", accepted steps: " << trajectory.getNumberOfAcceptedSteps();
+            logger << ", final position: " << trajectory.getLast() << std::endl;
         }
     }
 }
+
 
 int main(int argc, char **argv)
 {
@@ -65,13 +70,6 @@ int main(int argc, char **argv)
     RandomWalker &randomWalker = simulationFactory->getRandomWalker();
     randomWalker.run(std::cout);
 
-    for (std::size_t i = 0; i < randomWalker.getNumberOfTrajectories(); i++) {
-        const auto &trajectory = randomWalker.getTrajectory(i);
-        std::cout << "[main] Trajectory " << i << ": initial position: " << trajectory.getFirst();
-        std::cout << ", accepted steps: " << trajectory.getNumberOfAcceptedSteps();
-        std::cout << ", final position: " << trajectory.getLast() << std::endl;
-    }
-
     std::string outputFilePrefix = argv[2];
 
     std::cout << "[main] Calculating mean square displacement data... " << std::flush;
@@ -86,7 +84,7 @@ int main(int argc, char **argv)
     std::cout << "[main] Mean square displacement data stored to " + msdFilename << std::endl;
 
     if (parameters.storeTrajectories)
-        storeTrajectories(randomWalker, outputFilePrefix, std::cout);
+        store_trajectories(randomWalker, outputFilePrefix, std::cout);
 
     std::cout << "[main] Run finished." << std::endl;
     return EXIT_SUCCESS;

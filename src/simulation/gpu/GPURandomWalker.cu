@@ -7,6 +7,7 @@
 
 #include <stdexcept>
 #include <ostream>
+#include <chrono>
 
 #include "GPURandomWalker.h"
 #include "utils/Assertions.h"
@@ -79,12 +80,20 @@ void GPURandomWalker::run(std::ostream& logger) {
                           cudaMemcpyHostToDevice) );
 
     logger << "[GPURandomWalker::run] Starting simulation... " << std::flush;
+
+    auto start = std::chrono::high_resolution_clock::now();
     int numberOfBlocks = (numberOfTrajectories + blockSize - 1) / blockSize;
     gpu_random_walk<<<numberOfBlocks, blockSize>>>(numberOfTrajectories, this->numberOfSteps, this->tracerRadius,
                                                    this->drift, this->moveGenerator, this->moveFilter, gpuTrajectories,
                                                    gpuAcceptedSteps);
     cudaCheck( cudaDeviceSynchronize() );
+    auto finish = std::chrono::high_resolution_clock::now();
     logger << "completed." << std::endl;
+
+    auto simulationTimeInMus = std::chrono::duration_cast<std::chrono::microseconds>(finish - start).count();
+    auto singleRunTimeInMus = simulationTimeInMus / this->trajectories.size();
+    logger << "[GPURandomWalker::run] Finished after " << simulationTimeInMus << " μs, which gives ";
+    logger << singleRunTimeInMus << " μs per trajectory on average." << std::endl;
 
     std::vector<size_t> cpuAcceptedSteps(numberOfTrajectories);
     cudaCheck( cudaMemcpy(cpuAcceptedSteps.data(), gpuAcceptedSteps, numberOfTrajectories*sizeof(size_t),

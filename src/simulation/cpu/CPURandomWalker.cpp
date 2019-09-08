@@ -56,12 +56,12 @@ void CPURandomWalker::run(std::ostream &logger) {
         logger << "." << std::flush;
     }
     auto finish = std::chrono::high_resolution_clock::now();
-    logger << std::endl;
+    logger << " completed." << std::endl;
 
     auto simulationTimeInMus = std::chrono::duration_cast<std::chrono::microseconds>(finish - start).count();
     auto singleRunTimeInMus = simulationTimeInMus / this->trajectories.size();
     logger << "[CPURandomWalker::run] Finished after " << simulationTimeInMus << " μs, which gives ";
-    logger << singleRunTimeInMus << " μs per simulation on average." << std::endl;
+    logger << singleRunTimeInMus << " μs per trajectory on average." << std::endl;
 }
 
 std::size_t CPURandomWalker::getNumberOfTrajectories() const {
