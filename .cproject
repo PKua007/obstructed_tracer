@@ -33,6 +33,7 @@
 								<option id="nvcc.compiler.include.paths.1670324470" name="Include paths (-I)" superClass="nvcc.compiler.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="../src"/>
 								</option>
+								<option id="com.nvidia.cuda.ide.build.option1.886651979" name="Compiler Path (-ccbin)" superClass="com.nvidia.cuda.ide.build.option1" value="/usr/bin/gcc-5" valueType="string"/>
 								<inputType id="nvcc.compiler.input.cu.695576788" superClass="nvcc.compiler.input.cu"/>
 								<inputType id="nvcc.compiler.input.cpp.1599692312" superClass="nvcc.compiler.input.cpp"/>
 								<inputType id="nvcc.compiler.input.c.192242142" superClass="nvcc.compiler.input.c"/>
@@ -95,6 +96,8 @@
 									<listOptionValue builtIn="false" value="../src"/>
 								</option>
 								<option id="nvcc.compiler.ptxasoptions.2088696263" name="ptaxas options (-Xptxas)" superClass="nvcc.compiler.ptxasoptions"/>
+								<option id="com.nvidia.cuda.ide.build.option1.1027166000" name="Compiler Path (-ccbin)" superClass="com.nvidia.cuda.ide.build.option1" value="/opt/gcc-5.3.0/bin" valueType="string"/>
+								<option id="nvcc.compiler.def.symbols.1895179010" name="Defined symbols (-D)" superClass="nvcc.compiler.def.symbols"/>
 								<inputType id="nvcc.compiler.input.cu.716101612" superClass="nvcc.compiler.input.cu"/>
 								<inputType id="nvcc.compiler.input.cpp.1701386446" superClass="nvcc.compiler.input.cpp"/>
 								<inputType id="nvcc.compiler.input.c.1201317287" superClass="nvcc.compiler.input.c"/>

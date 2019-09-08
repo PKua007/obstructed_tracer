@@ -11,9 +11,13 @@
 #include "simulation/MoveFilter.h"
 
 class DefaultMoveFilter : public MoveFilter {
+private:
+    float tracerRadius{};
+
 public:
     CUDA_HOSTDEV bool isMoveValid(Tracer tracer, Move move) const override;
-    CUDA_HOSTDEV Tracer randomValidTracer(float radius) override;
+    CUDA_HOSTDEV Tracer randomValidTracer() override;
+    CUDA_HOSTDEV void setupForTracerRadius(float radius) override;
 };
 
 #endif /* DEFAULTMOVEFILTER_H_ */

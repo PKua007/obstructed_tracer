@@ -15,7 +15,8 @@ public:
     CUDA_HOSTDEV virtual ~MoveFilter() = default;
 
     CUDA_HOSTDEV virtual bool isMoveValid(Tracer tracer, Move move) const = 0;
-    CUDA_HOSTDEV virtual Tracer randomValidTracer(float radius) = 0;
+    CUDA_HOSTDEV virtual void setupForTracerRadius(float radius) = 0;
+    CUDA_HOSTDEV virtual Tracer randomValidTracer() = 0;
 };
 
 #endif /* MOVEFILTER_H_ */
