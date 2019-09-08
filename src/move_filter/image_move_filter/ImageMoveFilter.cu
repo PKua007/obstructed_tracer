@@ -218,13 +218,12 @@ Tracer ImageMoveFilter::randomValidTracer() {
 #if CUDA_DEVICE_COMPILATION
 
     void ImageMoveFilter::setupForTracerRadius(float radius) {
-        if (!CUDA_IS_IT_FIRST_THREAD)
+        int i = CUDA_THREAD_IDX;
+        if (i >= this->validPointsMapSize)
             return;
 
         this->tracerRadius = radius;
-
-        for (size_t i = 0; i < this->validPointsMapSize; i++)
-            this->validTracersMap[i] = this->isPointValid(this->indexToImagePoint(i), radius);
+        this->validTracersMap[i] = this->isPointValid(this->indexToImagePoint(i), radius);
     }
 
 #else // CUDA_HOST_COMPILATION

@@ -155,6 +155,7 @@ namespace {
     public:
         MoveFilter *moveFilter{};
         ImageBoundaryConditions *boundaryConditions{};
+        std::size_t numberOfSetupThreads{};
 
         MoveFilterOnGPU(const Parameters &parameters, std::ostream &logger) {
             std::istringstream moveFilterStream(parameters.moveFilter);
@@ -171,6 +172,9 @@ namespace {
             if (this->moveFilterType == IMAGE) {
                 this->fetchImageData(moveFilterStream, logger);
                 this->fetchBoundaryConditions(moveFilterStream);
+                this->numberOfSetupThreads = this->image.getNumberOfPixels();
+            } else {    // this->moveFilterType == DEFAULT
+                this->numberOfSetupThreads = 1;
             }
         }
 
@@ -242,8 +246,8 @@ GPUSimulationFactory::GPUSimulationFactory(const Parameters& parameters, std::os
 
     Move drift = {parameters.driftX, parameters.driftY};
     this->randomWalker.reset(new GPURandomWalker(parameters.numberOfWalks, parameters.numberOfSteps,
-                                                 parameters.tracerRadius, drift, this->moveGenerator,
-                                                 this->moveFilter));
+                                                 gpuMoveFilter.numberOfSetupThreads, parameters.tracerRadius, drift,
+                                                 this->moveGenerator, this->moveFilter));
 }
 
 GPUSimulationFactory::~GPUSimulationFactory() {

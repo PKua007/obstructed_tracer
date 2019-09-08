@@ -41,17 +41,30 @@ void setup_move_filter(MoveFilter* moveFilter, float tracerRadius) {
     moveFilter->setupForTracerRadius(tracerRadius);
 }
 
-GPURandomWalker::GPURandomWalker(std::size_t numberOfTrajectories, std::size_t numberOfSteps, float tracerRadius,
-                                 Move drift, MoveGenerator* moveGenerator, MoveFilter* moveFilter) :
-        numberOfSteps{numberOfSteps}, tracerRadius{tracerRadius}, drift{drift}, moveGenerator{moveGenerator},
-        moveFilter{moveFilter} {
+GPURandomWalker::GPURandomWalker(std::size_t numberOfTrajectories, std::size_t numberOfSteps,
+                                 std::size_t numberOfMoveFilterSetupThreads, float tracerRadius, Move drift,
+                                 MoveGenerator* moveGenerator, MoveFilter* moveFilter) :
+        numberOfSteps{numberOfSteps}, numberOfMoveFilterSetupThreads{numberOfMoveFilterSetupThreads},
+        tracerRadius{tracerRadius}, drift{drift}, moveGenerator{moveGenerator}, moveFilter{moveFilter}
+{
     Expects(numberOfTrajectories > 0);
     Expects(numberOfSteps > 0);
     Expects(tracerRadius >= 0.f);
     this->trajectories.resize(numberOfTrajectories);
 }
 
+void GPURandomWalker::setupMoveFilterForTracerRadius(std::ostream& logger) {
+    int numberOfBlocks = (this->numberOfMoveFilterSetupThreads + blockSize - 1)
+            / blockSize;
+    logger << "[GPURandomWalker::run] Setting up MoveFilter... " << std::flush;
+    setup_move_filter<<<numberOfBlocks, blockSize>>>(this->moveFilter, this->tracerRadius);
+    cudaCheck(cudaDeviceSynchronize());
+    logger << "completed." << std::endl;
+}
+
 void GPURandomWalker::run(std::ostream& logger) {
+    this->setupMoveFilterForTracerRadius(logger);
+
     std::size_t numberOfTrajectories = this->trajectories.size();
 
     Point **gpuTrajectories;
@@ -65,21 +78,12 @@ void GPURandomWalker::run(std::ostream& logger) {
     cudaCheck( cudaMemcpy(gpuTrajectories, cpuTrajectoryPointers.data(), numberOfTrajectories*sizeof(Point*),
                           cudaMemcpyHostToDevice) );
 
-    logger << "[GPURandomWalker::run] Setting up MoveFilter... " << std::flush;
-    setup_move_filter<<<1, 32>>>(this->moveFilter, this->tracerRadius);
-    cudaCheck( cudaDeviceSynchronize() );
-    logger << "completed." << std::endl;
-
     logger << "[GPURandomWalker::run] Starting simulation... " << std::flush;
-
-    int blockSize = 512;
     int numberOfBlocks = (numberOfTrajectories + blockSize - 1) / blockSize;
     gpu_random_walk<<<numberOfBlocks, blockSize>>>(numberOfTrajectories, this->numberOfSteps, this->tracerRadius,
                                                    this->drift, this->moveGenerator, this->moveFilter, gpuTrajectories,
                                                    gpuAcceptedSteps);
-
     cudaCheck( cudaDeviceSynchronize() );
-
     logger << "completed." << std::endl;
 
     std::vector<size_t> cpuAcceptedSteps(numberOfTrajectories);

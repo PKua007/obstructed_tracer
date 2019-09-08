@@ -67,7 +67,9 @@ int main(int argc, char **argv)
 
     std::string outputFilePrefix = argv[2];
 
+    std::cout << "[main] Calculating mean square displacement data... " << std::flush;
     MSDData msdData(randomWalker);
+    std::cout << "completed." << std::endl;
 
     std::string msdFilename = outputFilePrefix + "_msd.txt";
     std::ofstream msdFile(msdFilename);
