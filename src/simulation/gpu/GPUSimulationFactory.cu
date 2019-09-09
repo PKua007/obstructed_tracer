@@ -51,7 +51,7 @@ namespace {
             (*moveGenerator) = nullptr;
     }
 
-    class MoveGeneratorOnGPU {
+    class MoveGeneratorOnGPUFactory {
     private:
         MoveGeneratorType moveGeneratorType{};
         float sigma{};
@@ -59,7 +59,7 @@ namespace {
     public:
         MoveGenerator *moveGenerator{};
 
-        MoveGeneratorOnGPU(const Parameters &parameters) {
+        MoveGeneratorOnGPUFactory(const Parameters &parameters) {
             std::istringstream moveGeneratorStream(parameters.moveGenerator);
             std::string moveGeneratorName;
             moveGeneratorStream >> moveGeneratorName >> this->sigma;
@@ -75,7 +75,7 @@ namespace {
                 throw std::runtime_error("Unknown MoveGenerator: " + moveGeneratorName);
         }
 
-        void allocateOnGPU(unsigned long seed, std::size_t numberOfWalks) {
+        void create(unsigned long seed, std::size_t numberOfWalks) {
             MoveGenerator **moveGeneratorPlaceholder{};
             cudaCheck( cudaMalloc(&moveGeneratorPlaceholder, sizeof(MoveGenerator**)) );
             create_move_generator<<<1, 32>>>(seed, this->sigma, numberOfWalks, this->moveGeneratorType,
@@ -116,7 +116,7 @@ namespace {
             (*moveFilter) = nullptr;
     }
 
-    class MoveFilterOnGPU {
+    class MoveFilterOnGPUFactory {
     private:
         MoveFilterType moveFilterType{};
         BoundaryConditionsType boundaryConditionsType{};
@@ -157,7 +157,7 @@ namespace {
         ImageBoundaryConditions *boundaryConditions{};
         std::size_t numberOfSetupThreads{};
 
-        MoveFilterOnGPU(const Parameters &parameters, std::ostream &logger) {
+        MoveFilterOnGPUFactory(const Parameters &parameters, std::ostream &logger) {
             std::istringstream moveFilterStream(parameters.moveFilter);
             std::string moveFilterName;
             moveFilterStream >> moveFilterName;
@@ -178,7 +178,7 @@ namespace {
             }
         }
 
-        void allocateOnGPU(unsigned long seed, std::size_t numberOfWalks) {
+        void create(unsigned long seed, std::size_t numberOfWalks) {
             MoveFilter **moveFilterPlaceholder{};
             ImageBoundaryConditions **boundaryConditionsPlaceholder{};
             uint32_t *gpuIntImageData{};
@@ -234,20 +234,20 @@ void GPUSimulationFactory::initializeSeedGenerator(const Parameters &parameters,
 GPUSimulationFactory::GPUSimulationFactory(const Parameters& parameters, std::ostream& logger) {
     this->initializeSeedGenerator(parameters, logger);
 
-    MoveGeneratorOnGPU gpuMoveGenerator(parameters);
-    MoveFilterOnGPU gpuMoveFilter(parameters, logger);
+    MoveGeneratorOnGPUFactory gpuMoveGeneratorFactory(parameters);
+    MoveFilterOnGPUFactory gpuMoveFilterFactory(parameters, logger);
 
-    gpuMoveGenerator.allocateOnGPU(this->seedGenerator(), parameters.numberOfWalks);
-    gpuMoveFilter.allocateOnGPU(this->seedGenerator(), parameters.numberOfWalks);
+    gpuMoveGeneratorFactory.create(this->seedGenerator(), parameters.numberOfWalks);
+    gpuMoveFilterFactory.create(this->seedGenerator(), parameters.numberOfWalks);
 
-    this->moveGenerator = gpuMoveGenerator.moveGenerator;
-    this->moveFilter = gpuMoveFilter.moveFilter;
-    this->imageBoundaryConditions = gpuMoveFilter.boundaryConditions;
+    this->moveGenerator = gpuMoveGeneratorFactory.moveGenerator;
+    this->moveFilter = gpuMoveFilterFactory.moveFilter;
+    this->imageBoundaryConditions = gpuMoveFilterFactory.boundaryConditions;
 
     Move drift = {parameters.driftX, parameters.driftY};
     this->randomWalker.reset(new GPURandomWalker(parameters.numberOfWalks, parameters.numberOfSteps,
-                                                 gpuMoveFilter.numberOfSetupThreads, parameters.tracerRadius, drift,
-                                                 this->moveGenerator, this->moveFilter));
+                                                 gpuMoveFilterFactory.numberOfSetupThreads, parameters.tracerRadius,
+                                                 drift, this->moveGenerator, this->moveFilter));
 }
 
 GPUSimulationFactory::~GPUSimulationFactory() {

@@ -19,6 +19,7 @@
 
 class CPURandomWalker : public RandomWalker {
 private:
+    std::size_t     numberOfTrajectories{};
     std::size_t     numberOfSteps{};
     float           tracerRadius{};
     Move            drift{};

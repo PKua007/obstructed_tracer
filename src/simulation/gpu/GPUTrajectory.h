@@ -14,7 +14,7 @@
 
 class GPUTrajectory: public TrajectoryBase {
 public:
-    void moveGPUData(Point *gpuData, std::size_t size, std::size_t acceptedSteps);
+    void copyGPUData(Point *gpuData, std::size_t size, std::size_t acceptedSteps);
 };
 
 #endif /* GPUTRAJECTORY_H_ */

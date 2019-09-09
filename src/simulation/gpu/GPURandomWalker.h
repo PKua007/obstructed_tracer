@@ -9,7 +9,6 @@
 #define GPURANDOMWALKER_H_
 
 #include <vector>
-
 #include "RandomWalker.h"
 #include "GPUTrajectory.h"
 #include "../MoveGenerator.h"
@@ -17,6 +16,7 @@
 
 class GPURandomWalker : public RandomWalker {
 private:
+    std::size_t     numberOfTrajectories{};
     std::size_t     numberOfSteps{};
     std::size_t     numberOfMoveFilterSetupThreads{};
     float           tracerRadius{};
