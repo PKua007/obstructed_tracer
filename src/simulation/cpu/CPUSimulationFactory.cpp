@@ -89,21 +89,24 @@ std::unique_ptr<MoveFilter> CPUSimulationFactory::createMoveFilter(const Paramet
         throw std::runtime_error("Unknown MoveFilter: " + moveFilterType);
 }
 
-CPUSimulationFactory::CPUSimulationFactory(const Parameters &parameters, std::ostream &logger) {
-    if (parameters.seed == "random") {
+void CPUSimulationFactory::initializeSeedGenerator(std::string seed, std::ostream& logger) {
+    if (seed == "random") {
         unsigned long randomSeed = std::random_device()();
         this->seedGenerator.seed(randomSeed);
         logger << "[CPUSimulationFactory] Using random seed: " << randomSeed << std::endl;
     } else {
-        this->seedGenerator.seed(std::stoul(parameters.seed));
+        this->seedGenerator.seed(std::stoul(seed));
     }
+}
 
-    this->moveGenerator = createMoveGenerator(parameters);
-    this->moveFilter = createMoveFilter(parameters, logger);
+CPUSimulationFactory::CPUSimulationFactory(const Parameters &parameters, std::ostream &logger) {
+    this->initializeSeedGenerator(parameters.seed, logger);
+    this->moveGenerator = this->createMoveGenerator(parameters);
+    this->moveFilter = this->createMoveFilter(parameters, logger);
+
     Move drift = {parameters.driftX, parameters.driftY};
-
-    this->randomWalker.reset(new CPURandomWalker(parameters.numberOfWalks, parameters.numberOfSteps,
-                                                 parameters.tracerRadius, drift, this->moveGenerator.get(),
+    RandomWalker::WalkParameters walkParameters = {parameters.numberOfSteps, parameters.tracerRadius, drift};
+    this->randomWalker.reset(new CPURandomWalker(parameters.numberOfWalks, walkParameters, this->moveGenerator.get(),
                                                  this->moveFilter.get()));
 }
 

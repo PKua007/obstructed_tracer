@@ -30,8 +30,8 @@ private:
     CPUTrajectory runSingleTrajectory();
 
 public:
-    CPURandomWalker(std::size_t numberOfWalks, std::size_t numberOfSteps, float tracerRadius, Move drift,
-                    MoveGenerator *moveGenerator, MoveFilter *moveFilter);
+    CPURandomWalker(std::size_t numberOfWalks, WalkParameters walkParameters, MoveGenerator *moveGenerator,
+                    MoveFilter *moveFilter);
 
     void run(std::ostream &logger) override;
     std::size_t getNumberOfTrajectories() const override;

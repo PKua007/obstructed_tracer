@@ -221,18 +221,18 @@ void delete_objects(MoveGenerator *moveGenerator, MoveFilter *moveFilter, ImageB
     delete boundaryConditions;
 }
 
-void GPUSimulationFactory::initializeSeedGenerator(const Parameters &parameters, std::ostream &logger) {
-    if (parameters.seed == "random") {
+void GPUSimulationFactory::initializeSeedGenerator(const std::string &seed, std::ostream &logger) {
+    if (seed == "random") {
         unsigned long randomSeed = std::random_device()();
         this->seedGenerator.seed(randomSeed);
         logger << "[GPUSimulationFactory] Using random seed: " << randomSeed << std::endl;
     } else {
-        this->seedGenerator.seed(std::stoul(parameters.seed));
+        this->seedGenerator.seed(std::stoul(seed));
     }
 }
 
 GPUSimulationFactory::GPUSimulationFactory(const Parameters& parameters, std::ostream& logger) {
-    this->initializeSeedGenerator(parameters, logger);
+    this->initializeSeedGenerator(parameters.seed, logger);
 
     MoveGeneratorOnGPUFactory gpuMoveGeneratorFactory(parameters);
     MoveFilterOnGPUFactory gpuMoveFilterFactory(parameters, logger);
@@ -245,9 +245,10 @@ GPUSimulationFactory::GPUSimulationFactory(const Parameters& parameters, std::os
     this->imageBoundaryConditions = gpuMoveFilterFactory.boundaryConditions;
 
     Move drift = {parameters.driftX, parameters.driftY};
-    this->randomWalker.reset(new GPURandomWalker(parameters.numberOfWalks, parameters.numberOfSteps,
-                                                 gpuMoveFilterFactory.numberOfSetupThreads, parameters.tracerRadius,
-                                                 drift, this->moveGenerator, this->moveFilter));
+    RandomWalker::WalkParameters walkParameters = {parameters.numberOfSteps, parameters.tracerRadius, drift};
+    this->randomWalker.reset(new GPURandomWalker(parameters.numberOfWalks, walkParameters,
+                                                 gpuMoveFilterFactory.numberOfSetupThreads, this->moveGenerator,
+                                                 this->moveFilter));
 }
 
 GPUSimulationFactory::~GPUSimulationFactory() {

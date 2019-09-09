@@ -31,6 +31,7 @@ private:
     std::unique_ptr<MoveFilter> createImageMoveFilter(const Parameters& parameters,
                                                       std::istringstream& moveFilterStream, std::ostream& logger);
     std::unique_ptr<ImageBoundaryConditions> createImageBoundaryConditions(std::istringstream& moveFilterStream);
+    void initializeSeedGenerator(std::string seed, std::ostream& logger);
 
 public:
     CPUSimulationFactory(const Parameters &parameters, std::ostream &logger);

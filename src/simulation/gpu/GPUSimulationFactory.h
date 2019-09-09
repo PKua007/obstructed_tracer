@@ -24,7 +24,7 @@ private:
     ImageBoundaryConditions *imageBoundaryConditions;
     std::unique_ptr<GPURandomWalker> randomWalker;
 
-    void initializeSeedGenerator(const Parameters &parameters, std::ostream &logger);
+    void initializeSeedGenerator(const std::string &seed, std::ostream &logger);
 
 public:
     GPUSimulationFactory(const Parameters &parameters, std::ostream &logger);

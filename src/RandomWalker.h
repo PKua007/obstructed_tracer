@@ -12,6 +12,12 @@
 
 class RandomWalker {
 public:
+    struct WalkParameters {
+        size_t numberOfSteps;
+        float tracerRadius;
+        Move drift;
+    };
+
     virtual ~RandomWalker() = default;
 
     virtual void run(std::ostream &logger) = 0;

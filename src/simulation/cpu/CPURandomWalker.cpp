@@ -13,14 +13,15 @@
 #include "utils/OMPDefines.h"
 #include "simulation/SimulationTimer.h"
 
-CPURandomWalker::CPURandomWalker(std::size_t numberOfTrajectories, std::size_t numberOfSteps, float tracerRadius,
-                                 Move drift, MoveGenerator *moveGenerator, MoveFilter *moveFilter)
-        : numberOfTrajectories{numberOfTrajectories}, numberOfSteps{numberOfSteps}, tracerRadius{tracerRadius},
-          drift{drift}, moveGenerator{moveGenerator}, moveFilter{moveFilter}
+CPURandomWalker::CPURandomWalker(std::size_t numberOfTrajectories, RandomWalker::WalkParameters walkParameters,
+                                 MoveGenerator *moveGenerator, MoveFilter *moveFilter)
+        : numberOfTrajectories{numberOfTrajectories}, numberOfSteps{walkParameters.numberOfSteps},
+          tracerRadius{walkParameters.tracerRadius}, drift{walkParameters.drift}, moveGenerator{moveGenerator},
+          moveFilter{moveFilter}
 {
-    Expects(numberOfTrajectories > 0);
-    Expects(numberOfSteps > 0);
-    Expects(tracerRadius >= 0.f);
+    Expects(this->numberOfTrajectories > 0);
+    Expects(this->numberOfSteps > 0);
+    Expects(this->tracerRadius >= 0.f);
     this->trajectories.resize(numberOfTrajectories);
 }
 

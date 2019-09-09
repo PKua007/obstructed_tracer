@@ -75,7 +75,7 @@ namespace {
     };
 
     __global__
-    void gpu_random_walk(size_t numberOfTrajectories, size_t numberOfSteps, float tracerRadius, Move drift,
+    void gpu_random_walk(size_t numberOfTrajectories, RandomWalker::WalkParameters walkParameters,
                          MoveGenerator* moveGenerator, MoveFilter* moveFilter, Point **trajectories,
                          size_t *acceptedSteps)
     {
@@ -87,8 +87,8 @@ namespace {
         trajectories[i][0] = tracer.getPosition();
 
         acceptedSteps[i] = 0;
-        for (size_t step = 1; step <= numberOfSteps; step++) {
-            Move move = moveGenerator->generateMove() + drift;
+        for (size_t step = 1; step <= walkParameters.numberOfSteps; step++) {
+            Move move = moveGenerator->generateMove() + walkParameters.drift;
             if (moveFilter->isMoveValid(tracer, move)) {
                 tracer += move;
                 trajectories[i][step] = tracer.getPosition();
@@ -105,12 +105,12 @@ namespace {
     }
 }
 
-GPURandomWalker::GPURandomWalker(std::size_t numberOfTrajectories, std::size_t numberOfSteps,
-                                 std::size_t numberOfMoveFilterSetupThreads, float tracerRadius, Move drift,
-                                 MoveGenerator* moveGenerator, MoveFilter* moveFilter) :
-        numberOfSteps{numberOfSteps}, numberOfTrajectories{numberOfTrajectories},
-        numberOfMoveFilterSetupThreads{numberOfMoveFilterSetupThreads}, tracerRadius{tracerRadius}, drift{drift},
-        moveGenerator{moveGenerator}, moveFilter{moveFilter}
+GPURandomWalker::GPURandomWalker(std::size_t numberOfTrajectories, RandomWalker::WalkParameters walkParameters,
+                                 std::size_t numberOfMoveFilterSetupThreads,  MoveGenerator* moveGenerator,
+                                 MoveFilter* moveFilter) :
+        numberOfTrajectories{numberOfTrajectories}, walkParameters{walkParameters},
+        numberOfMoveFilterSetupThreads{numberOfMoveFilterSetupThreads}, moveGenerator{moveGenerator},
+        moveFilter{moveFilter}
 {
     Expects(numberOfTrajectories > 0);
     Expects(numberOfSteps > 0);
@@ -122,7 +122,7 @@ void GPURandomWalker::setupMoveFilterForTracerRadius(std::ostream& logger) {
     int numberOfBlocks = (this->numberOfMoveFilterSetupThreads + blockSize - 1)
             / blockSize;
     logger << "[GPURandomWalker::run] Setting up MoveFilter... " << std::flush;
-    setup_move_filter<<<numberOfBlocks, blockSize>>>(this->moveFilter, this->tracerRadius);
+    setup_move_filter<<<numberOfBlocks, blockSize>>>(this->moveFilter, this->walkParameters.tracerRadius);
     cudaCheck(cudaDeviceSynchronize());
     logger << "completed." << std::endl;
 }
@@ -130,14 +130,14 @@ void GPURandomWalker::setupMoveFilterForTracerRadius(std::ostream& logger) {
 void GPURandomWalker::run(std::ostream& logger) {
     this->setupMoveFilterForTracerRadius(logger);
 
-    TrajectoriesOnGPU trajectoriesOnGPU(this->numberOfTrajectories, this->numberOfSteps);
+    TrajectoriesOnGPU trajectoriesOnGPU(this->numberOfTrajectories, this->walkParameters.numberOfSteps);
 
     logger << "[GPURandomWalker::run] Starting simulation... " << std::flush;
     SimulationTimer timer(this->numberOfTrajectories);
     timer.start();
     int numberOfBlocks = (numberOfTrajectories + blockSize - 1) / blockSize;
-    gpu_random_walk<<<numberOfBlocks, blockSize>>>(this->numberOfTrajectories, this->numberOfSteps, this->tracerRadius,
-                                                   this->drift, this->moveGenerator, this->moveFilter,
+    gpu_random_walk<<<numberOfBlocks, blockSize>>>(this->numberOfTrajectories, this->walkParameters,
+                                                   this->moveGenerator, this->moveFilter,
                                                    trajectoriesOnGPU.getTrajectoriesArray(),
                                                    trajectoriesOnGPU.getAcceptedStepsArray());
     cudaCheck( cudaDeviceSynchronize() );
