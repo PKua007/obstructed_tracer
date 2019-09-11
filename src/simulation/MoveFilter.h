@@ -12,7 +12,7 @@
 
 class MoveFilter {
 public:
-    CUDA_HOSTDEV virtual ~MoveFilter() = default;
+    CUDA_HOSTDEV virtual ~MoveFilter() { };
 
     CUDA_HOSTDEV virtual bool isMoveValid(Tracer tracer, Move move) const = 0;
     CUDA_HOSTDEV virtual void setupForTracerRadius(float radius) = 0;

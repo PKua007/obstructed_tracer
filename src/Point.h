@@ -17,7 +17,7 @@ struct Point  {
     float x{};
     float y{};
 
-    CUDA_HOSTDEV Point() = default;
+    CUDA_HOSTDEV Point() { };
     CUDA_HOSTDEV Point(float x, float y) : x{x}, y{y} { }
 
     CUDA_HOSTDEV Point operator+(Move move) const { return {this->x + move.x, this->y + move.y}; }

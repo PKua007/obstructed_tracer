@@ -17,7 +17,7 @@ private:
     float radius{};
 
 public:
-    CUDA_HOSTDEV Tracer() = default;
+    CUDA_HOSTDEV Tracer() { };
     CUDA_HOSTDEV Tracer(Point position, float radius) : position{position}, radius{radius} { }
 
     CUDA_HOSTDEV Point getPosition() const { return position; }

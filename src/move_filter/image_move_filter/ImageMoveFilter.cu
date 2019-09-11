@@ -16,7 +16,7 @@ namespace {
         int x{};
         int y{};
 
-        CUDA_HOSTDEV ImageMove() = default;
+        CUDA_HOSTDEV ImageMove() { };
         CUDA_HOSTDEV ImageMove(int x, int y) : x{x}, y{y} { };
     };
 

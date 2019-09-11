@@ -14,7 +14,7 @@ struct ImagePoint {
     int x{};
     int y{};
 
-    CUDA_HOSTDEV ImagePoint() = default;
+    CUDA_HOSTDEV ImagePoint() { };
     CUDA_HOSTDEV ImagePoint(int x, int y) : x{x}, y{y} { };
     CUDA_HOSTDEV ImagePoint(Point point) : x{static_cast<int>(point.x)}, y{static_cast<int>(point.y)} { };
 
