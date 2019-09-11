@@ -23,11 +23,13 @@ private:
 
     friend std::ostream &operator<<(std::ostream &out, Entry msdData);
 
+    std::size_t numberOfTrajectories{};
     std::vector<Entry> data;
 
 public:
-    MSDData(const RandomWalker &randomWalker);
-    void store(std::ostream &out) const;
+    MSDData(std::size_t numberOfSteps) : data(numberOfSteps + 1) { }
+    void addTrajectories(const RandomWalker &randomWalker);
+    void store(std::ostream &out);
 };
 
 std::ostream &operator<<(std::ostream &out, MSDData::Entry entry);

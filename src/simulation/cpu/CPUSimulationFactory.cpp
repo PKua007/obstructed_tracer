@@ -107,7 +107,7 @@ CPUSimulationFactory::CPUSimulationFactory(const Parameters &parameters, std::os
     Move drift = {parameters.driftX, parameters.driftY};
     RandomWalker::WalkParameters walkParameters = {parameters.numberOfSteps, parameters.tracerRadius, drift};
     this->randomWalker.reset(new CPURandomWalker(parameters.numberOfWalksInSeries, walkParameters, this->moveGenerator.get(),
-                                                 this->moveFilter.get()));
+                                                 this->moveFilter.get(), logger));
 }
 
 RandomWalker &CPUSimulationFactory::getRandomWalker() {

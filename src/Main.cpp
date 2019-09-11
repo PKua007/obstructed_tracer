@@ -21,12 +21,13 @@
 
 namespace {
     void store_trajectories(const RandomWalker &randomWalker, const std::string &outputFilePrefix,
-                           std::ostream &logger) {
+                            std::size_t firstTrajectoryIndex, std::ostream &logger) {
         std::size_t numberOfTrajectories = randomWalker.getNumberOfTrajectories();
         for (std::size_t i = 0; i < numberOfTrajectories; i++) {
             auto &trajectory = randomWalker.getTrajectory(i);
 
-            std::string trajectoryFilename = outputFilePrefix + "_" + std::to_string(i) + ".txt";
+            std::size_t trajectoryIndex = i + firstTrajectoryIndex;
+            std::string trajectoryFilename = outputFilePrefix + "_" + std::to_string(trajectoryIndex) + ".txt";
             std::ofstream trajectoryFile(trajectoryFilename);
             if (!trajectoryFile)
                 die("[main] Cannot open " + trajectoryFilename + " to store trajectory");
@@ -34,7 +35,7 @@ namespace {
             trajectoryFile << std::fixed << std::setprecision(6);
             trajectory.store(trajectoryFile);
 
-            logger << "[main] Trajectory " << i << " stored to " << trajectoryFilename;
+            logger << "[main] Trajectory " << trajectoryIndex << " stored to " << trajectoryFilename;
             logger << ". Initial position: " << trajectory.getFirst();
             logger << ", accepted steps: " << trajectory.getNumberOfAcceptedSteps();
             logger << ", final position: " << trajectory.getLast() << std::endl;
@@ -68,13 +69,26 @@ int main(int argc, char **argv)
         die("[main] Unknown device: " + parameters.device);
 
     RandomWalker &randomWalker = simulationFactory->getRandomWalker();
-    randomWalker.run(std::cout);
+    MSDData msdData(parameters.numberOfSteps);
+    std::size_t numberOfAllTrajectories = parameters.numberOfSeries * parameters.numberOfWalksInSeries;
 
     std::string outputFilePrefix = argv[2];
+    for (std::size_t i = 0; i < parameters.numberOfSeries; i++) {
+        std::size_t startTrajectory = i * parameters.numberOfWalksInSeries;
+        std::size_t endTrajectory = (i + 1) * parameters.numberOfWalksInSeries - 1;
+        std::cout << std::endl;
+        std::cout << "[main] Series " << i << ": trajectories " << startTrajectory << " - " << endTrajectory;
+        std::cout << std::endl;
+        randomWalker.run(std::cout);
 
-    std::cout << "[main] Calculating mean square displacement data... " << std::flush;
-    MSDData msdData(randomWalker);
-    std::cout << "completed." << std::endl;
+        if (parameters.storeTrajectories)
+            store_trajectories(randomWalker, outputFilePrefix, startTrajectory, std::cout);
+
+        std::cout << "[main] Calculating mean square displacement data... " << std::flush;
+        msdData.addTrajectories(randomWalker);
+        std::cout << "completed." << std::endl;
+    }
+    std::cout << std::endl;
 
     std::string msdFilename = outputFilePrefix + "_msd.txt";
     std::ofstream msdFile(msdFilename);
@@ -82,9 +96,6 @@ int main(int argc, char **argv)
         die("[main] Cannot open " + msdFilename + " to store mean square displacement data");
     msdData.store(msdFile);
     std::cout << "[main] Mean square displacement data stored to " + msdFilename << std::endl;
-
-    if (parameters.storeTrajectories)
-        store_trajectories(randomWalker, outputFilePrefix, std::cout);
 
     std::cout << "[main] Run finished." << std::endl;
     return EXIT_SUCCESS;
