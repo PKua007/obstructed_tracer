@@ -16,6 +16,8 @@
 class MSDData {
 private:
     struct Entry {
+        float x{};
+        float y{};
         float x2{};
         float y2{};
         float xy{};

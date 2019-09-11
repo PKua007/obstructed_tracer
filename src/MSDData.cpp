@@ -14,6 +14,8 @@
 
 void MSDData::store(std::ostream &out) {
     for (auto &entry : this->data) {
+        entry.x /= this->numberOfTrajectories;
+        entry.y /= this->numberOfTrajectories;
         entry.x2 /= this->numberOfTrajectories;
         entry.y2 /= this->numberOfTrajectories;
         entry.xy /= this->numberOfTrajectories;
@@ -23,7 +25,7 @@ void MSDData::store(std::ostream &out) {
 }
 
 std::ostream &operator<<(std::ostream &out, MSDData::Entry entry) {
-    out << entry.x2 << " " << entry.y2 << " " << entry.xy;
+    out << entry.x << " " << entry.y << " " << entry.x2 << " " << entry.y2 << " " << entry.xy;
     return out;
 }
 
@@ -44,6 +46,8 @@ void MSDData::addTrajectories(const RandomWalker &randomWalker) {
         for (std::size_t j = 0; j < trajectory.getSize(); j++) {
             float x = trajectory[j].x - startX;
             float y = trajectory[j].y - startY;
+            this->data[j].x += x;
+            this->data[j].y += y;
             this->data[j].x2 += x*x;
             this->data[j].y2 += y*y;
             this->data[j].xy += x*y;
