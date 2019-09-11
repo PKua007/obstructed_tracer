@@ -11,7 +11,7 @@
 #include "CPURandomWalker.h"
 #include "utils/Assertions.h"
 #include "utils/OMPDefines.h"
-#include "Timer.h"
+#include "simulation/Timer.h"
 
 CPURandomWalker::CPURandomWalker(std::size_t numberOfTrajectories, RandomWalker::WalkParameters walkParameters,
                                  MoveGenerator *moveGenerator, MoveFilter *moveFilter, std::ostream &logger)

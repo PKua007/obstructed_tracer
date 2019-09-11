@@ -9,7 +9,7 @@
 #define PARAMETERS_H_
 
 #include <cstddef>
-#include <iosfwd>
+#include <string>
 
 
 class Parameters {

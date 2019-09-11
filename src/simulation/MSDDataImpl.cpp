@@ -9,22 +9,22 @@
 #include <iterator>
 #include <algorithm>
 
-#include "MSDData.h"
+#include "MSDDataImpl.h"
 #include "utils/Utils.h"
 #include "utils/Assertions.h"
 #include "utils/OMPDefines.h"
 
 
-MSDData::Entry operator+(const MSDData::Entry &first, const MSDData::Entry &second) {
+MSDDataImpl::Entry operator+(const MSDDataImpl::Entry &first, const MSDDataImpl::Entry &second) {
     return {first.x + second.x, first.y + second.y, first.x2 + second.x2, first.y2 + second.y2, first.xy + second.xy};
 }
 
-std::ostream &operator<<(std::ostream &out, MSDData::Entry entry) {
+std::ostream &operator<<(std::ostream &out, MSDDataImpl::Entry entry) {
     out << entry.x << " " << entry.y << " " << entry.x2 << " " << entry.y2 << " " << entry.xy;
     return out;
 }
 
-void MSDData::store(std::ostream &out) {
+void MSDDataImpl::store(std::ostream &out) {
     for (auto &entry : this->data) {
         entry.x /= this->numberOfTrajectories;
         entry.y /= this->numberOfTrajectories;
@@ -36,7 +36,7 @@ void MSDData::store(std::ostream &out) {
     std::copy(this->data.begin(), this->data.end(), std::ostream_iterator<Entry>(out, "\n"));
 }
 
-void MSDData::addTrajectories(const RandomWalker &randomWalker) {
+void MSDDataImpl::addTrajectories(const RandomWalker &randomWalker) {
     std::size_t numberOfNewTrajectories = randomWalker.getNumberOfTrajectories();
     Assert(numberOfNewTrajectories > 0);
 

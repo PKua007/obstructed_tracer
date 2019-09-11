@@ -12,7 +12,7 @@
 #include <array>
 #include <random>
 
-#include "RandomWalker.h"
+#include "simulation/RandomWalker.h"
 #include "CPUTrajectory.h"
 #include "../MoveGenerator.h"
 #include "../MoveFilter.h"

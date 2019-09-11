@@ -11,7 +11,7 @@
 #include "GPURandomWalker.h"
 #include "utils/Assertions.h"
 #include "utils/CudaCheck.h"
-#include "Timer.h"
+#include "simulation/Timer.h"
 
 
 __global__
