@@ -24,7 +24,6 @@ CPURandomWalker::CPURandomWalker(std::size_t numberOfTrajectories, RandomWalker:
     Expects(this->tracerRadius >= 0.f);
     this->trajectories.resize(numberOfTrajectories);
 
-    logger << "[CPURandomWalker] " << _OMP_MAXTHREADS << " OpenMP threads are available." << std::endl;
     logger << "[CPURandomWalker] Preparing MoveFilter... " << std::flush;
     this->moveFilter->setupForTracerRadius(this->tracerRadius);
     logger << "done." << std::endl;

@@ -23,13 +23,15 @@ private:
         float xy{};
     };
 
+    friend Entry operator+(const Entry &first, const Entry &second);
     friend std::ostream &operator<<(std::ostream &out, Entry msdData);
 
+    std::size_t numberOfSteps{};
     std::size_t numberOfTrajectories{};
     std::vector<Entry> data;
 
 public:
-    MSDData(std::size_t numberOfSteps) : data(numberOfSteps + 1) { }
+    MSDData(std::size_t numberOfSteps) : numberOfSteps{numberOfSteps}, data(numberOfSteps + 1) { }
     void addTrajectories(const RandomWalker &randomWalker);
     void store(std::ostream &out);
 };

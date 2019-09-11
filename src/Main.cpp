@@ -15,6 +15,7 @@
 
 #include "Parameters.h"
 #include "utils/Utils.h"
+#include "utils/OMPDefines.h"
 #include "simulation/cpu/CPUSimulationFactory.h"
 #include "simulation/gpu/GPUSimulationFactory.h"
 #include "Timer.h"
@@ -61,6 +62,7 @@ int main(int argc, char **argv)
     parameters.print(std::cout);
     std::cout << std::endl;
 
+    std::cout << "[main] " << _OMP_MAXTHREADS << " OpenMP threads are available." << std::endl;
     std::unique_ptr<SimulationFactory> simulationFactory;
     if (parameters.device == "cpu")
         simulationFactory.reset(new CPUSimulationFactory(parameters, std::cout));
