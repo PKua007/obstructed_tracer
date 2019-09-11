@@ -17,6 +17,7 @@
 #include "utils/Utils.h"
 #include "simulation/cpu/CPUSimulationFactory.h"
 #include "simulation/gpu/GPUSimulationFactory.h"
+#include "Timer.h"
 #include "MSDData.h"
 
 namespace {
@@ -85,8 +86,11 @@ int main(int argc, char **argv)
             store_trajectories(randomWalker, outputFilePrefix, startTrajectory, std::cout);
 
         std::cout << "[main] Calculating mean square displacement data... " << std::flush;
+        Timer timer;
+        timer.start();
         msdData.addTrajectories(randomWalker);
-        std::cout << "completed." << std::endl;
+        timer.stop();
+        std::cout << "completed in " << timer.count() << " μs." << std::endl;
     }
     std::cout << std::endl;
 

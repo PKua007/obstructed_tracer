@@ -11,7 +11,7 @@
 #include "CPURandomWalker.h"
 #include "utils/Assertions.h"
 #include "utils/OMPDefines.h"
-#include "simulation/SimulationTimer.h"
+#include "Timer.h"
 
 CPURandomWalker::CPURandomWalker(std::size_t numberOfTrajectories, RandomWalker::WalkParameters walkParameters,
                                  MoveGenerator *moveGenerator, MoveFilter *moveFilter, std::ostream &logger)
@@ -49,7 +49,7 @@ CPUTrajectory CPURandomWalker::runSingleTrajectory() {
 void CPURandomWalker::run(std::ostream &logger) {
     logger << "[CPURandomWalker::run] Simulating: " << std::flush;
 
-    SimulationTimer timer(this->numberOfTrajectories);
+    Timer timer;
     timer.start();
     _OMP_PARALLEL_FOR
     for (std::size_t i = 0; i < this->numberOfTrajectories; i++) {
@@ -63,7 +63,10 @@ void CPURandomWalker::run(std::ostream &logger) {
     timer.stop();
     logger << " completed." << std::endl;
 
-    timer.showInfo(logger);
+    auto simulationTimeInMus = timer.count();
+    auto singleRunTimeInMus = simulationTimeInMus / this->numberOfTrajectories;
+    logger << "[CPURandomWalker::run] Finished after " << simulationTimeInMus << " μs, which gives ";
+    logger << singleRunTimeInMus << " μs per trajectory on average." << std::endl;
 }
 
 std::size_t CPURandomWalker::getNumberOfTrajectories() const {

@@ -11,7 +11,7 @@
 #include "GPURandomWalker.h"
 #include "utils/Assertions.h"
 #include "utils/CudaCheck.h"
-#include "simulation/SimulationTimer.h"
+#include "Timer.h"
 
 
 __global__
@@ -103,24 +103,34 @@ void GPURandomWalker::setupMoveFilterForTracerRadius(std::ostream& logger) {
 }
 
 void GPURandomWalker::run(std::ostream& logger) {
-    SimulationTimer timer(this->numberOfTrajectories);
-    timer.start();
-
     logger << "[GPURandomWalker::run] Starting simulation... " << std::flush;
+    Timer kernelTimer;
+    kernelTimer.start();
     int numberOfBlocks = (numberOfTrajectories + blockSize - 1) / blockSize;
     gpu_random_walk<<<numberOfBlocks, blockSize>>>(this->numberOfTrajectories, this->walkParameters,
                                                    this->moveGenerator, this->moveFilter,
                                                    trajectoriesOnGPU.getTrajectoriesArray(),
                                                    trajectoriesOnGPU.getAcceptedStepsArray());
     cudaCheck( cudaDeviceSynchronize() );
+    kernelTimer.stop();
     logger << "completed." << std::endl;
 
     logger << "[GPURandomWalker::run] Fetching data from video memory... " << std::flush;
+    Timer copyTimer;
+    copyTimer.start();
     trajectoriesOnGPU.copyToCPU(this->trajectories);
+    copyTimer.stop();
     logger << "completed." << std::endl;
 
-    timer.stop();
-    timer.showInfo(logger);
+    auto kernelTimeInMus = kernelTimer.count();
+    auto copyTimeInMus = copyTimer.count();
+    
+    auto totalTimeInMus = kernelTimeInMus + copyTimeInMus;
+    auto onlyKernelSingleTrajectoryTimeInMus = kernelTimeInMus / this->numberOfTrajectories;
+    auto totalSingleTrajectoryTimeInMus = totalTimeInMus / this->numberOfTrajectories;
+    logger << "[GPURandomWalker::run] Finished after " << totalTimeInMus << " μs, which gives ";
+    logger << onlyKernelSingleTrajectoryTimeInMus << " μs per trajectory on average (";
+    logger << totalSingleTrajectoryTimeInMus << " μs with memory fetch)." << std::endl;
 }
 
 std::size_t GPURandomWalker::getNumberOfTrajectories() const {
