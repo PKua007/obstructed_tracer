@@ -248,7 +248,7 @@ GPUSimulationFactory::GPUSimulationFactory(const Parameters& parameters, std::os
     RandomWalker::WalkParameters walkParameters = {parameters.numberOfSteps, parameters.tracerRadius, drift};
     this->randomWalker.reset(new GPURandomWalker(parameters.numberOfWalksInSeries, walkParameters,
                                                  gpuMoveFilterFactory.numberOfSetupThreads, this->moveGenerator,
-                                                 this->moveFilter));
+                                                 this->moveFilter, logger));
 }
 
 GPUSimulationFactory::~GPUSimulationFactory() {
