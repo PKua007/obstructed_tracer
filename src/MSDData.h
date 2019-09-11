@@ -1,7 +1,7 @@
 /*
  * MSDData.h
  *
- *  Created on: 25 sie 2019
+ *  Created on: 11 wrz 2019
  *      Author: pkua
  */
 
@@ -9,27 +9,12 @@
 #define MSDDATA_H_
 
 #include <iosfwd>
-#include <vector>
-
-#include "RandomWalker.h"
 
 class MSDData {
-private:
-    struct Entry {
-        float x2{};
-        float y2{};
-        float xy{};
-    };
-
-    friend std::ostream &operator<<(std::ostream &out, Entry msdData);
-
-    std::vector<Entry> data;
-
 public:
-    MSDData(const RandomWalker &randomWalker);
-    void store(std::ostream &out) const;
-};
+    virtual ~MSDData() = default;
 
-std::ostream &operator<<(std::ostream &out, MSDData::Entry entry);
+    virtual void store(std::ostream &out) = 0;
+};
 
 #endif /* MSDDATA_H_ */

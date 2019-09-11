@@ -11,7 +11,7 @@
 #include <random>
 #include <cmath>
 
-#include "simulation/MoveGenerator.h"
+#include "random_walker/MoveGenerator.h"
 
 class CPUCauchyMoveGenerator : public MoveGenerator {
 private:

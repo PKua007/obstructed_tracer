@@ -11,7 +11,7 @@
 
 #include <curand_kernel.h>
 
-#include "simulation/MoveGenerator.h"
+#include "random_walker/MoveGenerator.h"
 
 
 class GPUGaussianMoveGenerator : public MoveGenerator {
@@ -19,7 +19,6 @@ private:
     float sigma;
     curandState *states;
     size_t numberOfTrajectories;
-
 
 public:
     CUDA_DEV GPUGaussianMoveGenerator(float sigma, unsigned int seed, size_t numberOfTrajectories);

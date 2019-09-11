@@ -10,7 +10,7 @@
 
 #include <iterator>
 
-#include "Trajectory.h"
+#include "simulation/Trajectory.h"
 
 class TrajectoryBase : public Trajectory {
 protected:

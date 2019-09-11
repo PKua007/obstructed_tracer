@@ -12,7 +12,7 @@
 #include <array>
 #include <random>
 
-#include "RandomWalker.h"
+#include "simulation/RandomWalker.h"
 #include "CPUTrajectory.h"
 #include "../MoveGenerator.h"
 #include "../MoveFilter.h"
@@ -31,7 +31,7 @@ private:
 
 public:
     CPURandomWalker(std::size_t numberOfWalks, WalkParameters walkParameters, MoveGenerator *moveGenerator,
-                    MoveFilter *moveFilter);
+                    MoveFilter *moveFilter, std::ostream &logger);
 
     void run(std::ostream &logger) override;
     std::size_t getNumberOfTrajectories() const override;

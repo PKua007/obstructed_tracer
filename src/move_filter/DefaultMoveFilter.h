@@ -8,7 +8,7 @@
 #ifndef DEFAULTMOVEFILTER_H_
 #define DEFAULTMOVEFILTER_H_
 
-#include "simulation/MoveFilter.h"
+#include "random_walker/MoveFilter.h"
 
 class DefaultMoveFilter : public MoveFilter {
 private:

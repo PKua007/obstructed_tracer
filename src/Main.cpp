@@ -14,37 +14,14 @@
 #include <fstream>
 
 #include "Parameters.h"
-#include "utils/Utils.h"
-#include "simulation/cpu/CPUSimulationFactory.h"
-#include "simulation/gpu/GPUSimulationFactory.h"
 #include "MSDData.h"
+#include "Simulation.h"
+#include "utils/Utils.h"
 
-namespace {
-    void store_trajectories(const RandomWalker &randomWalker, const std::string &outputFilePrefix,
-                           std::ostream &logger) {
-        std::size_t numberOfTrajectories = randomWalker.getNumberOfTrajectories();
-        for (std::size_t i = 0; i < numberOfTrajectories; i++) {
-            auto &trajectory = randomWalker.getTrajectory(i);
-
-            std::string trajectoryFilename = outputFilePrefix + "_" + std::to_string(i) + ".txt";
-            std::ofstream trajectoryFile(trajectoryFilename);
-            if (!trajectoryFile)
-                die("[main] Cannot open " + trajectoryFilename + " to store trajectory");
-
-            trajectoryFile << std::fixed << std::setprecision(6);
-            trajectory.store(trajectoryFile);
-
-            logger << "[main] Trajectory " << i << " stored to " << trajectoryFilename;
-            logger << ". Initial position: " << trajectory.getFirst();
-            logger << ", accepted steps: " << trajectory.getNumberOfAcceptedSteps();
-            logger << ", final position: " << trajectory.getLast() << std::endl;
-        }
-    }
-}
+#include "simulation/SimulationImpl.h"
 
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv){
     std::string command = argv[0];
     if (argc < 3)
         die("[main] Usage: " + command + " [input file] [output file prefix]");
@@ -59,22 +36,11 @@ int main(int argc, char **argv)
     parameters.print(std::cout);
     std::cout << std::endl;
 
-    std::unique_ptr<SimulationFactory> simulationFactory;
-    if (parameters.device == "cpu")
-        simulationFactory.reset(new CPUSimulationFactory(parameters, std::cout));
-    else if (parameters.device == "gpu")
-        simulationFactory.reset(new GPUSimulationFactory(parameters, std::cout));
-    else
-        die("[main] Unknown device: " + parameters.device);
-
-    RandomWalker &randomWalker = simulationFactory->getRandomWalker();
-    randomWalker.run(std::cout);
-
     std::string outputFilePrefix = argv[2];
 
-    std::cout << "[main] Calculating mean square displacement data... " << std::flush;
-    MSDData msdData(randomWalker);
-    std::cout << "completed." << std::endl;
+    auto simulation = std::make_unique<SimulationImpl>(parameters, outputFilePrefix, std::cout);
+    simulation->run(std::cout);
+    MSDData &msdData = simulation->getMSDData();
 
     std::string msdFilename = outputFilePrefix + "_msd.txt";
     std::ofstream msdFile(msdFilename);
@@ -82,9 +48,6 @@ int main(int argc, char **argv)
         die("[main] Cannot open " + msdFilename + " to store mean square displacement data");
     msdData.store(msdFile);
     std::cout << "[main] Mean square displacement data stored to " + msdFilename << std::endl;
-
-    if (parameters.storeTrajectories)
-        store_trajectories(randomWalker, outputFilePrefix, std::cout);
 
     std::cout << "[main] Run finished." << std::endl;
     return EXIT_SUCCESS;

@@ -8,7 +8,7 @@
 #ifndef TRACER_H_
 #define TRACER_H_
 
-#include "Point.h"
+#include "simulation/Point.h"
 #include "utils/CudaDefines.h"
 
 class Tracer {
