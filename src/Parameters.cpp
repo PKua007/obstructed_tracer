@@ -27,8 +27,10 @@ Parameters::Parameters(std::istream& input) {
             this->driftX = config.getFloat(key);
         else if (key == "driftY")
             this->driftY = config.getFloat(key);
-        else if (key == "numberOfWalks")
-            this->numberOfWalks = config.getUnsignedLong(key);
+        else if (key == "numberOfWalksInSeries")
+            this->numberOfWalksInSeries = config.getUnsignedLong(key);
+        else if (key == "numberOfSeries")
+            this->numberOfSeries = config.getUnsignedLong(key);
         else if (key == "storeTrajectories")
             this->storeTrajectories = (config.getString(key) == "true" ? true : false);
         else if (key == "seed")
@@ -43,20 +45,22 @@ Parameters::Parameters(std::istream& input) {
 }
 
 void Parameters::print(std::ostream& out) {
-    out << "numberOfSteps     : " << this->numberOfSteps << std::endl;
-    out << "tracerRadius      : " << this->tracerRadius << std::endl;
-    out << "moveGenerator     : " << this->moveGenerator << std::endl;
-    out << "moveFilter        : " << this->moveFilter << std::endl;
-    out << "driftX            : " << this->driftX << std::endl;
-    out << "driftY            : " << this->driftY << std::endl;
-    out << "numberOfWalks     : " << this->numberOfWalks << std::endl;
-    out << "storeTrajectories : " << (this->storeTrajectories ? "true" : "false") << std::endl;
-    out << "seed              : " << this->seed << std::endl;
-    out << "device            : " << this->device << std::endl;
+    out << "numberOfSteps         : " << this->numberOfSteps << std::endl;
+    out << "tracerRadius          : " << this->tracerRadius << std::endl;
+    out << "moveGenerator         : " << this->moveGenerator << std::endl;
+    out << "moveFilter            : " << this->moveFilter << std::endl;
+    out << "driftX                : " << this->driftX << std::endl;
+    out << "driftY                : " << this->driftY << std::endl;
+    out << "numberOfWalksInSeries : " << this->numberOfWalksInSeries << std::endl;
+    out << "numberOfSeries        : " << this->numberOfSeries << std::endl;
+    out << "storeTrajectories     : " << (this->storeTrajectories ? "true" : "false") << std::endl;
+    out << "seed                  : " << this->seed << std::endl;
+    out << "device                : " << this->device << std::endl;
 }
 
 void Parameters::validateParameters() const {
     Validate(this->numberOfSteps > 0);
     Validate(this->tracerRadius >= 0.f);
-    Validate(this->numberOfWalks > 0);
+    Validate(this->numberOfWalksInSeries > 0);
+    Validate(this->numberOfSeries > 0);
 }

@@ -237,8 +237,8 @@ GPUSimulationFactory::GPUSimulationFactory(const Parameters& parameters, std::os
     MoveGeneratorOnGPUFactory gpuMoveGeneratorFactory(parameters);
     MoveFilterOnGPUFactory gpuMoveFilterFactory(parameters, logger);
 
-    gpuMoveGeneratorFactory.create(this->seedGenerator(), parameters.numberOfWalks);
-    gpuMoveFilterFactory.create(this->seedGenerator(), parameters.numberOfWalks);
+    gpuMoveGeneratorFactory.create(this->seedGenerator(), parameters.numberOfWalksInSeries);
+    gpuMoveFilterFactory.create(this->seedGenerator(), parameters.numberOfWalksInSeries);
 
     this->moveGenerator = gpuMoveGeneratorFactory.moveGenerator;
     this->moveFilter = gpuMoveFilterFactory.moveFilter;
@@ -246,7 +246,7 @@ GPUSimulationFactory::GPUSimulationFactory(const Parameters& parameters, std::os
 
     Move drift = {parameters.driftX, parameters.driftY};
     RandomWalker::WalkParameters walkParameters = {parameters.numberOfSteps, parameters.tracerRadius, drift};
-    this->randomWalker.reset(new GPURandomWalker(parameters.numberOfWalks, walkParameters,
+    this->randomWalker.reset(new GPURandomWalker(parameters.numberOfWalksInSeries, walkParameters,
                                                  gpuMoveFilterFactory.numberOfSetupThreads, this->moveGenerator,
                                                  this->moveFilter));
 }

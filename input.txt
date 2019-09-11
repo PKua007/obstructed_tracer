@@ -1,11 +1,11 @@
 numberOfSteps = 100000
 tracerRadius = 4
-moveGenerator = GaussianMoveGenerator 3
+moveGenerator = CauchyMoveGenerator 3
 #moveFilter = DefaultMoveFilter
-moveFilter = ImageMoveFilter rsa.ppm PeriodicBoundaryConditions
+moveFilter = ImageMoveFilter maze.ppm PeriodicBoundaryConditions
 driftX = 0
 driftY = 0
-numberOfWalks = 500
+numberOfWalks = 7000
 storeTrajectories = false
 seed = random
 device = gpu
