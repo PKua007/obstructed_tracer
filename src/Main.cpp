@@ -16,8 +16,8 @@
 #include "Parameters.h"
 #include "utils/Utils.h"
 #include "utils/OMPDefines.h"
-#include "simulation/cpu/CPUSimulationFactory.h"
-#include "simulation/gpu/GPUSimulationFactory.h"
+#include "random_walker/cpu/CPURandomWalkerFactory.h"
+#include "random_walker/gpu/GPURandomWalkerFactory.h"
 #include "Timer.h"
 #include "MSDData.h"
 
@@ -63,11 +63,11 @@ int main(int argc, char **argv)
     std::cout << std::endl;
 
     std::cout << "[main] " << _OMP_MAXTHREADS << " OpenMP threads are available." << std::endl;
-    std::unique_ptr<SimulationFactory> simulationFactory;
+    std::unique_ptr<RandomWalkerFactory> simulationFactory;
     if (parameters.device == "cpu")
-        simulationFactory.reset(new CPUSimulationFactory(parameters, std::cout));
+        simulationFactory.reset(new CPURandomWalkerFactory(parameters, std::cout));
     else if (parameters.device == "gpu")
-        simulationFactory.reset(new GPUSimulationFactory(parameters, std::cout));
+        simulationFactory.reset(new GPURandomWalkerFactory(parameters, std::cout));
     else
         die("[main] Unknown device: " + parameters.device);
 

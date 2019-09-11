@@ -1,24 +1,24 @@
 /*
- * CPUSimulationFactory.h
+ * CPURandomWalkerFactory.h
  *
  *  Created on: 22 sie 2019
  *      Author: pkua
  */
 
-#ifndef CPUSIMULATIONFACTORY_H_
-#define CPUSIMULATIONFACTORY_H_
+#ifndef CPURANDOMWALKERFACTORY_H_
+#define CPURANDOMWALKERFACTORY_H_
 
 #include <memory>
 #include <iosfwd>
 
 #include "Parameters.h"
-#include "SimulationFactory.h"
+#include "RandomWalkerFactory.h"
 #include "../MoveGenerator.h"
 #include "../MoveFilter.h"
 #include "move_filter/image_move_filter/ImageBoundaryConditions.h"
 #include "CPURandomWalker.h"
 
-class CPUSimulationFactory : public SimulationFactory {
+class CPURandomWalkerFactory : public RandomWalkerFactory {
 private:
     std::mt19937 seedGenerator;
     std::unique_ptr<MoveGenerator> moveGenerator;
@@ -34,9 +34,9 @@ private:
     void initializeSeedGenerator(std::string seed, std::ostream& logger);
 
 public:
-    CPUSimulationFactory(const Parameters &parameters, std::ostream &logger);
+    CPURandomWalkerFactory(const Parameters &parameters, std::ostream &logger);
 
     RandomWalker &getRandomWalker() override;
 };
 
-#endif /* CPUSIMULATIONFACTORY_H_ */
+#endif /* CPURANDOMWALKERFACTORY_H_ */

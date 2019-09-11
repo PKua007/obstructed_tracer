@@ -11,7 +11,7 @@
 #include <random>
 #include <curand_kernel.h>
 
-#include "simulation/MoveFilter.h"
+#include "random_walker/MoveFilter.h"
 #include "ImageBoundaryConditions.h"
 #include "ImagePoint.h"
 

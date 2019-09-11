@@ -1,5 +1,5 @@
 /*
- * GPUSimulationFactory.cpp
+ * GPURandomWalkerFactory.cpp
  *
  *  Created on: 26 sie 2019
  *      Author: pkua
@@ -9,7 +9,7 @@
 #include <fstream>
 #include <vector>
 
-#include "GPUSimulationFactory.h"
+#include "GPURandomWalkerFactory.h"
 #include "utils/CudaCheck.h"
 #include "move_generator/gpu/GPUGaussianMoveGenerator.h"
 #include "move_generator/gpu/GPUCauchyMoveGenerator.h"
@@ -134,7 +134,7 @@ namespace {
 
             PPMImageReader imageReader;
             this->image = imageReader.read(imageFile);
-            logger << "[GPUSimulationFactory] Loaded image " << imageFilename << " (" << this->image.getWidth();
+            logger << "[GPURandomWalkerFactory] Loaded image " << imageFilename << " (" << this->image.getWidth();
             logger << "px x " << this->image.getHeight() << "px)" << std::endl;
         }
 
@@ -221,17 +221,17 @@ void delete_objects(MoveGenerator *moveGenerator, MoveFilter *moveFilter, ImageB
     delete boundaryConditions;
 }
 
-void GPUSimulationFactory::initializeSeedGenerator(const std::string &seed, std::ostream &logger) {
+void GPURandomWalkerFactory::initializeSeedGenerator(const std::string &seed, std::ostream &logger) {
     if (seed == "random") {
         unsigned long randomSeed = std::random_device()();
         this->seedGenerator.seed(randomSeed);
-        logger << "[GPUSimulationFactory] Using random seed: " << randomSeed << std::endl;
+        logger << "[GPURandomWalkerFactory] Using random seed: " << randomSeed << std::endl;
     } else {
         this->seedGenerator.seed(std::stoul(seed));
     }
 }
 
-GPUSimulationFactory::GPUSimulationFactory(const Parameters& parameters, std::ostream& logger) {
+GPURandomWalkerFactory::GPURandomWalkerFactory(const Parameters& parameters, std::ostream& logger) {
     this->initializeSeedGenerator(parameters.seed, logger);
 
     MoveGeneratorOnGPUFactory gpuMoveGeneratorFactory(parameters);
@@ -251,11 +251,11 @@ GPUSimulationFactory::GPUSimulationFactory(const Parameters& parameters, std::os
                                                  this->moveFilter, logger));
 }
 
-GPUSimulationFactory::~GPUSimulationFactory() {
+GPURandomWalkerFactory::~GPURandomWalkerFactory() {
     delete_objects<<<1, 32>>>(this->moveGenerator, this->moveFilter, this->imageBoundaryConditions);
     cudaCheck( cudaDeviceSynchronize() );
 }
 
-RandomWalker& GPUSimulationFactory::getRandomWalker() {
+RandomWalker& GPURandomWalkerFactory::getRandomWalker() {
     return *this->randomWalker;
 }

@@ -96,7 +96,7 @@ GPURandomWalker::GPURandomWalker(std::size_t numberOfTrajectories, RandomWalker:
 void GPURandomWalker::setupMoveFilterForTracerRadius(std::ostream& logger) {
     int numberOfBlocks = (this->numberOfMoveFilterSetupThreads + blockSize - 1)
             / blockSize;
-    logger << "[GPURandomWalker::run] Setting up MoveFilter... " << std::flush;
+    logger << "[GPURandomWalker] Setting up MoveFilter... " << std::flush;
     setup_move_filter<<<numberOfBlocks, blockSize>>>(this->moveFilter, this->walkParameters.tracerRadius);
     cudaCheck(cudaDeviceSynchronize());
     logger << "completed." << std::endl;

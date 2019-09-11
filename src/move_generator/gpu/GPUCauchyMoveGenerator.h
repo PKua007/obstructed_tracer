@@ -11,7 +11,7 @@
 
 #include <curand_kernel.h>
 
-#include "simulation/MoveGenerator.h"
+#include "random_walker/MoveGenerator.h"
 
 
 class GPUCauchyMoveGenerator : public MoveGenerator {

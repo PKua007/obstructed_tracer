@@ -1,22 +1,22 @@
 /*
- * GPUSimulationFactory.h
+ * GPURandomWalkerFactory.h
  *
  *  Created on: 26 sie 2019
  *      Author: pkua
  */
 
-#ifndef GPUSIMULATIONFACTORY_H_
-#define GPUSIMULATIONFACTORY_H_
+#ifndef GPURANDOMWALKERFACTORY_H_
+#define GPURANDOMWALKERFACTORY_H_
 
 #include <memory>
 #include <random>
 
 #include "Parameters.h"
-#include "SimulationFactory.h"
+#include "RandomWalkerFactory.h"
 #include "GPURandomWalker.h"
 #include "move_filter/image_move_filter/ImageBoundaryConditions.h"
 
-class GPUSimulationFactory: public SimulationFactory {
+class GPURandomWalkerFactory: public RandomWalkerFactory {
 private:
     std::mt19937 seedGenerator;
     MoveGenerator *moveGenerator;
@@ -27,10 +27,10 @@ private:
     void initializeSeedGenerator(const std::string &seed, std::ostream &logger);
 
 public:
-    GPUSimulationFactory(const Parameters &parameters, std::ostream &logger);
-    ~GPUSimulationFactory();
+    GPURandomWalkerFactory(const Parameters &parameters, std::ostream &logger);
+    ~GPURandomWalkerFactory();
 
     RandomWalker &getRandomWalker() override;
 };
 
-#endif /* GPUSIMULATIONFACTORY_H_ */
+#endif /* GPURANDOMWALKERFACTORY_H_ */

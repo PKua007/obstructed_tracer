@@ -25,4 +25,4 @@ public:
     unsigned long count() const;
 };
 
-#endif /* SIMULATIONTIMER_H_ */
+#endif /* TIMER_H_ */

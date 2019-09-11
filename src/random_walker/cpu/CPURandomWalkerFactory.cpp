@@ -1,5 +1,5 @@
 /*
- * CPUSimulationFactory.cpp
+ * CPURandomWalkerFactory.cpp
  *
  *  Created on: 22 sie 2019
  *      Author: pkua
@@ -8,7 +8,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "CPUSimulationFactory.h"
+#include "CPURandomWalkerFactory.h"
 #include "move_generator/cpu/CPUGaussianMoveGenerator.h"
 #include "move_generator/cpu/CPUCauchyMoveGenerator.h"
 #include "move_filter/DefaultMoveFilter.h"
@@ -18,7 +18,7 @@
 #include "image/PPMImageReader.h"
 #include "utils/Assertions.h"
 
-std::unique_ptr<MoveGenerator> CPUSimulationFactory::createMoveGenerator(const Parameters& parameters) {
+std::unique_ptr<MoveGenerator> CPURandomWalkerFactory::createMoveGenerator(const Parameters& parameters) {
     std::istringstream moveGeneratorStream(parameters.moveGenerator);
     std::string moveGeneratorType;
     float sigma;
@@ -36,7 +36,7 @@ std::unique_ptr<MoveGenerator> CPUSimulationFactory::createMoveGenerator(const P
 }
 
 std::unique_ptr<ImageBoundaryConditions>
-CPUSimulationFactory::createImageBoundaryConditions(std::istringstream& moveFilterStream) {
+CPURandomWalkerFactory::createImageBoundaryConditions(std::istringstream& moveFilterStream) {
     std::string imageBCType;
     moveFilterStream >> imageBCType;
     if (!moveFilterStream)
@@ -50,9 +50,9 @@ CPUSimulationFactory::createImageBoundaryConditions(std::istringstream& moveFilt
         throw std::runtime_error("Unknown ImageBoundaryConditions: " + imageBCType);
 }
 
-std::unique_ptr<MoveFilter> CPUSimulationFactory::createImageMoveFilter(const Parameters& parameters,
-                                                                        std::istringstream& moveFilterStream,
-                                                                        std::ostream& logger) {
+std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createImageMoveFilter(const Parameters& parameters,
+                                                                          std::istringstream& moveFilterStream,
+                                                                          std::ostream& logger) {
     std::string imageFilename;
     moveFilterStream >> imageFilename;
     if (!moveFilterStream)
@@ -65,19 +65,21 @@ std::unique_ptr<MoveFilter> CPUSimulationFactory::createImageMoveFilter(const Pa
     PPMImageReader imageReader;
     Image image = imageReader.read(imageFile);
     auto imageData = image.getIntData();
-    logger << "[CPUSimulationFactory] Loaded image " << imageFilename << " (" << image.getWidth() << "px x ";
+    logger << "[CPURandomWalkerFactory] Loaded image " << imageFilename << " (" << image.getWidth() << "px x ";
     logger << image.getHeight() << "px)" << std::endl;
 
     this->imageBC = createImageBoundaryConditions(moveFilterStream);
 
     auto imageMoveFilter = new ImageMoveFilter(imageData.data(), image.getWidth(), image.getHeight(),
-                                               this->imageBC.get(), this->seedGenerator(), parameters.numberOfWalksInSeries);
-    logger << "[CPUSimulationFactory] Found " << imageMoveFilter->getNumberOfValidTracers();
+                                               this->imageBC.get(), this->seedGenerator(),
+                                               parameters.numberOfWalksInSeries);
+    logger << "[CPURandomWalkerFactory] Found " << imageMoveFilter->getNumberOfValidTracers();
     logger << " valid starting points out of " << imageMoveFilter->getNumberOfAllPoints() << std::endl;
     return std::unique_ptr<MoveFilter>(imageMoveFilter);
 }
 
-std::unique_ptr<MoveFilter> CPUSimulationFactory::createMoveFilter(const Parameters& parameters, std::ostream& logger) {
+std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createMoveFilter(const Parameters& parameters,
+                                                                     std::ostream& logger) {
     std::istringstream moveFilterStream(parameters.moveFilter);
     std::string moveFilterType;
     moveFilterStream >> moveFilterType;
@@ -89,27 +91,27 @@ std::unique_ptr<MoveFilter> CPUSimulationFactory::createMoveFilter(const Paramet
         throw std::runtime_error("Unknown MoveFilter: " + moveFilterType);
 }
 
-void CPUSimulationFactory::initializeSeedGenerator(std::string seed, std::ostream& logger) {
+void CPURandomWalkerFactory::initializeSeedGenerator(std::string seed, std::ostream& logger) {
     if (seed == "random") {
         unsigned long randomSeed = std::random_device()();
         this->seedGenerator.seed(randomSeed);
-        logger << "[CPUSimulationFactory] Using random seed: " << randomSeed << std::endl;
+        logger << "[CPURandomWalkerFactory] Using random seed: " << randomSeed << std::endl;
     } else {
         this->seedGenerator.seed(std::stoul(seed));
     }
 }
 
-CPUSimulationFactory::CPUSimulationFactory(const Parameters &parameters, std::ostream &logger) {
+CPURandomWalkerFactory::CPURandomWalkerFactory(const Parameters &parameters, std::ostream &logger) {
     this->initializeSeedGenerator(parameters.seed, logger);
     this->moveGenerator = this->createMoveGenerator(parameters);
     this->moveFilter = this->createMoveFilter(parameters, logger);
 
     Move drift = {parameters.driftX, parameters.driftY};
     RandomWalker::WalkParameters walkParameters = {parameters.numberOfSteps, parameters.tracerRadius, drift};
-    this->randomWalker.reset(new CPURandomWalker(parameters.numberOfWalksInSeries, walkParameters, this->moveGenerator.get(),
-                                                 this->moveFilter.get(), logger));
+    this->randomWalker.reset(new CPURandomWalker(parameters.numberOfWalksInSeries, walkParameters,
+                                                 this->moveGenerator.get(), this->moveFilter.get(), logger));
 }
 
-RandomWalker &CPUSimulationFactory::getRandomWalker() {
+RandomWalker &CPURandomWalkerFactory::getRandomWalker() {
     return *this->randomWalker;
 }

@@ -10,7 +10,7 @@
 
 #include <random>
 
-#include "simulation/MoveGenerator.h"
+#include "random_walker/MoveGenerator.h"
 
 class CPUGaussianMoveGenerator : public MoveGenerator {
 private:
