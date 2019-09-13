@@ -25,7 +25,8 @@ private:
     std::string outputFilePrefix;
     MSDDataImpl msdData;
 
-    RandomWalkerFactory::WalkerParameters prepareWalkerParametersTemplate(const Parameters &parameters);
+    RandomWalkerFactory::WalkerParameters prepareWalkerParametersTemplate(const Parameters &parameters) const;
+    std::vector<std::string> prepareMoveFilterParameters(const std::string &moveFilterChain) const;
     void initializeSeedGenerator(std::string seed, std::ostream &logger);
     void runSingleSimulation(std::size_t simulationIndex, RandomWalker &randomWalker, std::ostream &logger);
     void store_trajectories(const RandomWalker &randomWalker, const std::string &outputFilePrefix,

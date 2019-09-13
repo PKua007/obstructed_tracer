@@ -8,15 +8,20 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <algorithm>
+#include <functional>
+#include <iterator>
 
 #include "SimulationImpl.h"
 #include "utils/Utils.h"
 #include "utils/OMPDefines.h"
+#include "utils/Assertions.h"
 #include "random_walker/cpu/CPURandomWalkerFactory.h"
 #include "random_walker/gpu/GPURandomWalkerFactory.h"
 #include "Timer.h"
 
-RandomWalkerFactory::WalkerParameters SimulationImpl::prepareWalkerParametersTemplate(const Parameters &parameters) {
+RandomWalkerFactory::WalkerParameters
+SimulationImpl::prepareWalkerParametersTemplate(const Parameters &parameters) const {
     // Walker parameters can be preprepared, because they are shared between multiple simulations.
     // The simulation can only differ in MoveFilter and its number is determined from Parameters::moveFilter
     RandomWalker::WalkParameters walkParameters;
@@ -31,6 +36,15 @@ RandomWalkerFactory::WalkerParameters SimulationImpl::prepareWalkerParametersTem
     walkerParametersTemplate.walkParameters = walkParameters;
 
     return walkerParametersTemplate;
+}
+
+std::vector<std::string> SimulationImpl::prepareMoveFilterParameters(const std::string &moveFilterChain) const {
+    auto moveFilterStrings = explode(moveFilterChain, ';');
+    std::for_each(moveFilterStrings.begin(), moveFilterStrings.end(), trim);
+    moveFilterStrings.erase(std::remove_if(moveFilterStrings.begin(), moveFilterStrings.end(),
+                                           std::mem_fun_ref(&std::string::empty)),
+                            moveFilterStrings.end());
+    return moveFilterStrings;
 }
 
 void SimulationImpl::initializeSeedGenerator(std::string seed, std::ostream& logger) {
@@ -73,9 +87,15 @@ SimulationImpl::SimulationImpl(const Parameters &parameters, const std::string &
         : outputFilePrefix{outputFilePrefix}, msdData(parameters.numberOfSteps), parameters{parameters}
 {
     this->walkerParametersTemplate = this->prepareWalkerParametersTemplate(parameters);
-    this->moveFilters = explode(parameters.moveFilter, ';');
+    this->moveFilters = this->prepareMoveFilterParameters(parameters.moveFilter);
+    Validate(!this->moveFilters.empty());
     this->initializeSeedGenerator(this->parameters.seed, logger);
-    logger << "[SimulationImpl] " << _OMP_MAXTHREADS << " OpenMP threads are available." << std::endl << std::endl;
+
+    logger << "[SimulationImpl] " << _OMP_MAXTHREADS << " OpenMP threads are available." << std::endl;
+    logger << "[SimulationImpl] " << moveFilters.size() << " simulations will be performed using MoveFilters:";
+    logger << std::endl;
+    std::copy(this->moveFilters.begin(), this->moveFilters.end(), std::ostream_iterator<std::string>(logger, "\n"));
+    logger << std::endl;
 }
 
 void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalker &randomWalker,
