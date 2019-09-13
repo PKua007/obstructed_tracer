@@ -16,7 +16,13 @@
 
 
 MSDDataImpl::Entry operator+(const MSDDataImpl::Entry &first, const MSDDataImpl::Entry &second) {
-    return {first.x + second.x, first.y + second.y, first.x2 + second.x2, first.y2 + second.y2, first.xy + second.xy};
+    MSDDataImpl::Entry result;
+    result.x = first.x + second.x;
+    result.y = first.y + second.y;
+    result.x2 = first.x2 + second.x2;
+    result.y2 = first.y2 + second.y2;
+    result.xy = first.xy + second.xy;
+    return result;
 }
 
 std::ostream &operator<<(std::ostream &out, MSDDataImpl::Entry entry) {

@@ -38,7 +38,7 @@ int main(int argc, char **argv){
 
     std::string outputFilePrefix = argv[2];
 
-    auto simulation = std::make_unique<SimulationImpl>(parameters, outputFilePrefix, std::cout);
+    auto simulation = std::unique_ptr<Simulation>(new SimulationImpl(parameters, outputFilePrefix, std::cout));
     simulation->run(std::cout);
     MSDData &msdData = simulation->getMSDData();
 
