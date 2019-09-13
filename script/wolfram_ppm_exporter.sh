@@ -23,3 +23,4 @@ for notebook in $(ls *.nb); do
     (echo 'Export["'"${notebook}.ppm"'", ' && (cat "${notebook}" | sed 's/Red/Black/g') && echo ", RasterSize->${resolution}]; Quit[];") > "${notebook}.m"
     MathKernel -noprompt -initfile "${notebook}.m"
 done
+
