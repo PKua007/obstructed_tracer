@@ -59,8 +59,8 @@ namespace {
     public:
         MoveGenerator *moveGenerator{};
 
-        MoveGeneratorOnGPUFactory(const Parameters &parameters) {
-            std::istringstream moveGeneratorStream(parameters.moveGenerator);
+        MoveGeneratorOnGPUFactory(const std::string &moveGeneratorString) {
+            std::istringstream moveGeneratorStream(moveGeneratorString);
             std::string moveGeneratorName;
             moveGeneratorStream >> moveGeneratorName >> this->sigma;
             if (!moveGeneratorStream)
@@ -157,8 +157,8 @@ namespace {
         ImageBoundaryConditions *boundaryConditions{};
         std::size_t numberOfSetupThreads{};
 
-        MoveFilterOnGPUFactory(const Parameters &parameters, std::ostream &logger) {
-            std::istringstream moveFilterStream(parameters.moveFilter);
+        MoveFilterOnGPUFactory(const std::string &moveFilterString, std::ostream &logger) {
+            std::istringstream moveFilterStream(moveFilterString);
             std::string moveFilterName;
             moveFilterStream >> moveFilterName;
 
@@ -221,32 +221,24 @@ void delete_objects(MoveGenerator *moveGenerator, MoveFilter *moveFilter, ImageB
     delete boundaryConditions;
 }
 
-void GPURandomWalkerFactory::initializeSeedGenerator(const std::string &seed, std::ostream &logger) {
-    if (seed == "random") {
-        unsigned long randomSeed = std::random_device()();
-        this->seedGenerator.seed(randomSeed);
-        logger << "[GPURandomWalkerFactory] Using random seed: " << randomSeed << std::endl;
-    } else {
-        this->seedGenerator.seed(std::stoul(seed));
-    }
-}
 
-GPURandomWalkerFactory::GPURandomWalkerFactory(const Parameters& parameters, std::ostream& logger) {
-    this->initializeSeedGenerator(parameters.seed, logger);
+GPURandomWalkerFactory::GPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters,
+                                               std::ostream &logger)
+        : numberOfWalksInSeries{walkerParameters.numberOfWalksInSeries}
+{
+    this->seedGenerator.seed(seed);
 
-    MoveGeneratorOnGPUFactory gpuMoveGeneratorFactory(parameters);
-    MoveFilterOnGPUFactory gpuMoveFilterFactory(parameters, logger);
+    MoveGeneratorOnGPUFactory gpuMoveGeneratorFactory(walkerParameters.moveGeneratorParameters);
+    MoveFilterOnGPUFactory gpuMoveFilterFactory(walkerParameters.moveFilterParameters, logger);
 
-    gpuMoveGeneratorFactory.create(this->seedGenerator(), parameters.numberOfWalksInSeries);
-    gpuMoveFilterFactory.create(this->seedGenerator(), parameters.numberOfWalksInSeries);
+    gpuMoveGeneratorFactory.create(this->seedGenerator(), this->numberOfWalksInSeries);
+    gpuMoveFilterFactory.create(this->seedGenerator(), this->numberOfWalksInSeries);
 
     this->moveGenerator = gpuMoveGeneratorFactory.moveGenerator;
     this->moveFilter = gpuMoveFilterFactory.moveFilter;
     this->imageBoundaryConditions = gpuMoveFilterFactory.boundaryConditions;
 
-    Move drift = {parameters.driftX, parameters.driftY};
-    RandomWalker::WalkParameters walkParameters = {parameters.numberOfSteps, parameters.tracerRadius, drift};
-    this->randomWalker.reset(new GPURandomWalker(parameters.numberOfWalksInSeries, walkParameters,
+    this->randomWalker.reset(new GPURandomWalker(this->numberOfWalksInSeries, walkerParameters.walkParameters,
                                                  gpuMoveFilterFactory.numberOfSetupThreads, this->moveGenerator,
                                                  this->moveFilter, logger));
 }

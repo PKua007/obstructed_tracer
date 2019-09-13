@@ -11,7 +11,6 @@
 #include <memory>
 #include <iosfwd>
 
-#include "Parameters.h"
 #include "simulation/RandomWalkerFactory.h"
 #include "../MoveGenerator.h"
 #include "../MoveFilter.h"
@@ -21,20 +20,19 @@
 class CPURandomWalkerFactory : public RandomWalkerFactory {
 private:
     std::mt19937 seedGenerator;
+    unsigned long numberOfWalksInSeries{};
     std::unique_ptr<MoveGenerator> moveGenerator;
     std::unique_ptr<ImageBoundaryConditions> imageBC;
     std::unique_ptr<MoveFilter> moveFilter;
     std::unique_ptr<RandomWalker> randomWalker;
 
-    std::unique_ptr<MoveGenerator> createMoveGenerator(const Parameters& parameters);
-    std::unique_ptr<MoveFilter> createMoveFilter(const Parameters& parameters, std::ostream& logger);
-    std::unique_ptr<MoveFilter> createImageMoveFilter(const Parameters& parameters,
-                                                      std::istringstream& moveFilterStream, std::ostream& logger);
-    std::unique_ptr<ImageBoundaryConditions> createImageBoundaryConditions(std::istringstream& moveFilterStream);
-    void initializeSeedGenerator(std::string seed, std::ostream& logger);
+    std::unique_ptr<MoveGenerator> createMoveGenerator(const std::string &moveGeneratorParameters);
+    std::unique_ptr<MoveFilter> createMoveFilter(const std::string &moveFilterParameters, std::ostream &logger);
+    std::unique_ptr<MoveFilter> createImageMoveFilter(std::istringstream &moveFilterStream, std::ostream &logger);
+    std::unique_ptr<ImageBoundaryConditions> createImageBoundaryConditions(std::istringstream &moveFilterStream);
 
 public:
-    CPURandomWalkerFactory(const Parameters &parameters, std::ostream &logger);
+    CPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters, std::ostream &logger);
 
     RandomWalker &getRandomWalker() override;
 };
