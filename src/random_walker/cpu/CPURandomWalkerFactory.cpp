@@ -18,8 +18,8 @@
 #include "image/PPMImageReader.h"
 #include "utils/Assertions.h"
 
-std::unique_ptr<MoveGenerator> CPURandomWalkerFactory::createMoveGenerator(const Parameters& parameters) {
-    std::istringstream moveGeneratorStream(parameters.moveGenerator);
+std::unique_ptr<MoveGenerator> CPURandomWalkerFactory::createMoveGenerator(const std::string &moveGeneratorParameters) {
+    std::istringstream moveGeneratorStream(moveGeneratorParameters);
     std::string moveGeneratorType;
     float sigma;
     moveGeneratorStream >> moveGeneratorType >> sigma;
@@ -36,7 +36,7 @@ std::unique_ptr<MoveGenerator> CPURandomWalkerFactory::createMoveGenerator(const
 }
 
 std::unique_ptr<ImageBoundaryConditions>
-CPURandomWalkerFactory::createImageBoundaryConditions(std::istringstream& moveFilterStream) {
+CPURandomWalkerFactory::createImageBoundaryConditions(std::istringstream &moveFilterStream) {
     std::string imageBCType;
     moveFilterStream >> imageBCType;
     if (!moveFilterStream)
@@ -50,9 +50,9 @@ CPURandomWalkerFactory::createImageBoundaryConditions(std::istringstream& moveFi
         throw std::runtime_error("Unknown ImageBoundaryConditions: " + imageBCType);
 }
 
-std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createImageMoveFilter(const Parameters& parameters,
-                                                                          std::istringstream& moveFilterStream,
-                                                                          std::ostream& logger) {
+std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createImageMoveFilter(std::istringstream &moveFilterStream,
+                                                                          std::ostream &logger)
+{
     std::string imageFilename;
     moveFilterStream >> imageFilename;
     if (!moveFilterStream)
@@ -72,33 +72,37 @@ std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createImageMoveFilter(const 
 
     auto imageMoveFilter = new ImageMoveFilter(imageData.data(), image.getWidth(), image.getHeight(),
                                                this->imageBC.get(), this->seedGenerator(),
-                                               parameters.numberOfWalksInSeries);
+                                               this->numberOfWalksInSeries);
     logger << "[CPURandomWalkerFactory] Found " << imageMoveFilter->getNumberOfValidTracers();
     logger << " valid starting points out of " << imageMoveFilter->getNumberOfAllPoints() << std::endl;
     return std::unique_ptr<MoveFilter>(imageMoveFilter);
 }
 
-std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createMoveFilter(const Parameters& parameters,
-                                                                     std::ostream& logger) {
-    std::istringstream moveFilterStream(parameters.moveFilter);
+std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createMoveFilter(const std::string &moveFilterParameters,
+                                                                     std::ostream &logger)
+{
+    std::istringstream moveFilterStream(moveFilterParameters);
     std::string moveFilterType;
     moveFilterStream >> moveFilterType;
     if (moveFilterType == "DefaultMoveFilter")
         return std::unique_ptr<MoveFilter>(new DefaultMoveFilter());
     else if (moveFilterType == "ImageMoveFilter")
-        return createImageMoveFilter(parameters, moveFilterStream, logger);
+        return createImageMoveFilter(moveFilterStream, logger);
     else
         throw std::runtime_error("Unknown MoveFilter: " + moveFilterType);
 }
 
-CPURandomWalkerFactory::CPURandomWalkerFactory(unsigned long seed, const Parameters &parameters, std::ostream &logger) {
+CPURandomWalkerFactory::CPURandomWalkerFactory(unsigned long seed, const std::string &moveGeneratorParameters,
+                                               const std::string &moveFilterParameters,
+                                               std::size_t numberOfWalksInSeries,
+                                               const RandomWalker::WalkParameters &walkParameters, std::ostream &logger)
+        : numberOfWalksInSeries{numberOfWalksInSeries}
+{
     this->seedGenerator.seed(seed);
-    this->moveGenerator = this->createMoveGenerator(parameters);
-    this->moveFilter = this->createMoveFilter(parameters, logger);
+    this->moveGenerator = this->createMoveGenerator(moveGeneratorParameters);
+    this->moveFilter = this->createMoveFilter(moveFilterParameters, logger);
 
-    Move drift = {parameters.driftX, parameters.driftY};
-    RandomWalker::WalkParameters walkParameters = {parameters.numberOfSteps, parameters.tracerRadius, drift};
-    this->randomWalker.reset(new CPURandomWalker(parameters.numberOfWalksInSeries, walkParameters,
+    this->randomWalker.reset(new CPURandomWalker(this->numberOfWalksInSeries, walkParameters,
                                                  this->moveGenerator.get(), this->moveFilter.get(), logger));
 }
 

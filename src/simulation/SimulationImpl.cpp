@@ -55,12 +55,21 @@ SimulationImpl::SimulationImpl(Parameters parameters, const std::string &outputF
 
     logger << "[SimulationImpl] " << _OMP_MAXTHREADS << " OpenMP threads are available." << std::endl;
 
-    if (this->parameters.device == "cpu")
-        this->simulationFactory.reset(new CPURandomWalkerFactory(this->seedGenerator(), this->parameters, logger));
-    else if (this->parameters.device == "gpu")
+    RandomWalker::WalkParameters walkParameters;
+    walkParameters.drift = {parameters.driftX, parameters.driftY};
+    walkParameters.numberOfSteps = parameters.numberOfSteps;
+    walkParameters.tracerRadius = parameters.tracerRadius;
+
+    if (this->parameters.device == "cpu") {
+        this->simulationFactory.reset(new CPURandomWalkerFactory(this->seedGenerator(), parameters.moveGenerator,
+                                                                 parameters.moveFilter,
+                                                                 parameters.numberOfWalksInSeries, walkParameters,
+                                                                 logger));
+    } else if (this->parameters.device == "gpu") {
         this->simulationFactory.reset(new GPURandomWalkerFactory(this->seedGenerator(), this->parameters, logger));
-    else
+    } else {
         die("[SimulationImpl] Unknown device: " + this->parameters.device);
+    }
 }
 
 void SimulationImpl::run(std::ostream &logger) {
