@@ -20,16 +20,19 @@ class SimulationImpl : public Simulation {
 private:
     std::mt19937 seedGenerator;
     Parameters parameters;
+    std::vector<std::string> moveFilters;
+    RandomWalkerFactory::WalkerParameters walkerParametersTemplate;
     std::string outputFilePrefix;
-    std::unique_ptr<RandomWalkerFactory> simulationFactory;
     MSDDataImpl msdData;
 
+    RandomWalkerFactory::WalkerParameters prepareWalkerParametersTemplate(const Parameters &parameters);
     void initializeSeedGenerator(std::string seed, std::ostream &logger);
+    void runSingleSimulation(std::size_t simulationIndex, RandomWalker &randomWalker, std::ostream &logger);
     void store_trajectories(const RandomWalker &randomWalker, const std::string &outputFilePrefix,
-                            std::size_t firstTrajectoryIndex, std::ostream &logger);
+                            std::size_t simulationIndex, std::size_t firstTrajectoryIndex, std::ostream &logger);
 
 public:
-    SimulationImpl(Parameters parameters, const std::string &outputFilePrefix, std::ostream &logger);
+    SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix, std::ostream &logger);
 
     void run(std::ostream &logger) override;
     MSDData &getMSDData() override { return this->msdData; }

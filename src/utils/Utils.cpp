@@ -6,12 +6,15 @@
  */
 
 
+#include <string>
 #include <cstring>
 #include <iostream>
 #include <iterator>
 #include <iomanip>
 #include <algorithm>
-
+#include <vector>
+#include <sstream>
+#include <utility>
 
 // trim from start
 std::string &ltrim(std::string &s) {
@@ -57,6 +60,17 @@ int lastIndexOf(const std::string &s, char target){
 		curIdx++;
 	}
 	return ret;
+}
+
+std::vector<std::string> explode(const std::string &s, char delim) {
+    std::vector<std::string> result;
+    std::istringstream iss(s);
+
+    std::string token;
+    while(std::getline(iss, token, delim))
+        result.push_back(std::move(token));
+
+    return result;
 }
 
 void die(const std::string & reason)

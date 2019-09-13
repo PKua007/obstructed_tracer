@@ -70,12 +70,9 @@ std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createImageMoveFilter(std::i
 
     this->imageBC = createImageBoundaryConditions(moveFilterStream);
 
-    auto imageMoveFilter = new ImageMoveFilter(imageData.data(), image.getWidth(), image.getHeight(),
-                                               this->imageBC.get(), this->seedGenerator(),
-                                               this->numberOfWalksInSeries);
-    logger << "[CPURandomWalkerFactory] Found " << imageMoveFilter->getNumberOfValidTracers();
-    logger << " valid starting points out of " << imageMoveFilter->getNumberOfAllPoints() << std::endl;
-    return std::unique_ptr<MoveFilter>(imageMoveFilter);
+    return std::unique_ptr<MoveFilter>(new ImageMoveFilter(imageData.data(), image.getWidth(), image.getHeight(),
+                                                           this->imageBC.get(), this->seedGenerator(),
+                                                           this->numberOfWalksInSeries));
 }
 
 std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createMoveFilter(const std::string &moveFilterParameters,
