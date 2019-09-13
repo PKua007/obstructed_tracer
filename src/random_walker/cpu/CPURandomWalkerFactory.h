@@ -32,9 +32,7 @@ private:
     std::unique_ptr<ImageBoundaryConditions> createImageBoundaryConditions(std::istringstream &moveFilterStream);
 
 public:
-    CPURandomWalkerFactory(unsigned long seed, const std::string &moveGeneratorParameters,
-                           const std::string &moveFilterParameters, std::size_t numberOfWalksInSeries,
-                           const RandomWalker::WalkParameters &walkParameters, std::ostream &logger);
+    CPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters, std::ostream &logger);
 
     RandomWalker &getRandomWalker() override;
 };

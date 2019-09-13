@@ -12,6 +12,13 @@
 
 class RandomWalkerFactory {
 public:
+    struct WalkerParameters {
+        std::string moveGeneratorParameters;
+        std::string moveFilterParameters;
+        std::size_t numberOfWalksInSeries;
+        RandomWalker::WalkParameters walkParameters;
+    };
+
     virtual ~RandomWalkerFactory() = default;
 
     virtual RandomWalker &getRandomWalker() = 0;

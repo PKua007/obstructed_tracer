@@ -92,17 +92,15 @@ std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createMoveFilter(const std::
         throw std::runtime_error("Unknown MoveFilter: " + moveFilterType);
 }
 
-CPURandomWalkerFactory::CPURandomWalkerFactory(unsigned long seed, const std::string &moveGeneratorParameters,
-                                               const std::string &moveFilterParameters,
-                                               std::size_t numberOfWalksInSeries,
-                                               const RandomWalker::WalkParameters &walkParameters, std::ostream &logger)
-        : numberOfWalksInSeries{numberOfWalksInSeries}
+CPURandomWalkerFactory::CPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters,
+                                               std::ostream &logger)
+        : numberOfWalksInSeries{walkerParameters.numberOfWalksInSeries}
 {
     this->seedGenerator.seed(seed);
-    this->moveGenerator = this->createMoveGenerator(moveGeneratorParameters);
-    this->moveFilter = this->createMoveFilter(moveFilterParameters, logger);
+    this->moveGenerator = this->createMoveGenerator(walkerParameters.moveGeneratorParameters);
+    this->moveFilter = this->createMoveFilter(walkerParameters.moveFilterParameters, logger);
 
-    this->randomWalker.reset(new CPURandomWalker(this->numberOfWalksInSeries, walkParameters,
+    this->randomWalker.reset(new CPURandomWalker(this->numberOfWalksInSeries, walkerParameters.walkParameters,
                                                  this->moveGenerator.get(), this->moveFilter.get(), logger));
 }
 

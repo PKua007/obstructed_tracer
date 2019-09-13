@@ -60,19 +60,18 @@ SimulationImpl::SimulationImpl(Parameters parameters, const std::string &outputF
     walkParameters.numberOfSteps = parameters.numberOfSteps;
     walkParameters.tracerRadius = parameters.tracerRadius;
 
-    if (this->parameters.device == "cpu") {
-        this->simulationFactory.reset(new CPURandomWalkerFactory(this->seedGenerator(), parameters.moveGenerator,
-                                                                 parameters.moveFilter,
-                                                                 parameters.numberOfWalksInSeries, walkParameters,
-                                                                 logger));
-    } else if (this->parameters.device == "gpu") {
-        this->simulationFactory.reset(new GPURandomWalkerFactory(this->seedGenerator(), parameters.moveGenerator,
-                                                                 parameters.moveFilter,
-                                                                 parameters.numberOfWalksInSeries, walkParameters,
-                                                                 logger));
-    } else {
+    RandomWalkerFactory::WalkerParameters walkerParameters;
+    walkerParameters.moveFilterParameters = parameters.moveFilter;
+    walkerParameters.moveGeneratorParameters = parameters.moveGenerator;
+    walkerParameters.numberOfWalksInSeries = parameters.numberOfWalksInSeries;
+    walkerParameters.walkParameters = walkParameters;
+
+    if (this->parameters.device == "cpu")
+        this->simulationFactory.reset(new CPURandomWalkerFactory(this->seedGenerator(), walkerParameters, logger));
+    else if (this->parameters.device == "gpu")
+        this->simulationFactory.reset(new GPURandomWalkerFactory(this->seedGenerator(), walkerParameters, logger));
+    else
         die("[SimulationImpl] Unknown device: " + this->parameters.device);
-    }
 }
 
 void SimulationImpl::run(std::ostream &logger) {

@@ -25,9 +25,7 @@ private:
     std::unique_ptr<GPURandomWalker> randomWalker;
 
 public:
-    GPURandomWalkerFactory(unsigned long seed, const std::string &moveGeneratorString,
-                           const std::string &moveFilterString, std::size_t numberOfWalksInSeries,
-                           const RandomWalker::WalkParameters &walkParameters, std::ostream &logger);
+    GPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters, std::ostream &logger);
     ~GPURandomWalkerFactory();
 
     RandomWalker &getRandomWalker() override;

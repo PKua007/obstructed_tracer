@@ -222,16 +222,14 @@ void delete_objects(MoveGenerator *moveGenerator, MoveFilter *moveFilter, ImageB
 }
 
 
-GPURandomWalkerFactory::GPURandomWalkerFactory(unsigned long seed, const std::string &moveGeneratorString,
-                                               const std::string &moveFilterString, std::size_t numberOfWalksInSeries,
-                                               const RandomWalker::WalkParameters &walkParameters,
+GPURandomWalkerFactory::GPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters,
                                                std::ostream &logger)
-        : numberOfWalksInSeries{numberOfWalksInSeries}
+        : numberOfWalksInSeries{walkerParameters.numberOfWalksInSeries}
 {
     this->seedGenerator.seed(seed);
 
-    MoveGeneratorOnGPUFactory gpuMoveGeneratorFactory(moveGeneratorString);
-    MoveFilterOnGPUFactory gpuMoveFilterFactory(moveFilterString, logger);
+    MoveGeneratorOnGPUFactory gpuMoveGeneratorFactory(walkerParameters.moveGeneratorParameters);
+    MoveFilterOnGPUFactory gpuMoveFilterFactory(walkerParameters.moveFilterParameters, logger);
 
     gpuMoveGeneratorFactory.create(this->seedGenerator(), this->numberOfWalksInSeries);
     gpuMoveFilterFactory.create(this->seedGenerator(), this->numberOfWalksInSeries);
@@ -240,7 +238,7 @@ GPURandomWalkerFactory::GPURandomWalkerFactory(unsigned long seed, const std::st
     this->moveFilter = gpuMoveFilterFactory.moveFilter;
     this->imageBoundaryConditions = gpuMoveFilterFactory.boundaryConditions;
 
-    this->randomWalker.reset(new GPURandomWalker(this->numberOfWalksInSeries, walkParameters,
+    this->randomWalker.reset(new GPURandomWalker(this->numberOfWalksInSeries, walkerParameters.walkParameters,
                                                  gpuMoveFilterFactory.numberOfSetupThreads, this->moveGenerator,
                                                  this->moveFilter, logger));
 }
