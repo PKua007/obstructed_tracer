@@ -66,7 +66,10 @@ SimulationImpl::SimulationImpl(Parameters parameters, const std::string &outputF
                                                                  parameters.numberOfWalksInSeries, walkParameters,
                                                                  logger));
     } else if (this->parameters.device == "gpu") {
-        this->simulationFactory.reset(new GPURandomWalkerFactory(this->seedGenerator(), this->parameters, logger));
+        this->simulationFactory.reset(new GPURandomWalkerFactory(this->seedGenerator(), parameters.moveGenerator,
+                                                                 parameters.moveFilter,
+                                                                 parameters.numberOfWalksInSeries, walkParameters,
+                                                                 logger));
     } else {
         die("[SimulationImpl] Unknown device: " + this->parameters.device);
     }

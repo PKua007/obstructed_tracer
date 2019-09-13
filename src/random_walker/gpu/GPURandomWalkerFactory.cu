@@ -59,8 +59,8 @@ namespace {
     public:
         MoveGenerator *moveGenerator{};
 
-        MoveGeneratorOnGPUFactory(const Parameters &parameters) {
-            std::istringstream moveGeneratorStream(parameters.moveGenerator);
+        MoveGeneratorOnGPUFactory(const std::string &moveGeneratorString) {
+            std::istringstream moveGeneratorStream(moveGeneratorString);
             std::string moveGeneratorName;
             moveGeneratorStream >> moveGeneratorName >> this->sigma;
             if (!moveGeneratorStream)
@@ -157,8 +157,8 @@ namespace {
         ImageBoundaryConditions *boundaryConditions{};
         std::size_t numberOfSetupThreads{};
 
-        MoveFilterOnGPUFactory(const Parameters &parameters, std::ostream &logger) {
-            std::istringstream moveFilterStream(parameters.moveFilter);
+        MoveFilterOnGPUFactory(const std::string &moveFilterString, std::ostream &logger) {
+            std::istringstream moveFilterStream(moveFilterString);
             std::string moveFilterName;
             moveFilterStream >> moveFilterName;
 
@@ -222,22 +222,25 @@ void delete_objects(MoveGenerator *moveGenerator, MoveFilter *moveFilter, ImageB
 }
 
 
-GPURandomWalkerFactory::GPURandomWalkerFactory(unsigned long seed, const Parameters& parameters, std::ostream& logger) {
+GPURandomWalkerFactory::GPURandomWalkerFactory(unsigned long seed, const std::string &moveGeneratorString,
+                                               const std::string &moveFilterString, std::size_t numberOfWalksInSeries,
+                                               const RandomWalker::WalkParameters &walkParameters,
+                                               std::ostream &logger)
+        : numberOfWalksInSeries{numberOfWalksInSeries}
+{
     this->seedGenerator.seed(seed);
 
-    MoveGeneratorOnGPUFactory gpuMoveGeneratorFactory(parameters);
-    MoveFilterOnGPUFactory gpuMoveFilterFactory(parameters, logger);
+    MoveGeneratorOnGPUFactory gpuMoveGeneratorFactory(moveGeneratorString);
+    MoveFilterOnGPUFactory gpuMoveFilterFactory(moveFilterString, logger);
 
-    gpuMoveGeneratorFactory.create(this->seedGenerator(), parameters.numberOfWalksInSeries);
-    gpuMoveFilterFactory.create(this->seedGenerator(), parameters.numberOfWalksInSeries);
+    gpuMoveGeneratorFactory.create(this->seedGenerator(), this->numberOfWalksInSeries);
+    gpuMoveFilterFactory.create(this->seedGenerator(), this->numberOfWalksInSeries);
 
     this->moveGenerator = gpuMoveGeneratorFactory.moveGenerator;
     this->moveFilter = gpuMoveFilterFactory.moveFilter;
     this->imageBoundaryConditions = gpuMoveFilterFactory.boundaryConditions;
 
-    Move drift = {parameters.driftX, parameters.driftY};
-    RandomWalker::WalkParameters walkParameters = {parameters.numberOfSteps, parameters.tracerRadius, drift};
-    this->randomWalker.reset(new GPURandomWalker(parameters.numberOfWalksInSeries, walkParameters,
+    this->randomWalker.reset(new GPURandomWalker(this->numberOfWalksInSeries, walkParameters,
                                                  gpuMoveFilterFactory.numberOfSetupThreads, this->moveGenerator,
                                                  this->moveFilter, logger));
 }

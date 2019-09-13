@@ -11,13 +11,13 @@
 #include <memory>
 #include <random>
 
-#include "Parameters.h"
 #include "simulation/RandomWalkerFactory.h"
 #include "GPURandomWalker.h"
 #include "move_filter/image_move_filter/ImageBoundaryConditions.h"
 
 class GPURandomWalkerFactory: public RandomWalkerFactory {
 private:
+    std::size_t numberOfWalksInSeries{};
     std::mt19937 seedGenerator;
     MoveGenerator *moveGenerator;
     MoveFilter *moveFilter;
@@ -25,7 +25,9 @@ private:
     std::unique_ptr<GPURandomWalker> randomWalker;
 
 public:
-    GPURandomWalkerFactory(unsigned long seed, const Parameters &parameters, std::ostream &logger);
+    GPURandomWalkerFactory(unsigned long seed, const std::string &moveGeneratorString,
+                           const std::string &moveFilterString, std::size_t numberOfWalksInSeries,
+                           const RandomWalker::WalkParameters &walkParameters, std::ostream &logger);
     ~GPURandomWalkerFactory();
 
     RandomWalker &getRandomWalker() override;
