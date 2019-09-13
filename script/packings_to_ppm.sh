@@ -46,12 +46,25 @@ done
 
 echo "******** Making images: exporting images ********"
 
-./wolfram_ppm_exporter.sh $resolution
+imagesGenerated="false"
+while [ $imagesGenerated == "false" ] ; do
+    ./wolfram_ppm_exporter.sh $resolution
 
-if [[ $? -ne 0 ]] ; then
-    echo "Making images failed. Aborting moving files"
-    exit 1
-fi
+    if [[ $? -ne 0 ]] ; then
+        echo "Making images failed. Aborting moving files"
+        exit 1
+    fi
+
+    # MathKernel sometimes crashed. We need to check if images are generated
+    imagesGenerated="true"
+    for packing in $(ls *bin) ; do
+        correspondingPPMFile="${packing}.nb.ppm" 
+        if [ ! -f "${correspondingPPMFile}" ] ; then
+            imagesGenerated="false"
+            echo "Mathematica skrewed - missing ${correspondingPPMFile}. To be redone"
+        fi
+    done
+done
 
 echo "******** Making images: moving images and deleting temporary files ********"
 
