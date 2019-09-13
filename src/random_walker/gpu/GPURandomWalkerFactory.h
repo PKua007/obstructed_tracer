@@ -24,10 +24,8 @@ private:
     ImageBoundaryConditions *imageBoundaryConditions;
     std::unique_ptr<GPURandomWalker> randomWalker;
 
-    void initializeSeedGenerator(const std::string &seed, std::ostream &logger);
-
 public:
-    GPURandomWalkerFactory(const Parameters &parameters, std::ostream &logger);
+    GPURandomWalkerFactory(unsigned long seed, const Parameters &parameters, std::ostream &logger);
     ~GPURandomWalkerFactory();
 
     RandomWalker &getRandomWalker() override;

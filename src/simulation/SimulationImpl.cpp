@@ -15,6 +15,16 @@
 #include "random_walker/gpu/GPURandomWalkerFactory.h"
 #include "Timer.h"
 
+void SimulationImpl::initializeSeedGenerator(std::string seed, std::ostream& logger) {
+    if (seed == "random") {
+        unsigned long randomSeed = std::random_device()();
+        this->seedGenerator.seed(randomSeed);
+        logger << "[SimulationImpl] Using random seed: " << randomSeed << std::endl;
+    } else {
+        this->seedGenerator.seed(std::stoul(seed));
+    }
+}
+
 void SimulationImpl::store_trajectories(const RandomWalker &randomWalker, const std::string &outputFilePrefix,
                                         std::size_t firstTrajectoryIndex, std::ostream &logger)
 {
@@ -39,13 +49,16 @@ void SimulationImpl::store_trajectories(const RandomWalker &randomWalker, const 
 }
 
 SimulationImpl::SimulationImpl(Parameters parameters, const std::string &outputFilePrefix, std::ostream &logger)
-        : outputFilePrefix{outputFilePrefix}, msdData(parameters.numberOfSteps), parameters(std::move(parameters))
+        : outputFilePrefix{outputFilePrefix}, msdData(parameters.numberOfSteps), parameters{parameters}
 {
+    this->initializeSeedGenerator(this->parameters.seed, logger);
+
     logger << "[SimulationImpl] " << _OMP_MAXTHREADS << " OpenMP threads are available." << std::endl;
+
     if (this->parameters.device == "cpu")
-        this->simulationFactory.reset(new CPURandomWalkerFactory(this->parameters, logger));
+        this->simulationFactory.reset(new CPURandomWalkerFactory(this->seedGenerator(), this->parameters, logger));
     else if (this->parameters.device == "gpu")
-        this->simulationFactory.reset(new GPURandomWalkerFactory(this->parameters, logger));
+        this->simulationFactory.reset(new GPURandomWalkerFactory(this->seedGenerator(), this->parameters, logger));
     else
         die("[SimulationImpl] Unknown device: " + this->parameters.device);
 }

@@ -221,18 +221,9 @@ void delete_objects(MoveGenerator *moveGenerator, MoveFilter *moveFilter, ImageB
     delete boundaryConditions;
 }
 
-void GPURandomWalkerFactory::initializeSeedGenerator(const std::string &seed, std::ostream &logger) {
-    if (seed == "random") {
-        unsigned long randomSeed = std::random_device()();
-        this->seedGenerator.seed(randomSeed);
-        logger << "[GPURandomWalkerFactory] Using random seed: " << randomSeed << std::endl;
-    } else {
-        this->seedGenerator.seed(std::stoul(seed));
-    }
-}
 
-GPURandomWalkerFactory::GPURandomWalkerFactory(const Parameters& parameters, std::ostream& logger) {
-    this->initializeSeedGenerator(parameters.seed, logger);
+GPURandomWalkerFactory::GPURandomWalkerFactory(unsigned long seed, const Parameters& parameters, std::ostream& logger) {
+    this->seedGenerator.seed(seed);
 
     MoveGeneratorOnGPUFactory gpuMoveGeneratorFactory(parameters);
     MoveFilterOnGPUFactory gpuMoveFilterFactory(parameters, logger);
