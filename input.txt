@@ -1,12 +1,45 @@
-numberOfSteps = 100000
-tracerRadius = 4
-moveGenerator = CauchyMoveGenerator 3
-#moveFilter = DefaultMoveFilter
-moveFilter = ImageMoveFilter maze.ppm PeriodicBoundaryConditions
-driftX = 0
-driftY = 0
-numberOfWalksInSeries = 5000
-numberOfSeries = 4
-storeTrajectories = false
-seed = random
-device = cpu
+#     Number of steps in a single trajectory, not including starting point
+numberOfSteps         = 5000   
+
+#     The radius of a tracer 
+tracerRadius          = 1
+
+#     Distribution to sample steps from; available: GaussianMoveGenerator (sigma); CauchyMoveGenerator (gamma)
+moveGenerator         = GaussianMoveGenerator 3   
+
+#     Filter accepting sampled moves; available:
+#     1. ImageMoveFilter (image) PeriodicBoundaryConditions|WallBoundaryConditions
+#            Creates available points map from (image) - pixels with (r+g+b)/3 >= 128 are available, other not. The move
+#            is accepted if the spherocylinder drawn by moving tracer disk on the image does not contain unavailable
+#            pixels.
+#            The last argument defines boundary conditions on the edges of the image.
+#     2. DefaultMoveFilter
+#            Accepts every move.
+#     Multiple MoveFilters can be passed split by ;. There will be independent simulation based on the rest of
+#     parameters performed, allowing for example to average reuslting mean swuare displacement data over different
+#     images.
+moveFilter            = ImageMoveFilter rsa.ppm PeriodicBoundaryConditions
+
+#     Constant drift to be added to each sampled move. Available formats: xy (x) (y); rt (radius) (angle in degrees)
+drift                 = rt 1 180
+
+#     Number of walks to be performed in a single series. They have to fit into video memory/RAM and will be performed
+#     in parallel. After that, they will be added to mean square displacement data, optionally stored and deleted.
+numberOfWalksInSeries = 3
+
+#     Number of series to be peformed. This enables to run more trajectories than can fit to memory. Total number of
+#     walks is then
+#        (number of simulations based on movefilter) * (number of series) * (number of walks in series)
+numberOfSeries        = 3
+
+#     If true, trajectories after single series run will be stored in files with names:
+#        (output prefix)_(index of simulation)_(index of trajectory)
+#     (index of trajectory) is calculated as:
+#        (index of series) * (number of walks in series) + (index of trajectory in a single series)
+storeTrajectories     = false
+
+#     Random generator seed to be used. "random" can be used to choose it randomly
+seed                  = random
+
+#     Device to simulate on. Can be one of: cpu, gpu
+device                = cpu
