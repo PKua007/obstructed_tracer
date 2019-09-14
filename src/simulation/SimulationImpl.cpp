@@ -20,12 +20,35 @@
 #include "random_walker/gpu/GPURandomWalkerFactory.h"
 #include "Timer.h"
 
+
+Move SimulationImpl::parseDrift(const std::string& driftString) const {
+    std::istringstream driftStream(driftString);
+    std::string coordinatesType;
+    float driftCoordinates[2];
+
+    driftStream >> coordinatesType >> driftCoordinates[0] >> driftCoordinates[1];
+    ValidateMsg(driftStream, "Drift must be: xy (x) (y) or rt (radius) (angle in degrees)");
+
+    if (coordinatesType == "xy") {
+        return {driftCoordinates[0], driftCoordinates[1]};
+    } else if (coordinatesType == "rt") {
+        float r = driftCoordinates[0];
+        float theta = driftCoordinates[1];
+        Validate(r >= 0);
+
+        float degreeToRad = float{M_PI} / 180.f;
+        return {r * std::cos(theta * degreeToRad), r * std::sin(theta * degreeToRad)};
+    } else {
+        throw ValidationException("Coordinates type in drift must be 'xy' or 'rt'");
+    }
+}
+
 RandomWalkerFactory::WalkerParameters
 SimulationImpl::prepareWalkerParametersTemplate(const Parameters &parameters) const {
     // Walker parameters can be preprepared, because they are shared between multiple simulations.
     // The simulation can only differ in MoveFilter and its number is determined from Parameters::moveFilter
     RandomWalker::WalkParameters walkParameters;
-    walkParameters.drift = {parameters.driftX, parameters.driftY};
+    walkParameters.drift = this->parseDrift(parameters.drift);
     walkParameters.numberOfSteps = parameters.numberOfSteps;
     walkParameters.tracerRadius = parameters.tracerRadius;
 

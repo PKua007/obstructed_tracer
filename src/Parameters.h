@@ -21,8 +21,7 @@ public:
     float       tracerRadius          = 0.f;
     std::string moveGenerator         = "GaussianMoveGenerator";
     std::string moveFilter            = "DefaultMoveFilter";
-    float       driftX                = 0.f;
-    float       driftY                = 0.f;
+    std::string drift                 = "xy 0 0";
     std::size_t numberOfWalksInSeries = 10;
     std::size_t numberOfSeries        = 1;
     bool        storeTrajectories     = false;

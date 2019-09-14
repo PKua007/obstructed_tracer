@@ -25,6 +25,7 @@ private:
     std::string outputFilePrefix;
     MSDDataImpl msdData;
 
+    Move parseDrift(const std::string &driftString) const;
     RandomWalkerFactory::WalkerParameters prepareWalkerParametersTemplate(const Parameters &parameters) const;
     std::vector<std::string> prepareMoveFilterParameters(const std::string &moveFilterChain) const;
     void initializeSeedGenerator(std::string seed, std::ostream &logger);

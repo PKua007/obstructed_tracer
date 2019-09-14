@@ -23,10 +23,8 @@ Parameters::Parameters(std::istream& input) {
             this->moveFilter = config.getString(key);
         else if (key == "moveGenerator")
             this->moveGenerator = config.getString(key);
-        else if (key == "driftX")
-            this->driftX = config.getFloat(key);
-        else if (key == "driftY")
-            this->driftY = config.getFloat(key);
+        else if (key == "drift")
+            this->drift = config.getString(key);
         else if (key == "numberOfWalksInSeries")
             this->numberOfWalksInSeries = config.getUnsignedLong(key);
         else if (key == "numberOfSeries")
@@ -49,8 +47,7 @@ void Parameters::print(std::ostream& out) {
     out << "tracerRadius          : " << this->tracerRadius << std::endl;
     out << "moveGenerator         : " << this->moveGenerator << std::endl;
     out << "moveFilter            : " << this->moveFilter << std::endl;
-    out << "driftX                : " << this->driftX << std::endl;
-    out << "driftY                : " << this->driftY << std::endl;
+    out << "drift                 : " << this->drift << std::endl;
     out << "numberOfWalksInSeries : " << this->numberOfWalksInSeries << std::endl;
     out << "numberOfSeries        : " << this->numberOfSeries << std::endl;
     out << "storeTrajectories     : " << (this->storeTrajectories ? "true" : "false") << std::endl;
