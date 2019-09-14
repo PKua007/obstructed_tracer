@@ -81,6 +81,7 @@ walkCommand=$(./walk_in_folder.sh ${folderName} | sed -n 2p)
 bash -c "$walkCommand"
 
 if [[ $? -ne 0 ]] ; then
-    echo "Random walk failed"
+    echo "Random walk failed. It can be redone with:"
+    echo "${walkCommand}"
 fi
 
