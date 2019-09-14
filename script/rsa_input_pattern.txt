@@ -1,12 +1,15 @@
 maxVoxels = 4000000
-requestedAngularVoxelSize = 0.3
-minDx = 0.0
 from = 0
-collectors = 3
-maxTime = 50.0
 split = 10000
+
 surfaceVolume = 100.0
+collectors = 3
+maxDensity = 0.3
+
+#### DO NOT EDIT ####
 storePackings = true
 boundaryConditions = periodic
+#maxTime = infinite
 particleType = particle_placeholder
 particleAttributes = attributes_placeholder
+#### DO NOT EDIT ####

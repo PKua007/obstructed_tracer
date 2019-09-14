@@ -3,31 +3,35 @@
 if [ $# == 0 ] ; then
     echo "Simple script which:"
     echo "1) Searches for packing of OrientedShape2_1 particles:"
-    echo "       packing_[particle]_[angle]_[sigma][additional attributes]_..."
-    echo "       ..volume_[index].bin"
-    echo "   (...) things are taken from arguments, [...] are regex-matched"
+    echo "       packing_[particle]_[angle]_[sigma]_<volume>_[index].bin"
+    echo "    or"
+    echo "       packing_[particle]_[angle]_[sigma]_[additional attributes]_..."
+    echo "       ..<volume>_[index].bin"
+    echo "   <...> things are ignored, [...] are regex-group-matched"
     echo "2) Generates Mathematica files from {each of them}"
     echo "       ./rsa.2.0 wolfram -f (input file) {packing} true (draw margin)"
     echo "3) Creates *ppm files of packings using wolfram_ppm_export.sh"
     echo "4) Renames and moves them to folder:"
-    echo "       [particle][additional attributes__[angle]_[sigma]_..."
-    echo"        ...(density)__(drift r)_(drift theta) / [index].ppm"
+    echo "       [particle]__[angle]_[sigma]__(drift r)_(drift theta)..."
+    echo "       ... / [index].ppm"
+    echo "       [particle]_[additional attributes]__[angle]_[sigma]__..."
+    echo "       ...(drift r)_(drift theta) / [index].ppm"
+    echo "   (...) things are taken from arguments."
     echo "   This signature contains all important information"
     echo "5) Deletes all intermediate files: *nb, *nb.m"
     echo
 fi
 
-if [ $# != 6 ] ; then
-    echo "Usage: $0 (density) (drift r) (drift theta) (periodic draw margin) (image resolution) (rsa input file)"
+if [ $# != 5 ] ; then
+    echo "Usage: $0 (drift r) (drift theta) (periodic draw margin) (image resolution) (rsa input file)"
     exit 1
 fi
 
-density=$1
-driftR=$2
-driftTheta=$3
-drawMargin=$4
-resolution=$5
-inputFile=$6
+driftR=$1
+driftTheta=$2
+drawMargin=$3
+resolution=$4
+inputFile=$5
 
 pattern='^packing_([a-zA-Z0-9]+)_([0-9.\-]+)_([0-9.]+)(|_.*)_[0-9]+_([0-9]+)\.bin$'
 
@@ -76,7 +80,7 @@ for packing in $(ls *bin) ; do
         index=${BASH_REMATCH[5]}
 
         rm "${packing}.nb" "${packing}.nb.m"
-        folder="${particle}__${angle}_${sigma}_${density}__${driftR}_${driftTheta}"
+        folder="${particle}__${angle}_${sigma}__${driftR}_${driftTheta}"
         mkdir --parents "${folder}"
         mv "${packing}.nb.ppm" "${folder}/${index}.ppm"
     fi

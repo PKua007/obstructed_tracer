@@ -1,10 +1,15 @@
-numberOfSteps = 10000
-tracerRadius = 4
-moveGenerator = GaussianMoveGenerator 3
-moveFilter = move_filter_placeholder
-drift = rt drift_r_placeholder drift_theta_placeholder
-numberOfWalksInSeries = 5000
-numberOfSeries = 3
-storeTrajectories = false
 seed = random
 device = gpu
+storeTrajectories = false
+
+tracerRadius = 0
+moveGenerator = GaussianMoveGenerator 3
+
+numberOfSteps = 10000
+numberOfWalksInSeries = 5000
+numberOfSeries = 3
+
+#### DO NOT EDIT ####
+moveFilter = move_filter_placeholder
+drift = rt drift_r_placeholder drift_theta_placeholder
+#### DO NOT EDIT ####
