@@ -8,8 +8,8 @@ if [[ $# == 0 ]] ; then
     echo "...<drift theta>, rsa data in the rsa subolder"
 fi
 
-if [[ $# != 8 ]] ; then
-    echo "Usage: $0 (particle) (angle) (sigma) (additional attr) (drift r) (drift theta) (periodic draw margin) (image resoultion)"
+if [[ $# != 7 ]] ; then
+    echo "Usage: $0 (particle) (angle) (sigma) (additional attr) (drift r) (drift theta) (image resoultion)"
     exit 1
 fi
 
@@ -19,8 +19,7 @@ sigma=$3
 attributes=$4
 driftR=$5
 driftTheta=$6
-periodicDrawMargin=$7
-imageResolution=$8
+imageResolution=$7
 
 if [ "${attributes}" == "" ] ; then
     fullAttributes="${angle} ${sigma}"
@@ -58,7 +57,7 @@ fi
 
 echo "******** Generating images of packings ********"
 
-./packings_to_ppm.sh $driftR $driftTheta $periodicDrawMargin $imageResolution rsa_input.txt
+./packings_to_ppm.sh $driftR $driftTheta $imageResolution rsa_input.txt
 
 if [[ $? -ne 0 ]] ; then
     echo "Image generation failed, aborting moving RSA files"
@@ -84,4 +83,3 @@ if [[ $? -ne 0 ]] ; then
     echo "Random walk failed. It can be redone with:"
     echo "${walkCommand}"
 fi
-

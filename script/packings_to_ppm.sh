@@ -9,7 +9,7 @@ if [ $# == 0 ] ; then
     echo "       ..<volume>_[index].bin"
     echo "   <...> things are ignored, [...] are regex-group-matched"
     echo "2) Generates Mathematica files from {each of them}"
-    echo "       ./rsa.2.0 wolfram -f (input file) {packing} true (draw margin)"
+    echo "       ./rsa.2.0 wolfram -f (input file) {packing} true"
     echo "3) Creates *ppm files of packings using wolfram_ppm_export.sh"
     echo "4) Renames and moves them to folder:"
     echo "       [particle]__[angle]_[sigma]__(drift r)_(drift theta)..."
@@ -22,16 +22,15 @@ if [ $# == 0 ] ; then
     echo
 fi
 
-if [ $# != 5 ] ; then
-    echo "Usage: $0 (drift r) (drift theta) (periodic draw margin) (image resolution) (rsa input file)"
+if [ $# != 4 ] ; then
+    echo "Usage: $0 (drift r) (drift theta) (image resolution) (rsa input file)"
     exit 1
 fi
 
 driftR=$1
 driftTheta=$2
-drawMargin=$3
-resolution=$4
-inputFile=$5
+resolution=$3
+inputFile=$4
 
 pattern='^packing_([a-zA-Z0-9]+)_([0-9.\-]+)_([0-9.]+)(|_.*)_[0-9]+_([0-9]+)\.bin$'
 
@@ -39,7 +38,7 @@ echo "******** Making images: generating *nb files ********"
 
 for packing in $(ls *bin) ; do
     if [[ $packing =~ $pattern ]] ; then
-        ./rsa.2.0 wolfram -f "$inputFile" "$packing" true "$drawMargin"
+        ./rsa.2.0 wolfram -f "$inputFile" "$packing" true
 
         if [[ $? -ne 0 ]] ; then
             echo "Wolframing ${packing} failed. Aborting the rest"

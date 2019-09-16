@@ -2,9 +2,9 @@ maxVoxels = 4000000
 from = 0
 split = 10000
 
-surfaceVolume = 100.0
-collectors = 3
-maxDensity = 0.3
+surfaceVolume = 1800.0
+collectors = 10
+maxDensity = 0.27
 
 #### DO NOT EDIT ####
 storePackings = true

@@ -6,7 +6,7 @@ tracerRadius = 0
 moveGenerator = GaussianMoveGenerator 3
 
 numberOfSteps = 10000
-numberOfWalksInSeries = 5000
+numberOfWalksInSeries = 1000
 numberOfSeries = 3
 
 #### DO NOT EDIT ####
