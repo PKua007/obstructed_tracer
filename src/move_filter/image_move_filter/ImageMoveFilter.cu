@@ -37,6 +37,15 @@ ImageMoveFilter::ImageMoveFilter(unsigned int *intImageData, size_t width, size_
     this->validPointsMapSize = this->width * this->height;
     this->validPointsMap = new bool[this->validPointsMapSize];
     this->validTracersMap = new bool[this->validPointsMapSize];
+
+    // On CPU in case of allocation fail std::bad_alloc should be thrown, we only need to check on GPU
+    #if CUDA_DEVICE_COMPILATION
+        if (this->validPointsMap == nullptr || this->validTracersMap == nullptr) {
+            printf("[ImageMoveFilter] Allocation of arrays of valid points failed. Increase the size of GPU heap.\n");
+            asm("trap;");
+        }
+    #endif
+
     this->imageBC->setupDimensions(this->width, this->height);
 
     // Image y axis starts from left upper corner downwards, so image is scanned from the bottom left, because

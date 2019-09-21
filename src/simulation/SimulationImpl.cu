@@ -16,12 +16,13 @@
 #include "utils/Utils.h"
 #include "utils/OMPDefines.h"
 #include "utils/Assertions.h"
+#include "utils/CudaCheck.h"
 #include "random_walker/cpu/CPURandomWalkerFactory.h"
 #include "random_walker/gpu/GPURandomWalkerFactory.h"
 #include "Timer.h"
 
 
-Move SimulationImpl::parseDrift(const std::string& driftString) const {
+Move SimulationImpl::parseDrift(const std::string &driftString) const {
     std::istringstream driftStream(driftString);
     std::string coordinatesType;
     float driftCoordinates[2];
@@ -70,13 +71,36 @@ std::vector<std::string> SimulationImpl::prepareMoveFilterParameters(const std::
     return moveFilterStrings;
 }
 
-void SimulationImpl::initializeSeedGenerator(std::string seed, std::ostream& logger) {
+void SimulationImpl::initializeSeedGenerator(const std::string &seed, std::ostream& logger) {
     if (seed == "random") {
         unsigned long randomSeed = std::random_device()();
         this->seedGenerator.seed(randomSeed);
         logger << "[SimulationImpl] Using random seed: " << randomSeed << std::endl;
     } else {
         this->seedGenerator.seed(std::stoul(seed));
+    }
+}
+
+void SimulationImpl::initializeDevice(const std::string &deviceParameters) {
+    std::istringstream deviceStream(deviceParameters);
+    std::string deviceName;
+    deviceStream >> deviceName;
+    ValidateMsg(deviceStream, "Wrong device format: \"cpu\" OR \"gpu\" (heap size in bytes = default)");
+
+    if (deviceName == "cpu") {
+        this->device = CPU;
+    } else if (deviceName == "gpu") {
+        this->device = GPU;
+
+        std::size_t heapSizeInBytes;
+        deviceStream >> heapSizeInBytes;
+
+        if (deviceStream) {
+            Validate(heapSizeInBytes > 0);
+            cudaCheck( cudaDeviceSetLimit(cudaLimitMallocHeapSize, heapSizeInBytes) );
+        } else if (!deviceStream.eof()) {
+            throw ValidationException("Wrong device format: \"cpu\" OR \"gpu\" (heap size in bytes = default)");
+        }
     }
 }
 
@@ -113,6 +137,7 @@ SimulationImpl::SimulationImpl(const Parameters &parameters, const std::string &
     this->moveFilters = this->prepareMoveFilterParameters(parameters.moveFilter);
     Validate(!this->moveFilters.empty());
     this->initializeSeedGenerator(this->parameters.seed, logger);
+    this->initializeDevice(this->parameters.device);
 
     logger << "[SimulationImpl] " << _OMP_MAXTHREADS << " OpenMP threads are available." << std::endl;
     logger << "[SimulationImpl] " << moveFilters.size() << " simulations will be performed using MoveFilters:";
@@ -153,12 +178,12 @@ void SimulationImpl::run(std::ostream &logger) {
         walkerParameters.moveFilterParameters = this->moveFilters[simulationIndex];
 
         std::unique_ptr<RandomWalkerFactory> randomWalkerFactory;
-        if (this->parameters.device == "cpu")
+        if (this->device == CPU)
             randomWalkerFactory.reset(new CPURandomWalkerFactory(this->seedGenerator(), walkerParameters, logger));
-        else if (this->parameters.device == "gpu")
+        else if (this->device == GPU)
             randomWalkerFactory.reset(new GPURandomWalkerFactory(this->seedGenerator(), walkerParameters, logger));
         else
-            die("[SimulationImpl] Unknown device: " + this->parameters.device);
+            throw std::runtime_error("");
 
         this->runSingleSimulation(simulationIndex, randomWalkerFactory->getRandomWalker(), logger);
     }

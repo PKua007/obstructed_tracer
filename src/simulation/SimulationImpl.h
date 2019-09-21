@@ -18,6 +18,12 @@
 
 class SimulationImpl : public Simulation {
 private:
+    enum Device {
+        CPU,
+        GPU
+    };
+
+    Device device;
     std::mt19937 seedGenerator;
     Parameters parameters;
     std::vector<std::string> moveFilters;
@@ -28,7 +34,8 @@ private:
     Move parseDrift(const std::string &driftString) const;
     RandomWalkerFactory::WalkerParameters prepareWalkerParametersTemplate(const Parameters &parameters) const;
     std::vector<std::string> prepareMoveFilterParameters(const std::string &moveFilterChain) const;
-    void initializeSeedGenerator(std::string seed, std::ostream &logger);
+    void initializeSeedGenerator(const std::string &seed, std::ostream &logger);
+    void initializeDevice(const std::string &device);
     void runSingleSimulation(std::size_t simulationIndex, RandomWalker &randomWalker, std::ostream &logger);
     void store_trajectories(const RandomWalker &randomWalker, const std::string &outputFilePrefix,
                             std::size_t simulationIndex, std::size_t firstTrajectoryIndex, std::ostream &logger);
