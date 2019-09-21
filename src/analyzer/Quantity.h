@@ -13,6 +13,9 @@
 struct Quantity {
     float value{};
     float error{};
+
+    Quantity() { }
+    Quantity(float value, float error) : value{value}, error{error} { }
 };
 
 inline std::ostream &operator<<(std::ostream &out, Quantity quantity) {
