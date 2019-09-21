@@ -14,7 +14,7 @@
 #include "Simulation.h"
 #include "Parameters.h"
 #include "RandomWalkerFactory.h"
-#include "MSDDataImpl.h"
+#include "AccumulatingMSDDataCalculator.h"
 
 class SimulationImpl : public Simulation {
 private:
@@ -29,7 +29,8 @@ private:
     std::vector<std::string> moveFilters;
     RandomWalkerFactory::WalkerParameters walkerParametersTemplate;
     std::string outputFilePrefix;
-    MSDDataImpl msdData;
+    AccumulatingMSDDataCalculator msdDataCalculator;
+    MSDData msdData;
 
     Move parseDrift(const std::string &driftString) const;
     RandomWalkerFactory::WalkerParameters prepareWalkerParametersTemplate(const Parameters &parameters) const;

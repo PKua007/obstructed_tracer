@@ -19,7 +19,6 @@ namespace {
         if (!sEntry)
             return stream;
 
-        stream >> std::ws;
         while (stream.good() && stream.peek() == '#')
             while (stream.good() && stream.get() != '\n')
                 { }
