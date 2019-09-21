@@ -20,13 +20,36 @@
 
 #include "simulation/SimulationImpl.h"
 
+namespace {
+    int perform_walk(int argc, char **argv, const Parameters &parameters) {
+        std::string command = argv[0];
+        if (argc < 4)
+            die("[perform_walk] Usage: " + command + " perform_walk [input file] [output files prefix]");
+
+        std::string outputFilePrefix = argv[3];
+
+        auto simulation = std::unique_ptr<Simulation>(new SimulationImpl(parameters, outputFilePrefix, std::cout));
+        simulation->run(std::cout);
+        MSDData &msdData = simulation->getMSDData();
+
+        std::string msdFilename = outputFilePrefix + "_msd.txt";
+        std::ofstream msdFile(msdFilename);
+        if (!msdFile)
+            die("[perform_walk] Cannot open " + msdFilename + " to store mean square displacement data");
+        msdData.store(msdFile);
+        std::cout << "[perform_walk] Mean square displacement data stored to " + msdFilename << std::endl;
+
+        std::cout << "[perform_walk] Run finished." << std::endl;
+        return EXIT_SUCCESS;
+    }
+}
 
 int main(int argc, char **argv){
     std::string command = argv[0];
     if (argc < 3)
-        die("[main] Usage: " + command + " [input file] [output file prefix]");
+        die("[main] Usage: " + command + " [mode] [input file] {mode specific arguments}");
 
-    std::string inputFilename = argv[1];
+    std::string inputFilename = argv[2];
     std::ifstream inputFile(inputFilename);
     if (!inputFile)
         die("[main] Cannot open " + inputFilename + " to read parameters");
@@ -36,20 +59,10 @@ int main(int argc, char **argv){
     parameters.print(std::cout);
     std::cout << std::endl;
 
-    std::string outputFilePrefix = argv[2];
-
-    auto simulation = std::unique_ptr<Simulation>(new SimulationImpl(parameters, outputFilePrefix, std::cout));
-    simulation->run(std::cout);
-    MSDData &msdData = simulation->getMSDData();
-
-    std::string msdFilename = outputFilePrefix + "_msd.txt";
-    std::ofstream msdFile(msdFilename);
-    if (!msdFile)
-        die("[main] Cannot open " + msdFilename + " to store mean square displacement data");
-    msdData.store(msdFile);
-    std::cout << "[main] Mean square displacement data stored to " + msdFilename << std::endl;
-
-    std::cout << "[main] Run finished." << std::endl;
-    return EXIT_SUCCESS;
+    std::string mode = argv[1];
+    if (mode == "perform_walk")
+        return perform_walk(argc, argv, parameters);
+    else
+        die("[main] Unknown mode: " + mode);
 }
 
