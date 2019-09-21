@@ -17,6 +17,7 @@
 #include "MSDData.h"
 #include "Simulation.h"
 #include "utils/Utils.h"
+#include "analyzer/Analyzer.h"
 
 #include "simulation/SimulationImpl.h"
 
@@ -42,6 +43,26 @@ namespace {
         std::cout << "[perform_walk] Run finished." << std::endl;
         return EXIT_SUCCESS;
     }
+
+    int analyze(int argc, char **argv, const Parameters &parameters) {
+        std::string command = argv[0];
+        if (argc < 4)
+            die("[analyze] Usage: " + command + " analyze [input file] [msd file]");
+
+        std::string msdFilename = argv[3];
+        std::ifstream msdFile(msdFilename);
+        if (!msdFile)
+            die("[analyze] Cannot open " + msdFilename + " to restore mean square displacement data");
+
+        MSDData msdData;
+        msdData.restore(msdFile);
+
+        Analyzer analyzer(parameters);
+        Analyzer::Result result = analyzer.analyze(msdData);
+        std::cout << "[analyze] Results: D = " << result.D << ", alpha = " << result.alpha << std::endl;
+
+        return EXIT_SUCCESS;
+    }
 }
 
 int main(int argc, char **argv){
@@ -62,6 +83,8 @@ int main(int argc, char **argv){
     std::string mode = argv[1];
     if (mode == "perform_walk")
         return perform_walk(argc, argv, parameters);
+    else if (mode == "analyze")
+        return analyze(argc, argv, parameters);
     else
         die("[main] Unknown mode: " + mode);
 }

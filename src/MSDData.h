@@ -30,6 +30,7 @@ public:
     using iterator = std::vector<Entry>::iterator;
     using const_iterator = std::vector<Entry>::const_iterator;
 
+    MSDData() { }
     MSDData(std::size_t numberOfSteps) : data(numberOfSteps + 1) { }
 
     const Entry &operator[](std::size_t index) const { return this->data.at(index); }
