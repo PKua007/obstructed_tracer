@@ -124,8 +124,6 @@ SimulationImpl::SimulationImpl(const Parameters &parameters, const std::string &
 void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalker &randomWalker,
                                          std::ostream &logger)
 {
-    std::size_t numberOfAllTrajectories = this->parameters.numberOfSeries * this->parameters.numberOfWalksInSeries;
-
     for (std::size_t i = 0; i < this->parameters.numberOfSeries; i++) {
         std::size_t startTrajectory = i * this->parameters.numberOfWalksInSeries;
         std::size_t endTrajectory = (i + 1) * this->parameters.numberOfWalksInSeries - 1;

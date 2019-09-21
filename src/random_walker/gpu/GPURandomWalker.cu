@@ -86,8 +86,7 @@ GPURandomWalker::GPURandomWalker(std::size_t numberOfTrajectories, RandomWalker:
         moveFilter{moveFilter}, trajectoriesOnGPU(numberOfTrajectories, walkParameters.numberOfSteps)
 {
     Expects(numberOfTrajectories > 0);
-    Expects(numberOfSteps > 0);
-    Expects(tracerRadius >= 0.f);
+    Expects(walkParameters.numberOfSteps > 0);
 
     this->trajectories.resize(numberOfTrajectories);
     this->setupMoveFilterForTracerRadius(logger);

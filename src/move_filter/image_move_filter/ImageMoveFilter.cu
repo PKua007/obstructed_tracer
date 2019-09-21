@@ -16,7 +16,6 @@ namespace {
         int x{};
         int y{};
 
-        CUDA_HOSTDEV ImageMove() { };
         CUDA_HOSTDEV ImageMove(int x, int y) : x{x}, y{y} { };
     };
 
@@ -184,7 +183,7 @@ size_t ImageMoveFilter::pointToIndex(ImagePoint point) const {
     ImagePoint ImageMoveFilter::randomTracerImagePosition() {
         float floatCacheIndex = this->randomUniformNumber() * this->validTracerIndicesCache.size();
         size_t cacheIndex = static_cast<size_t>(floatCacheIndex);
-        Assert(cacheIndex < this->validTracerIndicesCacheSize);
+        Assert(cacheIndex < this->validTracerIndicesCache.size());
         size_t tracerIndex = this->validTracerIndicesCache[cacheIndex];
         return this->indexToImagePoint(tracerIndex);
     }

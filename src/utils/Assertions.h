@@ -5,12 +5,14 @@
 #ifndef RSA3D_ASSERTIONS_H
 #define RSA3D_ASSERTIONS_H
 
+#include "CudaDefines.h"
+
 #include <stdexcept>
 
 // Cpp Core Guidelines-style assertions for design by contract
 // https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i6-prefer-expects-for-expressing-preconditions
 
-#ifndef __CUDACC__
+#if CUDA_HOST_COMPILATION
 
     #define S(x) #x
     #define S_(x) S(x)
@@ -28,9 +30,6 @@
 
     // Additional macros for validating things like input from file - wrong input shouldn't be considered as assertion
     // fail, because it is not programmer's fault ;)
-    struct ValidationException : public std::domain_error {
-        explicit ValidationException(const std::string &msg) : std::domain_error{msg} { }
-    };
 
     #define Validate(cond) if (!(cond)) throw ValidationException(__WHERE__ ": Validation " #cond " failed")
     #define ValidateMsg(cond, msg) if (!(cond)) throw ValidationException(msg)
@@ -44,5 +43,12 @@
     #define ValidateMsg(cond, msg)
 
 #endif
+
+
+// Although used only in host code, it should be visible for both to prevent errors
+
+struct ValidationException : public std::domain_error {
+    explicit ValidationException(const std::string &msg) : std::domain_error{msg} { }
+};
 
 #endif //RSA3D_ASSERTIONS_H
