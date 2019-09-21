@@ -54,7 +54,7 @@ ImageMoveFilter::ImageMoveFilter(unsigned int *intImageData, size_t width, size_
     for (size_t y = 0; y < this->height; y++) {
         for (size_t x = 0; x < this->width; x++) {
             ImagePoint imagePoint = {static_cast<int>(x), static_cast<int>(this->height - y - 1)};
-            if (intImageData[this->pointToIndex(imagePoint)] == 0xffffffff)
+            if (intImageData[this->imagePointToIndex(imagePoint)] == 0xffffffff)
                 this->validPointsMap[i] = true;
             else
                 this->validPointsMap[i] = false;
@@ -96,55 +96,55 @@ ImageMoveFilter::~ImageMoveFilter() {
 #endif
 
 
-bool ImageMoveFilter::checkValidPointsMap(ImagePoint point) const {
+bool ImageMoveFilter::isPointValid(ImagePoint point) const {
     point = this->imageBC->applyOnImagePoint(point);
-    return this->validPointsMap[this->pointToIndex(point)];
+    return this->validPointsMap[this->imagePointToIndex(point)];
 }
 
-bool ImageMoveFilter::checkValidTracersMap(ImagePoint point) const {
-    if (!this->imageBC->isImagePointInBounds(point, this->tracerRadius))
+bool ImageMoveFilter::isPrecomputedTracerValid(ImagePoint position) const {
+    if (!this->imageBC->isImagePointInBounds(position, this->tracerRadius))
         return false;
 
-    point = this->imageBC->applyOnImagePoint(point);
-    return this->validTracersMap[this->pointToIndex(point)];
+    position = this->imageBC->applyOnImagePoint(position);
+    return this->validTracersMap[this->imagePointToIndex(position)];
 }
 
-bool ImageMoveFilter::isPointValid(ImagePoint point, float pointRadius) const {
-    Expects(pointRadius >= 0.f);
+bool ImageMoveFilter::isNotPrecomputedTracerValid(ImagePoint position, float radius) const {
+    Expects(radius >= 0.f);
 
-    int intPointRadius = static_cast<int>(pointRadius);
-    if (!this->imageBC->isImagePointInBounds(point, intPointRadius))
+    int intPointRadius = static_cast<int>(radius);
+    if (!this->imageBC->isImagePointInBounds(position, intPointRadius))
         return false;
 
-    if (pointRadius == 0.f)
-        return this->checkValidPointsMap(point);
+    if (radius == 0.f)
+        return this->isPointValid(position);
 
     for (int x = -intPointRadius; x <= intPointRadius; x++) {
         for (int y = -intPointRadius; y <= intPointRadius; y++) {
-            if (x*x + y*y > pointRadius*pointRadius)
+            if (x*x + y*y > radius*radius)
                 continue;
 
-            if (!this->checkValidPointsMap({point.x + x, point.y + y}))
+            if (!this->isPointValid({position.x + x, position.y + y}))
                 return false;
         }
     }
     return true;
 }
 
-bool ImageMoveFilter::isLineValid(ImagePoint from, ImagePoint to) const {
+bool ImageMoveFilter::isPrecomputedTracerLineValid(ImagePoint from, ImagePoint to) const {
     ImageMove imageMove = to - from;
     if (abs(imageMove.x) > abs(imageMove.y)) {
         float a = float(imageMove.y) / float(imageMove.x);
         for (int x = from.x; x != to.x; x += sgn(imageMove.x)) {
             int y = static_cast<int>(round(from.y + a * (x - from.x)));
-            if (!this->checkValidTracersMap({ x, y }))
+            if (!this->isPrecomputedTracerValid({ x, y }))
                 return false;
         }
     } else {
         float a = float(imageMove.x) / float(imageMove.y);
         for (int y = from.y; y != to.y; y += sgn(imageMove.y)) {
             int x = static_cast<int>(round(from.x + a * (y - from.y)));
-            if (!this->checkValidTracersMap({ x, y }))
+            if (!this->isPrecomputedTracerValid({ x, y }))
                 return false;
         }
     }
@@ -156,7 +156,7 @@ ImagePoint ImageMoveFilter::indexToImagePoint(size_t index) const {
     return {static_cast<int>(index % this->width), static_cast<int>(index / this->width)};
 }
 
-size_t ImageMoveFilter::pointToIndex(ImagePoint point) const {
+size_t ImageMoveFilter::imagePointToIndex(ImagePoint point) const {
     return point.x + this->width * point.y;
 }
 
@@ -183,7 +183,7 @@ size_t ImageMoveFilter::pointToIndex(ImagePoint point) const {
             float floatMapIndex = this->randomUniformNumber() * this->validPointsMapSize;
             size_t mapIndex = static_cast<size_t>(floatMapIndex);
             imagePosition = this->indexToImagePoint(mapIndex);
-        } while(!this->checkValidTracersMap(imagePosition));
+        } while(!this->isPrecomputedTracerValid(imagePosition));
         return imagePosition;
     }
 
@@ -208,10 +208,10 @@ bool ImageMoveFilter::isMoveValid(Tracer tracer, Move move) const {
     if (imageFrom == imageTo)
         return true;
 
-    if (!checkValidTracersMap(imageTo))
+    if (!this->isPrecomputedTracerValid(imageTo))
         return false;
 
-    return isLineValid(imageFrom, imageTo);
+    return this->isPrecomputedTracerLineValid(imageFrom, imageTo);
 }
 
 Tracer ImageMoveFilter::randomValidTracer() {
@@ -231,7 +231,7 @@ Tracer ImageMoveFilter::randomValidTracer() {
             return;
 
         this->tracerRadius = radius;
-        this->validTracersMap[i] = this->isPointValid(this->indexToImagePoint(i), radius);
+        this->validTracersMap[i] = this->isNotPrecomputedTracerValid(this->indexToImagePoint(i), radius);
     }
 
 #else // CUDA_HOST_COMPILATION
@@ -242,7 +242,7 @@ Tracer ImageMoveFilter::randomValidTracer() {
 
         this->validTracerIndicesCache.clear();
         for (size_t i = 0; i < this->validPointsMapSize; i++) {
-            if (this->isPointValid(this->indexToImagePoint(i), radius)) {
+            if (this->isNotPrecomputedTracerValid(this->indexToImagePoint(i), radius)) {
                 this->validTracersMap[i] = true;
                 this->validTracerIndicesCache.push_back(i);
             } else {
