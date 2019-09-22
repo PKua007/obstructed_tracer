@@ -131,7 +131,8 @@ void SimulationImpl::store_trajectories(const RandomWalker &randomWalker, const 
 }
 
 SimulationImpl::SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix, std::ostream &logger)
-        : outputFilePrefix{outputFilePrefix}, msdData(parameters.numberOfSteps), parameters{parameters}
+        : outputFilePrefix{outputFilePrefix}, msdDataCalculator(parameters.numberOfSteps),
+          msdData(parameters.numberOfSteps), parameters{parameters}
 {
     this->walkerParametersTemplate = this->prepareWalkerParametersTemplate(parameters);
     this->moveFilters = this->prepareMoveFilterParameters(parameters.moveFilter);
@@ -163,7 +164,7 @@ void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalk
         logger << "[SimulationImpl::run] Calculating mean square displacement data... " << std::flush;
         Timer timer;
         timer.start();
-        this->msdData.addTrajectories(randomWalker);
+        this->msdDataCalculator.addTrajectories(randomWalker);
         timer.stop();
         logger << "completed in " << timer.count() << " μs." << std::endl;
     }
@@ -187,4 +188,6 @@ void SimulationImpl::run(std::ostream &logger) {
 
         this->runSingleSimulation(simulationIndex, randomWalkerFactory->getRandomWalker(), logger);
     }
+
+    this->msdData = this->msdDataCalculator.fetchMSDData();
 }
