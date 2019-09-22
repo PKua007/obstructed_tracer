@@ -10,9 +10,11 @@
 #include "utils/Assertions.h"
 #include <iostream>
 
-Analyzer::Result Analyzer::analyze(const MSDData& msdData) {
+Analyzer::Result Analyzer::analyze(const MSDData &msdData) {
     std::size_t trajectorySize = msdData.size();
+    // For a while we hardcode calculating regression for 2 last orders of points
     std::size_t startIndex = trajectorySize / 100;
+    Assert(startIndex > 0);
     Assert(startIndex < trajectorySize - 1);
 
     PowerRegression regression;
@@ -21,7 +23,7 @@ Analyzer::Result Analyzer::analyze(const MSDData& msdData) {
     regression.calculate();
 
     Result result;
-    result.D = {regression.getB(), 0};
+    result.D = {regression.getB(), regression.getSB()};
     result.alpha = {regression.getA(), regression.getSA()};
     return result;
 }

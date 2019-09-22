@@ -6,77 +6,73 @@
  */
 
 #include "PowerRegression.h"
+#include "utils/Assertions.h"
 
 #include <algorithm>
 #include <cmath>
 
 void PowerRegression::clear() {
-	this->data.clear();
+	(*this) = PowerRegression{}; // A brand new one - clear and with NaNs
 }
 
-/**
- * Add data point
- * @param x
- * @param y
- */
 void PowerRegression::addXY(float x, float y) {
+    Expects(x > 0);
+    Expects(y > 0);
 	this->data.push_back({x, y});
 }
 
-/**
- * calculates fit values
- */
 void PowerRegression::calculate(int from, int to) {
-    float slnx{};
-    float slny{};
-    float slnxlny{};
-    float slnx2{};
+    int n = to - from;
+    Expects(n > 2);
+
+    float sum_lnx{};
+    float sum_lny{};
+    float sum_lnxlny{};
+    float sum_lnx2{};
 	for (int i = from; i < to; i++) {
 		DataElement d = this->data[i];
 		float lnx = std::log(d.x);
 		float lny = std::log(d.y);
-		slnxlny += lnx*lny;
-		slnx += lnx;
-		slny += lny;
-		slnx2 += lnx*lnx;
-	}
-	this->a = ((to - from)*slnxlny - slnx*slny) / ((to - from)*slnx2 - slnx*slnx);
-	this->b = (slny - this->a*slnx)/(to-from);
 
-	float s2{};
+		sum_lnxlny += lnx*lny;
+		sum_lnx += lnx;
+		sum_lny += lny;
+		sum_lnx2 += lnx*lnx;
+	}
+	this->A = (n*sum_lnxlny - sum_lnx*sum_lny) / (n*sum_lnx2 - sum_lnx*sum_lnx);
+	this->lnB = (sum_lny - this->A*sum_lnx)/n;
+
+	float sigma2{};
 	for (int i = from; i < to; i++) {
 		DataElement d = this->data[i];
-		s2 += std::pow(std::log(d.y) - this->b - this->a*std::log(d.x), 2.);
+		sigma2 += std::pow(std::log(d.y) - this->lnB - this->A*std::log(d.x), 2);
 	}
-	this->s2a = ((to - from)/((to - from)*slnx2 - slnx*slnx))*((s2)/(to - from - 2.));
+	float mse2 = sigma2/(n - 2);
+
+	this->sigma2_A = (n/(n*sum_lnx2 - sum_lnx*sum_lnx))*mse2;
+
+	// This is added by PKua based on https://www.cse.wustl.edu/~jain/iucee/ftp/k_14slr.pdf
+	this->sigma2_lnB = sum_lnx2/(n*sum_lnx2 - sum_lnx*sum_lnx)*mse2;
 }
 
-/**
- * calculates fit values
- */
 void PowerRegression::calculate() {
 	this->calculate(0, this->data.size());
 }
 
-/**
- * @return parameter A from y = Bx^A
- */
 float PowerRegression::getA() {
-	return this->a;
+	return this->A;
 }
 
-/**
- * @return standard deviation squared for parameter A from y = Ax + B
- */
 float PowerRegression::getSA() {
-	return std::sqrt(this->s2a);
+	return std::sqrt(this->sigma2_A);
 }
 
-/**
- * @return parameter B from y = Bx^A
- */
 float PowerRegression::getB() {
-	return std::exp(this->b);
+	return std::exp(this->lnB);
+}
+
+float PowerRegression::getSB() {
+    return std::sqrt(this->sigma2_lnB) * this->getB();
 }
 
 int PowerRegression::size() {
