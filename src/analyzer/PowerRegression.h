@@ -12,63 +12,63 @@
 #include <limits>
 
 class PowerRegression {
-	struct DataElement {
-		float x{};
-		float y{};
+    struct DataElement {
+        float x{};
+        float y{};
 
-		DataElement() { }
-		DataElement(float x, float y) : x{x}, y{y} { }
-	};
+        DataElement() { }
+        DataElement(float x, float y) : x{x}, y{y} { }
+    };
 
 private:
-	std::vector<DataElement> data;
+    std::vector<DataElement> data;
 
-	float A = std::numeric_limits<float>::quiet_NaN();
-	float lnB = std::numeric_limits<float>::quiet_NaN();
+    float A = std::numeric_limits<float>::quiet_NaN();
+    float lnB = std::numeric_limits<float>::quiet_NaN();
     float sigma2_A = std::numeric_limits<float>::quiet_NaN();
     float sigma2_lnB = std::numeric_limits<float>::quiet_NaN();
 
 public:
-	void clear();
+    void clear();
 
-	/**
-	 * Add data point
-	 * @param x
-	 * @param y
-	 */
-	void addXY(float x, float y);
+    /**
+     * Add data point
+     * @param x
+     * @param y
+     */
+    void addXY(float x, float y);
 
-	/**
-	 * calculates fit values
-	 */
-	void calculate(int from, int to);
+    /**
+     * calculates fit values
+     */
+    void calculate(int from, int to);
 
-	/**
-	 * calculates fit values
-	 */
-	void calculate();
+    /**
+     * calculates fit values
+     */
+    void calculate();
 
-	/**
-	 * @return parameter A from y = Bx^A
-	 */
-	float getA();
+    /**
+     * @return parameter A from y = Bx^A
+     */
+    float getA();
 
-	/**
-	 * @return standard deviation squared for parameter A fromy = Bx^A
-	 */
-	float getSA();
+    /**
+     * @return standard deviation squared for parameter A fromy = Bx^A
+     */
+    float getSA();
 
-	/**
-	 * @return parameter B from y = Bx^A
-	 */
-	float getB();
+    /**
+     * @return parameter B from y = Bx^A
+     */
+    float getB();
 
-	/**
-	 * @return standard deviation squared for parameter A fromy = Bx^A
-	 */
-	float getSB();
+    /**
+     * @return standard deviation squared for parameter A fromy = Bx^A
+     */
+    float getSB();
 
-	int size();
+    int size();
 };
 
 #endif /* ANALIZATOR_LINEARREGRESSION_H_ */
