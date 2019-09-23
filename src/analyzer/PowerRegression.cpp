@@ -59,20 +59,13 @@ void PowerRegression::calculate() {
     this->calculate(0, this->data.size());
 }
 
-float PowerRegression::getA() {
-    return this->A;
+Quantity PowerRegression::getExponent() {
+    return {this->A, std::sqrt(this->sigma2_A)};
 }
 
-float PowerRegression::getSA() {
-    return std::sqrt(this->sigma2_A);
-}
-
-float PowerRegression::getB() {
-    return std::exp(this->lnB);
-}
-
-float PowerRegression::getSB() {
-    return std::sqrt(this->sigma2_lnB) * this->getB();
+Quantity PowerRegression::getMultiplier() {
+    float multiplier = std::exp(this->lnB);
+    return {multiplier, std::sqrt(this->sigma2_lnB) * multiplier};
 }
 
 int PowerRegression::size() {

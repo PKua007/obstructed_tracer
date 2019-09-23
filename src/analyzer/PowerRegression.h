@@ -11,6 +11,8 @@
 #include <vector>
 #include <limits>
 
+#include "Quantity.h"
+
 class PowerRegression {
     struct DataElement {
         float x{};
@@ -49,24 +51,15 @@ public:
     void calculate();
 
     /**
-     * @return parameter A from y = Bx^A
+     * @return parameter A from y = Bx^A with standard error
      */
-    float getA();
+    Quantity getExponent();
 
     /**
-     * @return standard deviation squared for parameter A fromy = Bx^A
+     * @return parameter B from y = Bx^A with standard error
      */
-    float getSA();
+    Quantity getMultiplier();
 
-    /**
-     * @return parameter B from y = Bx^A
-     */
-    float getB();
-
-    /**
-     * @return standard deviation squared for parameter A fromy = Bx^A
-     */
-    float getSB();
 
     int size();
 };
