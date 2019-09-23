@@ -11,22 +11,27 @@
 #include <vector>
 #include <limits>
 
+#include "Quantity.h"
+
 class PowerRegression {
     struct DataElement {
-        float x{};
-        float y{};
+        double x{};
+        double y{};
 
         DataElement() { }
-        DataElement(float x, float y) : x{x}, y{y} { }
+        DataElement(double x, double y) : x{x}, y{y} { }
     };
 
 private:
+    static constexpr double UNDEFINED = std::numeric_limits<double>::quiet_NaN();
+
     std::vector<DataElement> data;
 
-    float A = std::numeric_limits<float>::quiet_NaN();
-    float lnB = std::numeric_limits<float>::quiet_NaN();
-    float sigma2_A = std::numeric_limits<float>::quiet_NaN();
-    float sigma2_lnB = std::numeric_limits<float>::quiet_NaN();
+    double A = UNDEFINED;
+    double lnB = UNDEFINED;
+    double sigma2_A = UNDEFINED;
+    double sigma2_lnB = UNDEFINED;
+    double R2 = UNDEFINED;
 
 public:
     void clear();
@@ -36,7 +41,7 @@ public:
      * @param x
      * @param y
      */
-    void addXY(float x, float y);
+    void addXY(double x, double y);
 
     /**
      * calculates fit values
@@ -49,26 +54,21 @@ public:
     void calculate();
 
     /**
-     * @return parameter A from y = Bx^A
+     * @return parameter A from y = Bx^A with standard error
      */
-    float getA();
+    Quantity getExponent() const;
 
     /**
-     * @return standard deviation squared for parameter A fromy = Bx^A
+     * @return parameter B from y = Bx^A with standard error
      */
-    float getSA();
+    Quantity getMultiplier() const;
 
     /**
-     * @return parameter B from y = Bx^A
+     * @return R-squared coefficient
      */
-    float getB();
+    double getR2() const;
 
-    /**
-     * @return standard deviation squared for parameter A fromy = Bx^A
-     */
-    float getSB();
-
-    int size();
+    int size() const;
 };
 
 #endif /* ANALIZATOR_LINEARREGRESSION_H_ */

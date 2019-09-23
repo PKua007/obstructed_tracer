@@ -59,7 +59,8 @@ namespace {
 
         Analyzer analyzer(parameters);
         Analyzer::Result result = analyzer.analyze(msdData);
-        std::cout << "[analyze] Results: D = " << result.D << ", α = " << result.alpha << std::endl;
+        std::cout << "[analyze] Results: D = " << result.D << ", α = " << result.alpha << ", R² = " << result.R2;
+        std::cout << std::endl;
 
         return EXIT_SUCCESS;
     }
