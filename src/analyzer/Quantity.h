@@ -11,11 +11,11 @@
 #include <ostream>
 
 struct Quantity {
-    float value{};
-    float error{};
+    double value{};
+    double error{};
 
     Quantity() { }
-    Quantity(float value, float error) : value{value}, error{error} { }
+    Quantity(double value, double error) : value{value}, error{error} { }
 };
 
 inline std::ostream &operator<<(std::ostream &out, Quantity quantity) {

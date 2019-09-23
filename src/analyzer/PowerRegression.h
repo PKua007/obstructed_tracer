@@ -15,20 +15,23 @@
 
 class PowerRegression {
     struct DataElement {
-        float x{};
-        float y{};
+        double x{};
+        double y{};
 
         DataElement() { }
-        DataElement(float x, float y) : x{x}, y{y} { }
+        DataElement(double x, double y) : x{x}, y{y} { }
     };
 
 private:
+    static constexpr double UNDEFINED = std::numeric_limits<double>::quiet_NaN();
+
     std::vector<DataElement> data;
 
-    float A = std::numeric_limits<float>::quiet_NaN();
-    float lnB = std::numeric_limits<float>::quiet_NaN();
-    float sigma2_A = std::numeric_limits<float>::quiet_NaN();
-    float sigma2_lnB = std::numeric_limits<float>::quiet_NaN();
+    double A = UNDEFINED;
+    double lnB = UNDEFINED;
+    double sigma2_A = UNDEFINED;
+    double sigma2_lnB = UNDEFINED;
+    double R2 = UNDEFINED;
 
 public:
     void clear();
@@ -38,7 +41,7 @@ public:
      * @param x
      * @param y
      */
-    void addXY(float x, float y);
+    void addXY(double x, double y);
 
     /**
      * calculates fit values
@@ -53,15 +56,19 @@ public:
     /**
      * @return parameter A from y = Bx^A with standard error
      */
-    Quantity getExponent();
+    Quantity getExponent() const;
 
     /**
      * @return parameter B from y = Bx^A with standard error
      */
-    Quantity getMultiplier();
+    Quantity getMultiplier() const;
 
+    /**
+     * @return R-squared coefficient
+     */
+    double getR2() const;
 
-    int size();
+    int size() const;
 };
 
 #endif /* ANALIZATOR_LINEARREGRESSION_H_ */

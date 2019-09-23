@@ -20,6 +20,7 @@ public:
     struct Result {
         Quantity D{};
         Quantity alpha{};
+        double R2{};
     };
 
     Analyzer(const Parameters &parameters) : parameters(parameters) { }

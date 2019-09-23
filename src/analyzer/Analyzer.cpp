@@ -25,5 +25,6 @@ Analyzer::Result Analyzer::analyze(const MSDData &msdData) {
     Result result;
     result.D = regression.getMultiplier();
     result.alpha = regression.getExponent();
+    result.R2 = regression.getR2();
     return result;
 }
