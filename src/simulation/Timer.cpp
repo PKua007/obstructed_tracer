@@ -17,7 +17,7 @@ void Timer::stop() {
     this->finishTime = clock::now();
 }
 
-unsigned long Timer::count() const {
+unsigned long Timer::countMicroseconds() const {
     using namespace std::chrono;
 
     auto timeDifference = this->finishTime - this->startTime;

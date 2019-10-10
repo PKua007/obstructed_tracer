@@ -10,6 +10,9 @@
 
 #include "utils/CudaDefines.h"
 
+/**
+ * @brief A simple struct representing diffusion moves
+ */
 struct Move {
     float x;
     float y;

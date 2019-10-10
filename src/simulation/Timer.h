@@ -11,6 +11,9 @@
 #include <chrono>
 #include <iosfwd>
 
+/**
+ * @brief A convenient timer for performance checks.
+ */
 class Timer {
 private:
     using clock = std::chrono::high_resolution_clock;
@@ -20,9 +23,21 @@ private:
     time_point finishTime;
 
 public:
+    /**
+     * @brief Saves the time point of the start.
+     */
     void start();
+
+    /**
+     * @brief Saves the time point of the end.
+     */
     void stop();
-    unsigned long count() const;
+
+
+    /**
+     * @brief Returns the difference between end and start in microseconds.
+     */
+    unsigned long countMicroseconds() const;
 };
 
 #endif /* TIMER_H_ */
