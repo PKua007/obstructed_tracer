@@ -14,7 +14,7 @@
 #include "utils/CudaDefines.h"
 
 /**
- * @brief A host and device struct representing a floating precision point.
+ * @brief A `__host__ __device__` struct representing a floating precision point.
  */
 struct Point  {
     float x{};

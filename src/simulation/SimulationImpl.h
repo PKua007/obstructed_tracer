@@ -20,7 +20,7 @@
  * @brief The concrete implementation of a simulation.
  *
  * <p>Based on parameters, it chooses the GPU or CPU simulation model and performs walks in series. Walks in the series
- * are performed parallel and after they ends, the obtained trajectories are added to resulting MSDData. It takes care
+ * are performed in parallel and after they end, the obtained trajectories are added to resulting MSDData. It takes care
  * of selecting the random generator seed and setting the size of GPU heap.
  *
  * <p>The class will perform the separate series of simulations for each MoveFilter specified in the parameters
@@ -56,9 +56,8 @@ public:
     /**
      * @brief Constructs the simulation based on @a parameters.
      *
-     * It created the proper - GPU or CPU simulation model and performs walks in series. It takes care of selecting the
-     * random generator seed and setting the size of GPU heap. The info how @a parameters fields are interpreted is
-     * in input.txt file (see Parameters to know how input.txt entries are mapped to Parameters fields).
+     * It creates the proper - GPU or CPU simulation model. It takes care of selecting the random generator seed and
+     * setting the size of GPU heap. The info how @a parameters fields are interpreted is in input.txt file (seeParameters to know how input.txt entries are mapped to Parameters fields).
      *
      * @param parameters parameters of the simulation
      * @param outputFilePrefix the prefix of trajectory file name which will be saved if @a parameters want saving

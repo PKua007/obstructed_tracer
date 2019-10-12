@@ -12,9 +12,22 @@
 
 #include "simulation/Trajectory.h"
 
+/**
+ * @brief A base class for CPU and GPU trajectories implementing the Trajectory interface.
+ *
+ * It gives access for child classes to internal TrajectoryBase::trajectory and TrajectoryBase::acceptedSteps fields
+ * to set them anyway they want while taking care of the other boring stuff.
+ */
 class TrajectoryBase : public Trajectory {
 protected:
+    /**
+     * @brief Internal vector of points to be modified by subclasses.
+     */
     std::vector<Point> trajectory;
+
+    /**
+     * @brief Internal field with number of steps to be modified by subclasses.
+     */
     std::size_t acceptedSteps{};
 
 public:

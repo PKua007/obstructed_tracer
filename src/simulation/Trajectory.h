@@ -11,7 +11,7 @@
 #include "Point.h"
 
 /**
- * @brief A simple class representing a trajectory.
+ * @brief A simple interface representing a trajectory.
  *
  * It gives basic immutable access methods and also storing the trajectory in the output stream. How the points are
  * added and how many steps were accepted is up to implementing classes.

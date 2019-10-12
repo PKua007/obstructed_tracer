@@ -17,6 +17,12 @@
 #include "move_filter/image_move_filter/ImageBoundaryConditions.h"
 #include "CPURandomWalker.h"
 
+/**
+ * @brief A class which construct CPURandomWalker from given parameters.
+ *
+ * Before creating the random walker itself, it creates CPU versions of MoveFilter and MoveGenerator based on
+ * parameters and hands them to the walker. It also take the responsibility of clearing the memory.
+ */
 class CPURandomWalkerFactory : public RandomWalkerFactory {
 private:
     std::mt19937 seedGenerator;
@@ -32,6 +38,16 @@ private:
     std::unique_ptr<ImageBoundaryConditions> createImageBoundaryConditions(std::istringstream &moveFilterStream);
 
 public:
+    /**
+     * @brief Constructs the factory based on passed arguments.
+     *
+     * MoveGenerator and MoveFilter classes will be created based on WalkerParameters::moveGeneratorParameters and
+     * WalkerParameters::moveFilterParameters textual representations.
+     *
+     * @param seed the seed which will be used in MoveFilter
+     * @param walkerParameters the parameters of the walker, MoveFilter and MoveGenerator
+     * @param logger the output stream which will be passed to RandomWalker to show info
+     */
     CPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters, std::ostream &logger);
 
     RandomWalker &getRandomWalker() override;
