@@ -42,9 +42,10 @@ public:
      * @brief Constructs the factory based on passed arguments.
      *
      * MoveGenerator and MoveFilter classes will be created based on WalkerParameters::moveGeneratorParameters and
-     * WalkerParameters::moveFilterParameters textual representations.
+     * WalkerParameters::moveFilterParameters textual representations. @a seed is used to create byte generator, which
+     * then samples two new seeds: for MoveGenerator and MoveFilter (for MoveFilter::randomValidTracer).
      *
-     * @param seed the seed which will be used in MoveFilter
+     * @param seed the seed which will be used in MoveFilter and MoveGenerator
      * @param walkerParameters the parameters of the walker, MoveFilter and MoveGenerator
      * @param logger the output stream which will be passed to RandomWalker to show info
      */

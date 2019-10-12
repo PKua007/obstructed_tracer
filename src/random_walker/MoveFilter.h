@@ -13,8 +13,12 @@
 /**
  * @brief This `__host__ __device__` interface filters the moves of the tracer.
  *
- * After setting up the tracer radius, the filter decides based on current tracer position and a move whether it
+ * <p> After setting up the tracer radius, the filter decides based on current tracer position and a move whether it
  * can be done. It can also provide random starting tracer which is valid from the point of this filter.
+ *
+ * <p>The canonical use of this class is to use MoveFilter::setupForTracer radius to specify the tracer radius, then
+ * get random tracer by MoveFilter::randomValidTracer and use it in MoveFilter::isMoveValid. It will ensure that
+ * everything is consistent and the class will always assume proper tracer radius.
  */
 class MoveFilter {
 public:
@@ -23,7 +27,8 @@ public:
     /**
      * @brief Check whether the move is valid.
      *
-     * If radius has not been set using setupForTracerRadius, it assumes 0.
+     * If radius has not been set using setupForTracerRadius, the bahaviour is undefined. Otherwise it uses one chosen
+     * there.
      *
      * @param tracer current tracer position
      * @param move move to perform
@@ -44,7 +49,7 @@ public:
     /**
      * @brief Returns a tracer for which `isMoveValid(tracer, 0) == true`.
      *
-     * @return a valid tracer
+     * @return a valid tracer. The tracer radius is the one passed to MoveFilter::setupForTracerRadius
      */
     CUDA_HOSTDEV virtual Tracer randomValidTracer() = 0;
 };

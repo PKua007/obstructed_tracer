@@ -37,7 +37,9 @@ public:
      * @brief Constructs the factory.
      *
      * It allocated @a moveGenerator and @a moveFilter on GPU (and passes seed to MoveFilter). Then it creates
-     * GPURandomWalker based on @a walkerParameters and gives it @a moveGenerator and @a moveFilter.
+     * GPURandomWalker based on @a walkerParameters and gives it @a moveGenerator and @a moveFilter. @a seed is used to
+     * create byte generator, which then samples two new seeds: for MoveGenerator and MoveFilter (for
+     * MoveFilter::randomValidTracer).
      *
      * @param seed the random generator seed for @a moveFilter
      * @param walkerParameters the parameters of the random walk, RandomWalker, MoveGenerator and MoveFilter
