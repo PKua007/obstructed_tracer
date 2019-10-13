@@ -166,7 +166,7 @@ void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalk
         timer.start();
         this->msdDataCalculator.addTrajectories(randomWalker);
         timer.stop();
-        logger << "completed in " << timer.count() << " μs." << std::endl;
+        logger << "completed in " << timer.countMicroseconds() << " μs." << std::endl;
     }
     logger << std::endl;
 }

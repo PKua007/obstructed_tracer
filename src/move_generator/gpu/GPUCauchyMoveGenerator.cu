@@ -9,8 +9,9 @@
 
 #include "GPUCauchyMoveGenerator.h"
 
-CUDA_DEV GPUCauchyMoveGenerator::GPUCauchyMoveGenerator(float sigma, unsigned int seed, size_t numberOfTrajectories) :
-        sigma{sigma}, numberOfTrajectories{numberOfTrajectories} {
+CUDA_DEV GPUCauchyMoveGenerator::GPUCauchyMoveGenerator(float width, unsigned int seed, size_t numberOfTrajectories)
+        : width{width}, numberOfTrajectories{numberOfTrajectories}
+{
     this->states = new curandState[this->numberOfTrajectories];
     for (size_t i = 0; i < numberOfTrajectories; i++)
         curand_init(seed, i, 0, &(this->states[i]));
@@ -22,7 +23,7 @@ CUDA_DEV GPUCauchyMoveGenerator::~GPUCauchyMoveGenerator() {
 
 CUDA_DEV float GPUCauchyMoveGenerator::randomCauchy() {
     float uniform = curand_uniform(&(this->states[CUDA_THREAD_IDX]));
-    return this->sigma * tanf(CUDART_PI_F * (uniform - 0.5f));
+    return this->width * tanf(CUDART_PI_F * (uniform - 0.5f));
 }
 
 CUDA_DEV Move GPUCauchyMoveGenerator::generateMove() {

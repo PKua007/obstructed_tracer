@@ -121,8 +121,8 @@ void GPURandomWalker::run(std::ostream& logger) {
     copyTimer.stop();
     logger << "completed." << std::endl;
 
-    auto kernelTimeInMus = kernelTimer.count();
-    auto copyTimeInMus = copyTimer.count();
+    auto kernelTimeInMus = kernelTimer.countMicroseconds();
+    auto copyTimeInMus = copyTimer.countMicroseconds();
     
     auto totalTimeInMus = kernelTimeInMus + copyTimeInMus;
     auto onlyKernelSingleTrajectoryTimeInMus = kernelTimeInMus / this->numberOfTrajectories;

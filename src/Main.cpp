@@ -8,6 +8,8 @@
  ============================================================================
  */
 
+/** @file */
+
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
@@ -22,6 +24,7 @@
 #include "simulation/SimulationImpl.h"
 
 namespace {
+    /* Mode performing random walk. See main for the description. Returns exit code for main. */
     int perform_walk(int argc, char **argv, const Parameters &parameters) {
         std::string command = argv[0];
         if (argc < 4)
@@ -44,6 +47,7 @@ namespace {
         return EXIT_SUCCESS;
     }
 
+    /* Mode analyzing the results. See main for the description. Returns exit code for main. */
     int analyze(int argc, char **argv, const Parameters &parameters) {
         std::string command = argv[0];
         if (argc < 4)
@@ -66,7 +70,31 @@ namespace {
     }
 }
 
-int main(int argc, char **argv){
+/**
+ * @brief Entry point with two distinct modes: @a perform_walk and @a analyze
+ *
+ * Usage:
+ * <blockquote>./obstructed_tracer [mode] (mode specific arguments)</blockquote>
+ * <ul>
+ *     <li>
+ *         <p><b>perform_walk</b>
+ *         <p><em>arguments: [input file] [output files prefix]</em>
+ *         <p>It reads the parameters from [input file] (see Parameters and input.txt) and performs random walk.
+ *         The output mean square displacement data and, if desired, trajectories data will be saved as
+ *         <blockquote>[output files prefix]_msd.txt</blockquote>
+ *         and
+ *         <blockquote>[output files prefix]_[simulation index]_[trajectory_index].txt</blockquote>
+ *     </li>
+ *     <li>
+ *         <p><b>analyze</b>
+ *         <p><em>arguments: [input file] [msd file]</em>
+ *         <p>It reads the parameters from [input file] and calculates the diffusion coefficient D and exponent &alpha;
+ *         for last two orders of [msd file] mean square displacement data. It assumes that this file was generated
+ *         using the same input file.
+ *     </li>
+ * </ul>
+ */
+int main(int argc, char **argv) {
     std::string command = argv[0];
     if (argc < 3)
         die("[main] Usage: " + command + " [mode] [input file] {mode specific arguments}");
