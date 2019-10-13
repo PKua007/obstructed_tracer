@@ -15,7 +15,9 @@
 #include <algorithm>
 
 
-// Parse exception class
+/**
+ * @brief An exception thrown if there was a problem parsing config in Config.
+ */
 class ConfigParseException : public std::runtime_error
 {
 public:
@@ -24,7 +26,9 @@ public:
 };
 
 
-// No field exception class
+/**
+ * @brief An exception thrown if there was an access to nonexistent field in Config.
+ */
 class ConfigNoFieldException : public std::runtime_error
 {
 public:

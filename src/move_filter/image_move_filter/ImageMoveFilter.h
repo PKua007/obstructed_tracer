@@ -67,6 +67,9 @@ public:
      *
      * <p>On GPU, the constructor is assumed to be invoked only in the first CUDA thread.
      *
+     * <p>What is important, while image coordinates start from top left corner and go right and down, the coordinates
+     * in valid point map are translated to cartesian, with image left down corner being at (0, 0).
+     *
      * @param intImageData the array of 0xFFFFFFFF-like colors
      * @param width width of the image used
      * @param height height of the image used

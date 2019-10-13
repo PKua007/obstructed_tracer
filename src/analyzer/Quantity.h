@@ -10,6 +10,9 @@
 
 #include <ostream>
 
+/**
+ * @brief A struct representing a quantity with error.
+ */
 struct Quantity {
     double value{};
     double error{};

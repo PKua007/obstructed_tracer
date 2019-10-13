@@ -10,6 +10,9 @@
 
 #include <stdexcept>
 
+/**
+ * @brief An exception thrown by cudaCheck if an error has been encountered.
+ */
 class CudaException : public std::runtime_error {
 public:
     CudaException(const std::string &what) : std::runtime_error{what} { }

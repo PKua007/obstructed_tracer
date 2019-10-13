@@ -47,6 +47,9 @@
 
 // Although used only in host code, it should be visible for both to prevent errors
 
+/**
+ * @brief An exceptions thrown by Validate and ValidateMsg macros.
+ */
 struct ValidationException : public std::domain_error {
     explicit ValidationException(const std::string &msg) : std::domain_error{msg} { }
 };

@@ -13,7 +13,11 @@
 
 #include "Quantity.h"
 
+/**
+ * @brief A class performing power fit to points.
+ */
 class PowerRegression {
+private:
     struct DataElement {
         double x{};
         double y{};
@@ -22,7 +26,6 @@ class PowerRegression {
         DataElement(double x, double y) : x{x}, y{y} { }
     };
 
-private:
     static constexpr double UNDEFINED = std::numeric_limits<double>::quiet_NaN();
 
     std::vector<DataElement> data;
@@ -34,40 +37,62 @@ private:
     double R2 = UNDEFINED;
 
 public:
+    /**
+     * @brief Resets object's state - all points and results are deleted.
+     */
     void clear();
 
     /**
-     * Add data point
-     * @param x
-     * @param y
+     * @brief Appends data point.
      */
     void addXY(double x, double y);
 
     /**
-     * calculates fit values
+     * @brief After having added point (PowerRegression::addXY), it can be used to calculate fit values.
+     *
+     * The fit is made to points with INDICES of points from range [@a from, @a to). They can be then fetched using
+     * getters: PowerRegression::getMultiplier, PowerRegression::getExponent and PowerRegression::getR2.
+     *
+     * @param from the INDEX of starting fit point, inclusive
+     * @param to the INDEX of final fit point, exclusive
      */
     void calculate(int from, int to);
 
     /**
-     * calculates fit values
+     * @brief Performs fit to all points.
+     *
+     * See PowerRegression::calculate(int, int) for expaination.
      */
     void calculate();
 
     /**
-     * @return parameter A from y = Bx^A with standard error
+     * @brief After invoking PowerRegression::calculate or PowerRegression::calculate(int, int) it returns parameter A
+     * from y = Bx<sup>A</sup> with standard error.
+     *
+     * @return parameter A from y = Bx<sup>A</sup> with standard error
      */
     Quantity getExponent() const;
 
     /**
-     * @return parameter B from y = Bx^A with standard error
+     * @brief After invoking PowerRegression::calculate or PowerRegression::calculate(int, int) it returns parameter B
+     * from y = Bx<sup>A</sup> with standard error.
+     *
+     * @return parameter B from y = Bx<sup>A</sup> with standard error
      */
     Quantity getMultiplier() const;
 
     /**
-     * @return R-squared coefficient
+     * @brief After invoking PowerRegression::calculate or PowerRegression::calculate(int, int) it returns
+     * R<sup>2</sup> measure of the quality of the fit.
+     *
+     * @return R<sup>2</sup> measure of the quality of the fit
      */
     double getR2() const;
 
+    /**
+     * @brief Returns the number of point added.
+     * @return the number of point added
+     */
     int size() const;
 };
 
