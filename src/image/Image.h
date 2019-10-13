@@ -5,6 +5,8 @@
  *      Author: pkua
  */
 
+/** @file */
+
 #ifndef IMAGE_H_
 #define IMAGE_H_
 
@@ -14,6 +16,9 @@
 
 /**
  * @brief A simple struct representing a color.
+ * @see operator<<(std::ostream &, Color)
+ * @see operator==(Color, Color)
+ * @see operator!=(Color, Color)
  */
 struct Color {
     uint8_t r;
@@ -28,10 +33,24 @@ struct Color {
 };
 
 #define WHITE Color{uint8_t{255}, uint8_t{255}, uint8_t{255}}
-#define BLACK Color{uint8_t{255}, uint8_t{255}, uint8_t{255}}
+#define BLACK Color{uint8_t{0}, uint8_t{0}, uint8_t{0}}
 
+/**
+ * @brief Stream insertion operator for Color printing in 0xFFFFFF style.
+ * @param out stream to print @a color to
+ * @param color Color to be printed
+ * @return reference to @a out
+ */
 std::ostream &operator<<(std::ostream &out, Color color);
+
+/**
+ * @brief Checks if @a color1 and @a color2 are equal.
+ */
 bool operator==(Color color1, Color color2);
+
+/**
+ * @brief Checks if @a color1 and @a color2 are not equal.
+ */
 bool operator!=(Color color1, Color color2);
 
 /**

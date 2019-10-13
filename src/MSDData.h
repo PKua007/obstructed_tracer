@@ -5,6 +5,8 @@
  *      Author: pkua
  */
 
+/** @file */
+
 #ifndef MSDDATA_H_
 #define MSDDATA_H_
 
@@ -22,6 +24,9 @@ class MSDData {
 public:
     /**
      * @brief Struct of mean values for a single trajectory step.
+     * @see operator+(const MSDData::Entry &, const MSDData::Entry &)
+     * @see operator<<(std::ostream &, MSDData::Entry)
+     * @see operator>>(std::istream &, MSDData::Entry &)
      */
     struct Entry {
         float x{};
@@ -117,7 +122,28 @@ public:
     void restore(std::istream &in);
 };
 
+/**
+ * @brief Sums all fields of two MSDData::Entry objects.
+ * @param first lhs operand
+ * @param second rhs operand
+ * @return new MSDData::Entry obtained by summing all entries of @a first and @a second
+ */
 MSDData::Entry operator+(const MSDData::Entry &first, const MSDData::Entry &second);
+
+/**
+ * @brief Stream insertion operator for MSDData::Entry.
+ * @param out stream to print @a entry to
+ * @param entry MSDData::Entry to be printed
+ * @return reference to @a out
+ */
 std::ostream &operator<<(std::ostream &out, MSDData::Entry entry);
+
+/**
+ * @brief Stream extraction operator for MSDData::Entry.
+ * @param in stream to read @a entry from
+ * @param entry MSDData::Entry to be read
+ * @return reference to @a in
+ */
+std::istream &operator>>(std::istream &in, MSDData::Entry &entry);
 
 #endif /* MSDDATA_H_ */

@@ -5,6 +5,8 @@
  *      Author: pkua
  */
 
+/** @file */
+
 #ifndef POINT_H_
 #define POINT_H_
 
@@ -15,6 +17,7 @@
 
 /**
  * @brief A `__host__ __device__` struct representing a floating precision point.
+ * @see operator<<(std::ostream &, Point point)
  */
 struct Point  {
     float x{};
@@ -66,7 +69,7 @@ struct Point  {
  * @param point point to be printed
  * @return the reference to @a out
  */
-inline std::ostream &operator<<(std::ostream& out, Point point) {
+inline std::ostream &operator<<(std::ostream &out, Point point) {
     out << point.x << " " << point.y;
     return out;
 }
