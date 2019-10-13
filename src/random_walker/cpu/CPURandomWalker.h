@@ -46,7 +46,7 @@ public:
      *
      * @param numberOfWalks number of walks to be performed in parallel using OpenMP loop
      * @param walkParameters the parameter of each random walk
-     * @param moveGenetator strategy of sampling moves
+     * @param moveGenerator strategy of sampling moves
      * @param moveFilter strategy of accepting moves and choosing starting positions of the tracer
      * @param logger the output stream on which info about preparing @a moveFilter will be printed
      */

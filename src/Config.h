@@ -80,11 +80,12 @@ public:
      *
      * # empty lines are omitted
      * key3 = value3 # whitespace is trimmed
-     * # key3 = value3 - duplicate fields are forbidden
      * \endcode
      *
      * @param in stream to parse from
      * @param delim delimiter for key, value; defaults to '='
+     * @param allowRedefinition if `true`, redefinition of field will overwrite the old value; if `false`, it will
+     * throw ConfigParseException
      * @throws ConfigParseException on parse error (no delimiter of a duplicate field)
      * @throws std::invalid_argument when delim = '#' (comment)
      * @return Config object to be deleted manualy after use

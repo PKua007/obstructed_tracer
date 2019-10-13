@@ -80,7 +80,7 @@ public:
      *
      * @param numberOfWalks number of walks to be performed in parallel
      * @param walkParameters the parameters of all walks
-     * @param numberOfMovefilterSetupThreads the number of threads which will be used to setup @a moveFilter for
+     * @param numberOfMoveFilterSetupThreads the number of threads which will be used to setup @a moveFilter for
      * tracer radius
      * @param moveGenerator GPU-allocated MoveGenerator sampling random moves
      * @param moveFilter GPU-allocated MoveFilter for accpeting moves and sampling random initial tracers

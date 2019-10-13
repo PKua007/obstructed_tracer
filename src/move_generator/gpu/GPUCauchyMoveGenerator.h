@@ -19,7 +19,7 @@
  */
 class GPUCauchyMoveGenerator : public MoveGenerator {
 private:
-    float sigma;
+    float width;
     curandState *states;
     size_t numberOfTrajectories;
 
@@ -35,7 +35,7 @@ public:
      * @param seed the random seed for generators
      * @param numberOfTrajectories the number of trajectories for which independent number will be sampled on GPU
      */
-    CUDA_DEV GPUCauchyMoveGenerator(float sigma, unsigned int seed, size_t numberOfTrajectories);
+    CUDA_DEV GPUCauchyMoveGenerator(float width, unsigned int seed, size_t numberOfTrajectories);
 
     CUDA_DEV GPUCauchyMoveGenerator(const GPUCauchyMoveGenerator &other) = delete;
     CUDA_DEV GPUCauchyMoveGenerator operator=(GPUCauchyMoveGenerator other) = delete;

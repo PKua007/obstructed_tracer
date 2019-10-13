@@ -43,7 +43,7 @@ public:
 
     /**
      * @brief Sets the new radius of a tracer.
-     * @param position the new radius of a tracer
+     * @param radius the new radius of a tracer
      */
     CUDA_HOSTDEV void setRadius(float radius) { this->radius = radius; }
 
