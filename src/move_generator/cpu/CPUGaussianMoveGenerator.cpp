@@ -9,7 +9,8 @@
 
 CPUGaussianMoveGenerator::CPUGaussianMoveGenerator(float sigma, unsigned int seed) {
     this->randomGenerator.seed(seed);
-    this->normalDistribution = std::normal_distribution<float>(0.f, sigma);
+    // We need to divide sigma by sqrt(2), because if we sample x and y with sigma^2, then r is sampled from 2sigma^2
+    this->normalDistribution = std::normal_distribution<float>(0.f, sigma * M_SQRT1_2);
 }
 
 Move CPUGaussianMoveGenerator::generateMove() {
