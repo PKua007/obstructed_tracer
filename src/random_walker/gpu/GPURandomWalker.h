@@ -9,10 +9,12 @@
 #define GPURANDOMWALKER_H_
 
 #include <vector>
+
 #include "simulation/RandomWalker.h"
 #include "GPUTrajectory.h"
 #include "../MoveGenerator.h"
 #include "../MoveFilter.h"
+#include "simulation/Timer.h"
 
 /**
  * @brief A GPU implementation of RandomWalker using CUDA.
@@ -68,6 +70,7 @@ private:
     static constexpr int blockSize = 512;
 
     void setupMoveFilterForTracerRadius(std::ostream& logger);
+    void printTimerInfo(const Timer &kernelTimer, const Timer &copyTimer, std::ostream &logger);
 
 public:
     /**

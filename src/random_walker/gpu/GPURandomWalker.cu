@@ -110,6 +110,18 @@ void GPURandomWalker::setupMoveFilterForTracerRadius(std::ostream& logger) {
     logger << "completed." << std::endl;
 }
 
+void GPURandomWalker::printTimerInfo(const Timer &kernelTimer, const Timer &copyTimer, std::ostream &logger) {
+    auto kernelTimeInMus = kernelTimer.countMicroseconds();
+    auto copyTimeInMus = copyTimer.countMicroseconds();
+
+    auto totalTimeInMus = kernelTimeInMus + copyTimeInMus;
+    auto onlyKernelSingleTrajectoryTimeInMus = kernelTimeInMus / this->numberOfTrajectories;
+    auto totalSingleTrajectoryTimeInMus = totalTimeInMus / this->numberOfTrajectories;
+    logger << "[GPURandomWalker::run] Finished after " << totalTimeInMus << " μs, which gives ";
+    logger << onlyKernelSingleTrajectoryTimeInMus << " μs per trajectory on average (";
+    logger << totalSingleTrajectoryTimeInMus << " μs with memory fetch)." << std::endl;
+}
+
 void GPURandomWalker::run(std::ostream& logger, const std::vector<Tracer> &initialTracers) {
     Tracer *gpuInitialTracers;
     cudaCheck( cudaMalloc(&gpuInitialTracers, this->numberOfTrajectories*sizeof(Tracer)) );
@@ -137,15 +149,7 @@ void GPURandomWalker::run(std::ostream& logger, const std::vector<Tracer> &initi
     copyTimer.stop();
     logger << "completed." << std::endl;
 
-    auto kernelTimeInMus = kernelTimer.countMicroseconds();
-    auto copyTimeInMus = copyTimer.countMicroseconds();
-    
-    auto totalTimeInMus = kernelTimeInMus + copyTimeInMus;
-    auto onlyKernelSingleTrajectoryTimeInMus = kernelTimeInMus / this->numberOfTrajectories;
-    auto totalSingleTrajectoryTimeInMus = totalTimeInMus / this->numberOfTrajectories;
-    logger << "[GPURandomWalker::run] Finished after " << totalTimeInMus << " μs, which gives ";
-    logger << onlyKernelSingleTrajectoryTimeInMus << " μs per trajectory on average (";
-    logger << totalSingleTrajectoryTimeInMus << " μs with memory fetch)." << std::endl;
+    this->printTimerInfo(kernelTimer, copyTimer, logger);
 }
 
 std::size_t GPURandomWalker::getNumberOfTrajectories() const {
@@ -159,7 +163,7 @@ std::vector<Tracer> GPURandomWalker::getRandomInitialTracersVector() {
     cudaCheck( cudaMalloc(&gpuInitialTracers, this->numberOfTrajectories*sizeof(Tracer)) );
     int numberOfBlocks = (numberOfTrajectories + blockSize - 1) / blockSize;
     random_valid_tracer_vector<<<numberOfBlocks, blockSize>>>(this->moveFilter, gpuInitialTracers,
-                                                                this->numberOfTrajectories);
+                                                              this->numberOfTrajectories);
     cudaCheck( cudaMemcpy(cpuInitialTracers.data(), gpuInitialTracers, this->numberOfTrajectories*sizeof(Tracer),
                           cudaMemcpyDeviceToHost) );
     cudaCheck( cudaFree(gpuInitialTracers) );
