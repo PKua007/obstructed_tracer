@@ -8,7 +8,7 @@
 #ifndef MOVEFILTER_H_
 #define MOVEFILTER_H_
 
-#include "Tracer.h"
+#include "simulation/Tracer.h"
 
 /**
  * @brief This `__host__ __device__` interface filters the moves of the tracer.

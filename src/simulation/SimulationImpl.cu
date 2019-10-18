@@ -156,7 +156,8 @@ void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalk
         logger << std::endl;
         logger << "[SimulationImpl::run] Simulation " << simulationIndex << ", series " << i << ": trajectories ";
         logger << startTrajectory << " - " << endTrajectory << std::endl;
-        randomWalker.run(logger);
+        auto initialTracers = randomWalker.getRandomInitialTracersVector();
+        randomWalker.run(logger, initialTracers);
 
         if (this->parameters.storeTrajectories)
             store_trajectories(randomWalker, this->outputFilePrefix, simulationIndex, startTrajectory, logger);

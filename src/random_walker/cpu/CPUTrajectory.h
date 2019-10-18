@@ -30,9 +30,10 @@ public:
      * @brief Creates an empty trajectory, however the memory is reserved for @a numberOfPoint points INCLUDING initial
      * tracer position.
      *
-     * @param numberOfPoints desired number of point in the trajectory INCLUDING the initial tracer position
+     * @param numberOfPoints desired number of point in the trajectory EXLCUDING the initial tracer position
+     * @param initialPosition initial position of a tracer; it will not be included in accepted steps
      */
-    CPUTrajectory(std::size_t numberOfPoints);
+    CPUTrajectory(std::size_t numberOfPoints, Point initialPosition);
 
     /**
      * @brief Copies the last point of the trajectory to next. The accepted steps counter is not incremented.
@@ -43,6 +44,8 @@ public:
      * @brief Append a @a point to the trajectory and inctrements accepted step counter.
      */
     void moveToPoint(Point point);
+
+    void appendAnotherTrajectory(const Trajectory &trajectory);
 };
 
 #endif /* CPUTRAJECTORY_H_ */

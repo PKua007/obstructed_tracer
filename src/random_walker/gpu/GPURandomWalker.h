@@ -97,8 +97,9 @@ public:
      *
      * @param logger output stream to show progress
      */
-    void run(std::ostream &logger) override;
+    void run(std::ostream &logger, const std::vector<Tracer> &initialTracers) override;
 
+    std::vector<Tracer> getRandomInitialTracersVector() override;
     std::size_t getNumberOfTrajectories() const override;
     const Trajectory &getTrajectory(std::size_t index) const override;
 };

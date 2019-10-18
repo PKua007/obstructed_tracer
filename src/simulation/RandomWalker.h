@@ -8,12 +8,16 @@
 #ifndef RANDOMWALKER_H_
 #define RANDOMWALKER_H_
 
+#include <vector>
+
+#include "Tracer.h"
 #include "Trajectory.h"
 
 /**
  * @brief Interface for class which can perform a series of random walks in parallel.
  *
- * A single walk is perform the following way:
+ * RandomWalker can generate a vector of random inital tracers using underlying MoveFilter. It then is used in a run,
+ * where each single walk is perform the following way:
  * <ol>
  *     <li>Use MoveGenerator to generate random move.</li>
  *     <li>Add drift to the move.</li>
@@ -46,13 +50,20 @@ public:
     virtual ~RandomWalker() = default;
 
     /**
+     * @brief Returns a vector of random valid initial tracers using underlying MoveFilter.
+     * @return a vector of random valid initial tracers using underlying MoveFilter
+     */
+    virtual std::vector<Tracer> getRandomInitialTracersVector() = 0;
+
+    /**
      * @brief Performs the multiple random walk of the same type logging some information onto @a logger.
      *
      * The obtained trajectories can be late fetched using getTrajectory.
      *
      * @param logger stream to log information on the process
+     * @param initialTracers initial tracer positions for random walks
      */
-    virtual void run(std::ostream &logger) = 0;
+    virtual void run(std::ostream &logger, const std::vector<Tracer> &initialTracers) = 0;
 
     /**
      * @brief Return the number of walks performed.
