@@ -63,6 +63,7 @@ public:
 
     std::vector<Tracer> getRandomInitialTracersVector() override;
     std::size_t getNumberOfTrajectories() const override;
+    std::size_t getNumberOfSteps() const override;
     const Trajectory &getTrajectory(std::size_t index) const override;
 };
 

@@ -72,6 +72,12 @@ public:
     virtual std::size_t getNumberOfTrajectories() const = 0;
 
     /**
+     * @brief Return the number of steps in each trajectory EXCLUDING initial tracer.
+     * @return tthe number of steps in each trajectory EXCLUDING initial tracer
+     */
+    virtual std::size_t getNumberOfSteps() const = 0;
+
+    /**
      * @brief Returns the trajectory of the index @a index.
      * @param index index of the trajectory to fetch
      * @return the tractory of the index @a index

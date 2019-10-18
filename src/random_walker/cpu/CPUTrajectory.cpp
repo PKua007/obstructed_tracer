@@ -26,9 +26,11 @@ void CPUTrajectory::moveToPoint(Point point) {
 }
 
 void CPUTrajectory::appendAnotherTrajectory(const Trajectory &trajectory) {
-    Expects(this->getLast() == trajectory.getFirst());
+    if (this->getSize() != 0)
+        Expects(this->getLast() == trajectory.getFirst());
 
-    for (std::size_t i = 1; i < trajectory.getNumberOfAcceptedSteps(); i++)
+    // If this is empty, the initial tracer should be included
+    for (std::size_t i = (this->getSize() == 0 ? 0 : 1); i < trajectory.getNumberOfAcceptedSteps(); i++)
         this->trajectory.push_back(trajectory[i]);
     this->acceptedSteps += trajectory.getNumberOfAcceptedSteps();
 }

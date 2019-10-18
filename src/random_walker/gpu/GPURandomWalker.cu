@@ -156,6 +156,10 @@ std::size_t GPURandomWalker::getNumberOfTrajectories() const {
     return this->numberOfTrajectories;
 }
 
+std::size_t GPURandomWalker::getNumberOfSteps() const {
+    return this->walkParameters.numberOfSteps;
+}
+
 std::vector<Tracer> GPURandomWalker::getRandomInitialTracersVector() {
     std::vector<Tracer> cpuInitialTracers(this->numberOfTrajectories);
 

@@ -73,6 +73,10 @@ std::size_t CPURandomWalker::getNumberOfTrajectories() const {
     return this->numberOfTrajectories;
 }
 
+std::size_t CPURandomWalker::getNumberOfSteps() const {
+    return this->numberOfSteps;
+}
+
 std::vector<Tracer> CPURandomWalker::getRandomInitialTracersVector() {
     std::vector<Tracer> result(this->numberOfTrajectories);
     std::generate(result.begin(), result.end(), std::bind(&MoveFilter::randomValidTracer, this->moveFilter));
