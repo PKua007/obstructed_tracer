@@ -9,6 +9,7 @@
 #include <functional>
 
 #include "SplitRandomWalker.h"
+#include "simulation/Timer.h"
 #include "utils/Assertions.h"
 
 SplitRandomWalker::SplitRandomWalker(std::size_t numberOfSplits, RandomWalker &randomWalker)
@@ -29,6 +30,8 @@ void SplitRandomWalker::run(std::ostream &logger, const std::vector<Tracer> &ini
     for (auto &trajectory : this->trajectories)
         trajectory.clear();
 
+    Timer timer;
+    timer.start();
     std::vector<Tracer> currentInitialTracers(initialTracers.begin(), initialTracers.end());
     for (std::size_t i = 0; i < this->numberOfSplits; i++) {
         std::size_t startStep = i * numberOfStepsPerSplit;
@@ -46,6 +49,12 @@ void SplitRandomWalker::run(std::ostream &logger, const std::vector<Tracer> &ini
                            std::mem_fn(&Trajectory::getLast));
         }
     }
+    timer.stop();
+
+    auto simulationTimeInMus = timer.countMicroseconds();
+    auto singleRunTimeInMus = simulationTimeInMus / this->numberOfTrajectories;
+    logger << "[SplitRadnomWalker::run] Whole trajectories finished after " << simulationTimeInMus;
+    logger << " μs, which gives " << singleRunTimeInMus << " μs per trajectory on average." << std::endl;
 }
 
 std::size_t SplitRandomWalker::getNumberOfTrajectories() const {
