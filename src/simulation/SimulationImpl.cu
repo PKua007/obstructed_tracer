@@ -19,6 +19,7 @@
 #include "utils/CudaCheck.h"
 #include "random_walker/cpu/CPURandomWalkerFactory.h"
 #include "random_walker/gpu/GPURandomWalkerFactory.h"
+#include "random_walker/SplitRandomWalker.h"
 #include "Timer.h"
 
 
@@ -50,7 +51,8 @@ SimulationImpl::prepareWalkerParametersTemplate(const Parameters &parameters) co
     // The simulation can only differ in MoveFilter and its number is determined from Parameters::moveFilter
     RandomWalker::WalkParameters walkParameters;
     walkParameters.drift = this->parseDrift(parameters.drift);
-    walkParameters.numberOfSteps = parameters.numberOfSteps;
+    // walkParameters.numberOfSteps is for a single walk, so if walks are split we have to divide by number of splits
+    walkParameters.numberOfSteps = parameters.numberOfSteps / parameters.numberOfSplits;
     walkParameters.tracerRadius = parameters.tracerRadius;
 
     RandomWalkerFactory::WalkerParameters walkerParametersTemplate;
@@ -131,9 +133,13 @@ void SimulationImpl::store_trajectories(const RandomWalker &randomWalker, const 
 }
 
 SimulationImpl::SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix, std::ostream &logger)
-        : outputFilePrefix{outputFilePrefix}, msdDataCalculator(parameters.numberOfSteps),
-          msdData(parameters.numberOfSteps), parameters{parameters}
+        : outputFilePrefix{outputFilePrefix}, parameters{parameters}, msdDataCalculator(parameters.numberOfSteps),
+          msdData(parameters.numberOfSteps)
 {
+    ValidateMsg(parameters.numberOfSteps % parameters.numberOfSplits == 0,
+                "Cannot split " + std::to_string(parameters.numberOfSteps) + " in "
+                + std::to_string(parameters.numberOfSplits) + " equal parts");
+
     this->walkerParametersTemplate = this->prepareWalkerParametersTemplate(parameters);
     this->moveFilters = this->prepareMoveFilterParameters(parameters.moveFilter);
     Validate(!this->moveFilters.empty());
@@ -187,7 +193,13 @@ void SimulationImpl::run(std::ostream &logger) {
         else
             throw std::runtime_error("");
 
-        this->runSingleSimulation(simulationIndex, randomWalkerFactory->getRandomWalker(), logger);
+        RandomWalker &randomWalker = randomWalkerFactory->getRandomWalker();
+        if (this->parameters.numberOfSplits == 1) {
+            this->runSingleSimulation(simulationIndex, randomWalker, logger);
+        } else {
+            SplitRandomWalker splitRandomWalker(this->parameters.numberOfSplits, randomWalker);
+            this->runSingleSimulation(simulationIndex, splitRandomWalker, logger);
+        }
     }
 
     this->msdData = this->msdDataCalculator.fetchMSDData();

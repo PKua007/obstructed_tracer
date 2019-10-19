@@ -28,6 +28,7 @@ public:
     std::string moveFilter            = "DefaultMoveFilter";
     std::string drift                 = "xy 0 0";
     std::size_t numberOfWalksInSeries = 10;
+    std::size_t numberOfSplits        = 1;
     std::size_t numberOfSeries        = 1;
     bool        storeTrajectories     = false;
     std::string seed                  = "random";

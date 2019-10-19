@@ -30,7 +30,7 @@ void CPUTrajectory::appendAnotherTrajectory(const Trajectory &trajectory) {
         Expects(this->getLast() == trajectory.getFirst());
 
     // If this is empty, the initial tracer should be included
-    for (std::size_t i = (this->getSize() == 0 ? 0 : 1); i < trajectory.getNumberOfAcceptedSteps(); i++)
+    for (std::size_t i = (this->getSize() == 0 ? 0 : 1); i < trajectory.getSize(); i++)
         this->trajectory.push_back(trajectory[i]);
     this->acceptedSteps += trajectory.getNumberOfAcceptedSteps();
 }

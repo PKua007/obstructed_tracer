@@ -22,7 +22,7 @@
 class CPUTrajectory : public TrajectoryBase {
 public:
     /**
-     * @brief Created an empty trajectory.
+     * @brief Creates an empty trajectory.
      */
     CPUTrajectory() = default;
 
@@ -41,7 +41,7 @@ public:
     void stayStill();
 
     /**
-     * @brief Append a @a point to the trajectory and inctrements accepted step counter.
+     * @brief Append a @a point to the trajectory and increments accepted step counter.
      */
     void moveToPoint(Point point);
 

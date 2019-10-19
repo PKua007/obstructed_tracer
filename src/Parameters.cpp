@@ -27,6 +27,8 @@ Parameters::Parameters(std::istream& input) {
             this->drift = config.getString(key);
         else if (key == "numberOfWalksInSeries")
             this->numberOfWalksInSeries = config.getUnsignedLong(key);
+        else if (key == "numberOfSplits")
+            this->numberOfSplits = config.getUnsignedLong(key);
         else if (key == "numberOfSeries")
             this->numberOfSeries = config.getUnsignedLong(key);
         else if (key == "storeTrajectories")
@@ -49,6 +51,7 @@ void Parameters::print(std::ostream& out) {
     out << "moveFilter            : " << this->moveFilter << std::endl;
     out << "drift                 : " << this->drift << std::endl;
     out << "numberOfWalksInSeries : " << this->numberOfWalksInSeries << std::endl;
+    out << "numberOfSplits        : " << this->numberOfSplits << std::endl;
     out << "numberOfSeries        : " << this->numberOfSeries << std::endl;
     out << "storeTrajectories     : " << (this->storeTrajectories ? "true" : "false") << std::endl;
     out << "seed                  : " << this->seed << std::endl;
@@ -59,5 +62,6 @@ void Parameters::validateParameters() const {
     Validate(this->numberOfSteps > 0);
     Validate(this->tracerRadius >= 0.f);
     Validate(this->numberOfWalksInSeries > 0);
+    Validate(this->numberOfSplits > 0);
     Validate(this->numberOfSeries > 0);
 }
