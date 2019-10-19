@@ -13,11 +13,7 @@
 #include "../TrajectoryBase.h"
 
 /**
- * @brief Trajectory created by CPURandomWalker.
- *
- * The subsequent points are added using CPUTrajectory::stayStill or CPUTrajectory::moveToPoint methods. This two
- * methods are also used to count the number of accepted steps - the use of stayStill does not increment the counter,
- * while moveToPoint does.
+ * @brief Trajectory created by CPURandomWalker or SplitRandomWalker.
  */
 class CPUTrajectory : public TrajectoryBase {
 public:
@@ -27,24 +23,25 @@ public:
     CPUTrajectory() = default;
 
     /**
-     * @brief Creates an empty trajectory, however the memory is reserved for @a numberOfPoint points INCLUDING initial
-     * tracer position.
+     * @brief Creates an empty trajectory, but memory is reserved for @a numberOfPoints + 1 for initial tracer
+     */
+    CPUTrajectory(std::size_t numberOfPoints);
+
+    /**
+     * @brief Append a @a point to the trajectory.
      *
-     * @param numberOfPoints desired number of point in the trajectory EXLCUDING the initial tracer position
-     * @param initialPosition initial position of a tracer; it will not be included in accepted steps
+     * The first point cannot be counted as accepted.
+     *
+     * @param point point to be added
+     * @param isAccepted if true, the accepted steps counter is increased
      */
-    CPUTrajectory(std::size_t numberOfPoints, Point initialPosition);
+    void addPoint(Point point, bool isAccepted = false);
 
     /**
-     * @brief Copies the last point of the trajectory to next. The accepted steps counter is not incremented.
+     * @brief Appends another trajectory at the end of this trajectory.
+     *
+     * The first point of @a trajectory has to match the end of this trajectory.
      */
-    void stayStill();
-
-    /**
-     * @brief Append a @a point to the trajectory and increments accepted step counter.
-     */
-    void moveToPoint(Point point);
-
     void appendAnotherTrajectory(const Trajectory &trajectory);
 };
 

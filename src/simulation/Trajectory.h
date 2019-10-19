@@ -52,6 +52,11 @@ public:
     virtual Point getLast() const = 0;
 
     /**
+     * @brief Clears the whole trajectory and resets the number of accepted steps.
+     */
+    virtual void clear() = 0;
+
+    /**
      * @brief Stores the trajectory in the output stream @a out in a text form.
      *
      * Each line contains one step in format "x y"

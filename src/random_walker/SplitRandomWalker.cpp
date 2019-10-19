@@ -17,6 +17,8 @@ SplitRandomWalker::SplitRandomWalker(std::size_t numberOfSplits, RandomWalker &r
 {
     Expects(this->numberOfSplits > 0);
     this->trajectories.resize(this->numberOfTrajectories);
+    for (auto &trajectory : this->trajectories)
+        trajectory = CPUTrajectory(this->numberOfSplits * this->numberOfStepsPerSplit);
 }
 
 std::vector<Tracer> SplitRandomWalker::getRandomInitialTracersVector() {
@@ -24,12 +26,10 @@ std::vector<Tracer> SplitRandomWalker::getRandomInitialTracersVector() {
 }
 
 void SplitRandomWalker::run(std::ostream &logger, const std::vector<Tracer> &initialTracers) {
-    // dirty reset of trajectories until refactoring
-    this->trajectories.resize(0);
-    this->trajectories.resize(this->numberOfTrajectories);
+    for (auto &trajectory : this->trajectories)
+        trajectory.clear();
 
     std::vector<Tracer> currentInitialTracers(initialTracers.begin(), initialTracers.end());
-
     for (std::size_t i = 0; i < this->numberOfSplits; i++) {
         std::size_t startStep = i * numberOfStepsPerSplit;
         std::size_t endStep = startStep + numberOfStepsPerSplit - 1;

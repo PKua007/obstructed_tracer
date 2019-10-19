@@ -32,7 +32,17 @@ public:
     SplitRandomWalker(std::size_t numberOfSplits, RandomWalker &randomWalker);
 
     std::vector<Tracer> getRandomInitialTracersVector() override;
+
+    /**
+     * @brief It performs the whole trajectory run by using underlying RandomWalker passed in the constructor.
+     *
+     * The trajectory is split in parts and each part is a separate run of the underlying RandomWalker.
+     *
+     * @param logger stream to log information on the process
+     * @param initialTracers initial tracer positions for random walks
+     */
     void run(std::ostream &logger, const std::vector<Tracer> &initialTracers) override;
+
     std::size_t getNumberOfTrajectories() const override;
     std::size_t getNumberOfSteps() const override;
     const Trajectory &getTrajectory(std::size_t index) const override;

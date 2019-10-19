@@ -36,6 +36,12 @@ public:
     Point operator[](std::size_t index) const override { return this->trajectory[index]; }
     Point getFirst() const override { return this->trajectory.front(); }
     Point getLast() const override{ return this->trajectory.back(); }
+
+    void clear() override {
+        this->trajectory.clear();
+        this->acceptedSteps = 0;
+    }
+
     void store(std::ostream &out) const override {
         std::copy(this->trajectory.begin(), this->trajectory.end(), std::ostream_iterator<Point>(out, "\n"));
     }

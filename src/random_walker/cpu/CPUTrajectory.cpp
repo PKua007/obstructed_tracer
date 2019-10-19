@@ -5,24 +5,22 @@
  *      Author: pkua
  */
 
+#include <ostream>
+
 #include "CPUTrajectory.h"
 #include "utils/Assertions.h"
 
-#include <ostream>
-
-CPUTrajectory::CPUTrajectory(std::size_t numberOfPoints, Point initialPosition) {
-    // + 1 for initial tracer
+CPUTrajectory::CPUTrajectory(std::size_t numberOfPoints) {
+    // + 1 for the initial tracer
     this->trajectory.reserve(numberOfPoints + 1);
-    this->trajectory.push_back(initialPosition);
 }
 
-void CPUTrajectory::stayStill() {
-    this->trajectory.push_back(this->trajectory.back());
-}
+void CPUTrajectory::addPoint(Point point, bool isAccepted) {
+    Expects ( !(this->getSize() == 0 && isAccepted) );
 
-void CPUTrajectory::moveToPoint(Point point) {
     this->trajectory.push_back(point);
-    this->acceptedSteps++;
+    if (isAccepted)
+        this->acceptedSteps++;
 }
 
 void CPUTrajectory::appendAnotherTrajectory(const Trajectory &trajectory) {
