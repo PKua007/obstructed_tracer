@@ -12,8 +12,8 @@
 
 #include "simulation/RandomWalker.h"
 #include "GPUTrajectory.h"
-#include "../MoveGenerator.h"
-#include "../MoveFilter.h"
+#include "MoveGenerator.h"
+#include "MoveFilter.h"
 #include "simulation/Timer.h"
 
 /**

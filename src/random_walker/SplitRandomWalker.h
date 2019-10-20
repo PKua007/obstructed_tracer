@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "simulation/RandomWalker.h"
-#include "cpu/CPUTrajectory.h"
+#include "CPUTrajectory.h"
 
 /**
  * @brief RandomWalker, which encapsulated another RandomWalker, and performs walks in parts.

@@ -10,7 +10,7 @@
 
 #include <vector>
 
-#include "../TrajectoryBase.h"
+#include "TrajectoryBase.h"
 
 /**
  * @brief Trajectory on GPU. The data is copied from GPU memory and number of accepted steps it given in the

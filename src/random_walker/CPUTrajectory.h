@@ -10,7 +10,7 @@
 
 #include <vector>
 
-#include "../TrajectoryBase.h"
+#include "TrajectoryBase.h"
 
 /**
  * @brief Trajectory created by CPURandomWalker or SplitRandomWalker.

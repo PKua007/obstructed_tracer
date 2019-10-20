@@ -12,8 +12,8 @@
 #include <iosfwd>
 
 #include "simulation/RandomWalkerFactory.h"
-#include "../MoveGenerator.h"
-#include "../MoveFilter.h"
+#include "MoveGenerator.h"
+#include "MoveFilter.h"
 #include "move_filter/image_move_filter/ImageBoundaryConditions.h"
 #include "CPURandomWalker.h"
 
