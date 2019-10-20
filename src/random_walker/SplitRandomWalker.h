@@ -11,14 +11,14 @@
 #include <vector>
 
 #include "simulation/RandomWalker.h"
-#include "CPUTrajectory.h"
+#include "TrajectoryImpl.h"
 
 /**
  * @brief RandomWalker, which encapsulated another RandomWalker, and performs walks in parts.
  *
  * If we imagine that trajectories are rows of a 2d array, it used one underlying RandomWalker run to fill first n
  * columns (so n first steps of all trajectories), then second run to next n columns and so on. The initial positions
- * for the first run are taken from underlying RandomWalker RandomWalker::randomInitialTracersVector method.
+ * for the first run are taken from underlying RandomWalker RandomWalker::getRandomInitialTracersVector method.
  */
 class SplitRandomWalker : public RandomWalker {
 private:
@@ -26,7 +26,7 @@ private:
     std::size_t numberOfSplits{};
     std::size_t numberOfTrajectories{};
     RandomWalker &randomWalker;
-    std::vector<CPUTrajectory> trajectories;
+    std::vector<TrajectoryImpl> trajectories;
 
 public:
     SplitRandomWalker(std::size_t numberOfSplits, RandomWalker &randomWalker);

@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "simulation/RandomWalker.h"
-#include "GPUTrajectory.h"
+#include "TrajectoryImpl.h"
 #include "MoveGenerator.h"
 #include "MoveFilter.h"
 #include "simulation/Timer.h"
@@ -56,7 +56,7 @@ private:
         /* Copies trajectory data from GPU to CPU. The vector has to be initialized to have size equal to
          * numberOfTrajectories, however the trajectories in the vector themselves require no special treatment.
          */
-        void copyToCPU(std::vector<GPUTrajectory> &trajectories);
+        void copyToCPU(std::vector<TrajectoryImpl> &trajectories);
     };
 
     std::size_t     numberOfTrajectories{};
@@ -64,7 +64,7 @@ private:
     std::size_t     numberOfMoveFilterSetupThreads{};
     MoveGenerator   *moveGenerator{};
     MoveFilter      *moveFilter{};
-    std::vector<GPUTrajectory> trajectories;
+    std::vector<TrajectoryImpl> trajectories;
     TrajectoriesOnGPU trajectoriesOnGPU;
 
     static constexpr int blockSize = 512;
@@ -99,6 +99,7 @@ public:
      * After the walks results on GPU are copied to CPU and can be accessed.
      *
      * @param logger output stream to show progress
+     * @param initialTracers initial tracer positions for random walks
      */
     void run(std::ostream &logger, const std::vector<Tracer> &initialTracers) override;
 

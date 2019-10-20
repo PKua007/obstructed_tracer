@@ -31,9 +31,9 @@ CPURandomWalker::CPURandomWalker(std::size_t numberOfTrajectories, RandomWalker:
     logger << "done." << std::endl;
 }
 
-CPUTrajectory CPURandomWalker::runSingleTrajectory(Tracer initialTracer) {
+TrajectoryImpl CPURandomWalker::runSingleTrajectory(Tracer initialTracer) {
     Tracer tracer = initialTracer;
-    CPUTrajectory trajectory(this->numberOfSteps);
+    TrajectoryImpl trajectory(this->numberOfSteps);
     trajectory.addPoint(tracer.getPosition());
 
     for (std::size_t i = 0; i < this->numberOfSteps; i++) {
@@ -85,6 +85,6 @@ std::vector<Tracer> CPURandomWalker::getRandomInitialTracersVector() {
     return result;
 }
 
-const Trajectory& CPURandomWalker::getTrajectory(std::size_t index) const {
+const Trajectory &CPURandomWalker::getTrajectory(std::size_t index) const {
     return this->trajectories[index];
 }

@@ -19,7 +19,7 @@ SplitRandomWalker::SplitRandomWalker(std::size_t numberOfSplits, RandomWalker &r
     Expects(this->numberOfSplits > 0);
     this->trajectories.resize(this->numberOfTrajectories);
     for (auto &trajectory : this->trajectories)
-        trajectory = CPUTrajectory(this->numberOfSplits * this->numberOfStepsPerSplit);
+        trajectory = TrajectoryImpl(this->numberOfSplits * this->numberOfStepsPerSplit);
 }
 
 std::vector<Tracer> SplitRandomWalker::getRandomInitialTracersVector() {
