@@ -24,6 +24,15 @@ public:
     CUDA_HOSTDEV Tracer(Point position, float radius) : position{position}, radius{radius} { }
 
     /**
+     * @brief Replaces the old position of a tracer leaving the tracer radius unaltered.
+     * @return the position of the tracer
+     */
+    CUDA_HOSTDEV Tracer &operator=(Point position) {
+        this->position = position;
+        return *this;
+    }
+
+    /**
      * @brief Returns the position of the tracer.
      * @return the position of the tracer
      */

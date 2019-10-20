@@ -13,9 +13,9 @@
 #include <random>
 
 #include "simulation/RandomWalker.h"
-#include "CPUTrajectory.h"
-#include "../MoveGenerator.h"
-#include "../MoveFilter.h"
+#include "TrajectoryImpl.h"
+#include "MoveGenerator.h"
+#include "MoveFilter.h"
 
 /**
  * @brief CPU implementation of RandomWalker performing walks in parallel using OpenMP.
@@ -32,9 +32,9 @@ private:
     Move            drift{};
     MoveGenerator   *moveGenerator{};
     MoveFilter      *moveFilter{};
-    std::vector<CPUTrajectory> trajectories;
+    std::vector<TrajectoryImpl> trajectories;
 
-    CPUTrajectory runSingleTrajectory();
+    TrajectoryImpl runSingleTrajectory(Tracer initialTracer);
 
 public:
     /**
@@ -57,10 +57,13 @@ public:
      * @brief Performs random walks which number was set in the constructor in parallel using OpenMP.
      *
      * @param logger the output stream which will be used to print some info about the progress
+     * @param initialTracers initial tracer positions for random walks
      */
-    void run(std::ostream &logger) override;
+    void run(std::ostream &logger, const std::vector<Tracer> &initialTracers) override;
 
+    std::vector<Tracer> getRandomInitialTracersVector() override;
     std::size_t getNumberOfTrajectories() const override;
+    std::size_t getNumberOfSteps() const override;
     const Trajectory &getTrajectory(std::size_t index) const override;
 };
 

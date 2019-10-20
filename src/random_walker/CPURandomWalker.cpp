@@ -7,6 +7,8 @@
 
 #include <ostream>
 #include <iostream>
+#include <algorithm>
+#include <functional>
 
 #include "CPURandomWalker.h"
 #include "utils/Assertions.h"
@@ -29,30 +31,31 @@ CPURandomWalker::CPURandomWalker(std::size_t numberOfTrajectories, RandomWalker:
     logger << "done." << std::endl;
 }
 
-CPUTrajectory CPURandomWalker::runSingleTrajectory() {
-    CPUTrajectory trajectory(this->numberOfSteps + 1);
-    Tracer tracer = this->moveFilter->randomValidTracer();
-    trajectory.moveToPoint(tracer.getPosition());
+TrajectoryImpl CPURandomWalker::runSingleTrajectory(Tracer initialTracer) {
+    Tracer tracer = initialTracer;
+    TrajectoryImpl trajectory(this->numberOfSteps);
+    trajectory.addPoint(tracer.getPosition());
+
     for (std::size_t i = 0; i < this->numberOfSteps; i++) {
         Move move = this->moveGenerator->generateMove() + drift;
         if (this->moveFilter->isMoveValid(tracer, move)) {
             tracer += move;
-            trajectory.moveToPoint(tracer.getPosition());
+            trajectory.addPoint(tracer.getPosition(), true);
         } else {
-            trajectory.stayStill();
+            trajectory.addPoint(tracer.getPosition(), false);
         }
     }
     return trajectory;
 }
 
-void CPURandomWalker::run(std::ostream &logger) {
+void CPURandomWalker::run(std::ostream &logger, const std::vector<Tracer> &initialTracers) {
     logger << "[CPURandomWalker::run] Simulating: " << std::flush;
 
     Timer timer;
     timer.start();
     _OMP_PARALLEL_FOR
     for (std::size_t i = 0; i < this->numberOfTrajectories; i++) {
-        this->trajectories[i] = this->runSingleTrajectory();
+        this->trajectories[i] = this->runSingleTrajectory(initialTracers[i]);
 
         if (i % 100 == 99) {
             _OMP_CRITICAL(stdout)
@@ -72,6 +75,16 @@ std::size_t CPURandomWalker::getNumberOfTrajectories() const {
     return this->numberOfTrajectories;
 }
 
-const Trajectory& CPURandomWalker::getTrajectory(std::size_t index) const {
+std::size_t CPURandomWalker::getNumberOfSteps() const {
+    return this->numberOfSteps;
+}
+
+std::vector<Tracer> CPURandomWalker::getRandomInitialTracersVector() {
+    std::vector<Tracer> result(this->numberOfTrajectories);
+    std::generate(result.begin(), result.end(), std::bind(&MoveFilter::randomValidTracer, this->moveFilter));
+    return result;
+}
+
+const Trajectory &CPURandomWalker::getTrajectory(std::size_t index) const {
     return this->trajectories[index];
 }
