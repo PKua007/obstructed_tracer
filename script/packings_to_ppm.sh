@@ -8,8 +8,8 @@ if [ $# == 0 ] ; then
     echo "       packing_[particle]_[angle]_[sigma]_[additional attributes]_..."
     echo "       ..<volume>_[index].bin"
     echo "   <...> things are ignored, [...] are regex-group-matched"
-    echo "2) Generates Mathematica files from {each of them}"
-    echo "       ./rsa.2.0 wolfram -f (input file) {packing} true"
+    echo "2) Generates periodic povray files from {each of them}"
+    echo "       ./rsa.2.0 povray -f (input file) {packing} true"
     echo "3) Creates *ppm files of packings using wolfram_ppm_export.sh"
     echo "4) Renames and moves them to folder:"
     echo "       [particle]__[angle]_[sigma]__(drift r)_(drift theta)..."
@@ -18,7 +18,7 @@ if [ $# == 0 ] ; then
     echo "       ...(drift r)_(drift theta) / [index].ppm"
     echo "   (...) things are taken from arguments."
     echo "   This signature contains all important information"
-    echo "5) Deletes all intermediate files: *nb, *nb.m"
+    echo "5) Deletes all intermediate files: *pov"
     echo
 fi
 
@@ -34,14 +34,14 @@ inputFile=$4
 
 pattern='^packing_([a-zA-Z0-9]+)_([0-9.\-]+)_([0-9.]+)(|_.*)_[0-9]+_([0-9]+)\.bin$'
 
-echo "******** Making images: generating *nb files ********"
+echo "******** Making images: generating *pov files ********"
 
 for packing in $(ls *bin) ; do
     if [[ $packing =~ $pattern ]] ; then
-        ./rsa.2.0 wolfram -f "$inputFile" "$packing" true
+        ./rsa.2.0 povray -f "$inputFile" "$packing" true
 
         if [[ $? -ne 0 ]] ; then
-            echo "Wolframing ${packing} failed. Aborting the rest"
+            echo "Povraying ${packing} failed. Aborting the rest"
             exit 1
         fi
     fi
@@ -49,24 +49,15 @@ done
 
 echo "******** Making images: exporting images ********"
 
-imagesGenerated="false"
-while [ $imagesGenerated == "false" ] ; do
-    ./wolfram_ppm_exporter.sh $resolution
+for packing in $(ls *bin) ; do
+    if [[ $packing =~ $pattern ]] ; then
+        povray "$packing.pov" +W${resolution} +H${resolution} +FP8
 
-    if [[ $? -ne 0 ]] ; then
-        echo "Making images failed. Aborting moving files"
-        exit 1
-    fi
-
-    # MathKernel sometimes crashed. We need to check if images are generated
-    imagesGenerated="true"
-    for packing in $(ls *bin) ; do
-        correspondingPPMFile="${packing}.nb.ppm" 
-        if [ ! -f "${correspondingPPMFile}" ] ; then
-            imagesGenerated="false"
-            echo "Mathematica skrewed - missing ${correspondingPPMFile}. To be redone"
+        if [[ $? -ne 0 ]] ; then
+            echo "Exporting ${packing}.ppm failed. Aborting the rest"
+            exit 1
         fi
-    done
+    fi
 done
 
 echo "******** Making images: moving images and deleting temporary files ********"
@@ -78,9 +69,9 @@ for packing in $(ls *bin) ; do
         sigma=${BASH_REMATCH[3]}
         index=${BASH_REMATCH[5]}
 
-        rm "${packing}.nb" "${packing}.nb.m"
+        rm "${packing}.pov"
         folder="${particle}__${angle}_${sigma}__${driftR}_${driftTheta}"
         mkdir --parents "${folder}"
-        mv "${packing}.nb.ppm" "${folder}/${index}.ppm"
+        mv "${packing}.ppm" "${folder}/${index}.ppm"
     fi
 done

@@ -30,7 +30,7 @@ for file in $(ls $dataFolder) ; do
         driftTheta=${BASH_REMATCH[3]}
 
         resultArray=($(./obstructed_tracer analyze ${dataFolder}/${file}/input.txt ${dataFolder}/${file}_msd.txt \
-            | sed -r -n 's/^.*D = ([0-9.e-]+) ± ([0-9.e-]+), α = ([0-9.e-]+) ± ([0-9.e-]+), R² = ([0-9.e-]+)$/\1 \2 \3 \4 \5/p'))
+            | sed -r -n 's/^.*D = ([0-9.e+-]+) ± ([0-9.e+-]+), α = ([0-9.e+-]+) ± ([0-9.e+-]+), R² = ([0-9.e+-]+)$/\1 \2 \3 \4 \5/p'))
         D=${resultArray[0]}
         dD=${resultArray[1]}
         alpha=${resultArray[2]}

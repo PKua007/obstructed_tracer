@@ -50,4 +50,4 @@ cat tracer_input_pattern.txt | sed "s/move_filter_placeholder/${moveFilter}/g
 
 outputPrefix="${folder}"
 echo "Prepared ${numberOfMoveFilters} simulations. Run them using command:"
-echo "(cd ${folder} && ../obstructed_tracer input.txt ../${outputPrefix})"
+echo "(cd ${folder} && ../obstructed_tracer perform_walk input.txt ../${outputPrefix})"
