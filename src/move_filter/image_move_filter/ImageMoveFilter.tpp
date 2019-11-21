@@ -28,8 +28,8 @@ namespace {
 
 template <typename BoundaryConditions>
 ImageMoveFilter<BoundaryConditions>::ImageMoveFilter(unsigned int *intImageData, size_t width, size_t height,
-                                 unsigned long seed, size_t numberOfTrajectories) :
-        width{width}, height{height}, imageBC{imageBC} {
+                                                     unsigned long seed, size_t numberOfTrajectories) :
+        width{width}, height{height}, imageBC(width, height) {
     this->initializeGenerators(seed, numberOfTrajectories);
 
     this->validPointsMapSize = this->width * this->height;
@@ -43,8 +43,6 @@ ImageMoveFilter<BoundaryConditions>::ImageMoveFilter(unsigned int *intImageData,
             asm("trap;");
         }
     #endif
-
-    this->imageBC.setupDimensions(this->width, this->height);
 
     // Image y axis starts from left upper corner downwards, so image is scanned from the bottom left, because
     // validPointsMap is in "normal" coordinate system, with (0, 0) in left bottom corner

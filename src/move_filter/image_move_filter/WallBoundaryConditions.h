@@ -19,10 +19,8 @@ private:
     std::size_t height{};
 
 public:
-    CUDA_HOSTDEV void setupDimensions(size_t width, size_t height) {
-        this->width = width;
-        this->height = height;
-    }
+    CUDA_HOSTDEV WallBoundaryConditions(size_t width, size_t height) : width{width}, height{height}
+    { }
 
     /**
      * @brief Returns true, if all pixels of a disk placed in @a imagePoint are in the bounds of the image.

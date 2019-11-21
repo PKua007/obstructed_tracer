@@ -21,10 +21,8 @@ private:
     CUDA_HOSTDEV int mod(int a, int b) const { return (a % b + b) % b; }
 
 public:
-    CUDA_HOSTDEV void setupDimensions(size_t width, size_t height) {
-        this->width = width;
-        this->height = height;
-    }
+    CUDA_HOSTDEV PeriodicBoundaryConditions(size_t width, size_t height) : width{width}, height{height}
+    { }
 
     /**
      * @brief All points are accepted due to infinite repeating of periodic boundary conditions - return always true.
