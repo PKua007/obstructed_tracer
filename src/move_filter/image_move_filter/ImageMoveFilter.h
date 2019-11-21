@@ -12,7 +12,6 @@
 #include <curand_kernel.h>
 
 #include "random_walker/MoveFilter.h"
-#include "ImageBoundaryConditions.h"
 #include "ImagePoint.h"
 
 /**
@@ -23,6 +22,7 @@
  * eg. free and periodic. The pixels available for finite-sized tracers are precomputed, to the performance is not
  * affected by size of a tracer. Most methods are common for CPU or GPU, however there are some divergencies.
  */
+template <typename BoundaryConditions>
 class ImageMoveFilter: public MoveFilter {
 private:
 
@@ -41,7 +41,7 @@ private:
     float tracerRadius{};
     size_t width{};
     size_t height{};
-    ImageBoundaryConditions *imageBC{};
+    BoundaryConditions imageBC{};
     bool* validPointsMap{};   // This is calculated from image
     bool* validTracersMap{};  // This is calculated in ImageMoveFilter::setupForTracerRadius
     size_t validPointsMapSize{};
@@ -79,7 +79,7 @@ public:
      * prepare independent random generators for each
      */
     CUDA_HOSTDEV ImageMoveFilter(unsigned int *intImageData, size_t width, size_t height,
-                                 ImageBoundaryConditions *imageBC, unsigned long seed, size_t numberOfTrajectories);
+                                 unsigned long seed, size_t numberOfTrajectories);
 
     CUDA_HOSTDEV ImageMoveFilter(const ImageMoveFilter &other) = delete;
     CUDA_HOSTDEV ImageMoveFilter operator=(ImageMoveFilter other) = delete;
@@ -141,5 +141,8 @@ public:
     std::size_t getNumberOfValidTracers();
 #endif
 };
+
+
+#include "ImageMoveFilter.tpp"
 
 #endif /* IMAGEMOVEFILTER_H_ */

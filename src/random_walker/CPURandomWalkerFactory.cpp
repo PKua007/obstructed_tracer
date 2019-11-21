@@ -35,21 +35,6 @@ std::unique_ptr<MoveGenerator> CPURandomWalkerFactory::createMoveGenerator(const
         throw std::runtime_error("Unknown MoveGenerator: " + moveGeneratorType);
 }
 
-std::unique_ptr<ImageBoundaryConditions>
-CPURandomWalkerFactory::createImageBoundaryConditions(std::istringstream &moveFilterStream) {
-    std::string imageBCType;
-    moveFilterStream >> imageBCType;
-    if (!moveFilterStream)
-        throw std::runtime_error("Malformed ImageMoveFilter parameters");
-
-    if (imageBCType == "WallBoundaryConditions")
-        return std::unique_ptr<ImageBoundaryConditions>(new WallBoundaryConditions());
-    else if (imageBCType == "PeriodicBoundaryConditions")
-        return std::unique_ptr<ImageBoundaryConditions>(new PeriodicBoundaryConditions());
-    else
-        throw std::runtime_error("Unknown ImageBoundaryConditions: " + imageBCType);
-}
-
 std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createImageMoveFilter(std::istringstream &moveFilterStream,
                                                                           std::ostream &logger)
 {
@@ -68,11 +53,24 @@ std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createImageMoveFilter(std::i
     logger << "[CPURandomWalkerFactory] Loaded image " << imageFilename << " (" << image.getWidth() << "px x ";
     logger << image.getHeight() << "px)" << std::endl;
 
-    this->imageBC = createImageBoundaryConditions(moveFilterStream);
+    std::string imageBCType;
+    moveFilterStream >> imageBCType;
+    if (!moveFilterStream)
+        throw std::runtime_error("Malformed ImageMoveFilter parameters");
 
-    return std::unique_ptr<MoveFilter>(new ImageMoveFilter(imageData.data(), image.getWidth(), image.getHeight(),
-                                                           this->imageBC.get(), this->seedGenerator(),
-                                                           this->numberOfWalksInSeries));
+    if (imageBCType == "WallBoundaryConditions") {
+        return std::unique_ptr<ImageMoveFilter<WallBoundaryConditions>>(
+            new ImageMoveFilter<WallBoundaryConditions>(imageData.data(), image.getWidth(), image.getHeight(),
+                                                        this->seedGenerator(), this->numberOfWalksInSeries)
+        );
+    } else if (imageBCType == "PeriodicBoundaryConditions") {
+        return std::unique_ptr<ImageMoveFilter<PeriodicBoundaryConditions>>(
+            new ImageMoveFilter<PeriodicBoundaryConditions>(imageData.data(), image.getWidth(), image.getHeight(),
+                                                            this->seedGenerator(), this->numberOfWalksInSeries)
+        );
+    } else {
+        throw std::runtime_error("Unknown ImageBoundaryConditions: " + imageBCType);
+    }
 }
 
 std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createMoveFilter(const std::string &moveFilterParameters,
