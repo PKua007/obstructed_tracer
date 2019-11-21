@@ -90,30 +90,26 @@ namespace {
     __global__
     void create_move_filter(unsigned long seed, size_t numberOfTrajectories, MoveFilterType moveFilterType,
                             uint32_t *intImageData, size_t width, size_t height,
-                            BoundaryConditionsType boundaryConditionsType, MoveFilter **moveFilter,
-                            ImageBoundaryConditions **boundaryConditions)
+                            BoundaryConditionsType boundaryConditionsType, MoveFilter **moveFilter)
     {
         if (!CUDA_IS_IT_FIRST_THREAD)
             return;
 
-        if (moveFilterType == IMAGE) {
-            if (boundaryConditionsType == WALL)
-                (*boundaryConditions) = new WallBoundaryConditions();
-            else if (boundaryConditionsType == PERIODIC)
-                (*boundaryConditions) = new PeriodicBoundaryConditions();
-            else
-                (*boundaryConditions) = nullptr;
-        } else {
-            (*boundaryConditions) = nullptr;
-        }
-
-        if (moveFilterType == DEFAULT)
+        if (moveFilterType == DEFAULT) {
             (*moveFilter) = new DefaultMoveFilter();
-        else if (moveFilterType == IMAGE)
-            (*moveFilter) = new ImageMoveFilter(intImageData, width, height, *boundaryConditions, seed,
-                                                numberOfTrajectories);
-        else
+        } else if (moveFilterType == IMAGE) {
+            if (boundaryConditionsType == WALL) {
+                (*moveFilter) = new ImageMoveFilter<WallBoundaryConditions>(intImageData, width, height, seed,
+                                                                            numberOfTrajectories);
+            } else if (boundaryConditionsType == PERIODIC) {
+                (*moveFilter) = new ImageMoveFilter<PeriodicBoundaryConditions>(intImageData, width, height, seed,
+                                                                                numberOfTrajectories);
+            } else {
+                (*moveFilter) = nullptr;
+            }
+        } else {
             (*moveFilter) = nullptr;
+        }
     }
 
     class MoveFilterOnGPUFactory {
@@ -154,7 +150,6 @@ namespace {
 
     public:
         MoveFilter *moveFilter{};
-        ImageBoundaryConditions *boundaryConditions{};
         std::size_t numberOfSetupThreads{};
 
         MoveFilterOnGPUFactory(const std::string &moveFilterString, std::ostream &logger) {
@@ -180,11 +175,9 @@ namespace {
 
         void create(unsigned long seed, std::size_t numberOfWalks) {
             MoveFilter **moveFilterPlaceholder{};
-            ImageBoundaryConditions **boundaryConditionsPlaceholder{};
             uint32_t *gpuIntImageData{};
 
             cudaCheck( cudaMalloc(&moveFilterPlaceholder, sizeof(MoveFilter**)) );
-            cudaCheck( cudaMalloc(&boundaryConditionsPlaceholder, sizeof(ImageBoundaryConditions**)) );
 
             auto intImageData = this->image.getIntData();
             if (this->moveFilterType == IMAGE) {
@@ -195,16 +188,13 @@ namespace {
 
             create_move_filter<<<1, 32>>>(seed, numberOfWalks, this->moveFilterType, gpuIntImageData,
                                           this->image.getWidth(), this->image.getHeight(), this->boundaryConditionsType,
-                                          moveFilterPlaceholder, boundaryConditionsPlaceholder);
+                                          moveFilterPlaceholder);
             cudaCheck( cudaDeviceSynchronize() );
 
             cudaCheck( cudaMemcpy(&(this->moveFilter), moveFilterPlaceholder, sizeof(MoveFilter*),
                                   cudaMemcpyDeviceToHost) );
-            cudaCheck( cudaMemcpy(&(this->boundaryConditions), boundaryConditionsPlaceholder,
-                                  sizeof(ImageBoundaryConditions*), cudaMemcpyDeviceToHost) );
 
             cudaCheck( cudaFree(moveFilterPlaceholder) );
-            cudaCheck( cudaFree(boundaryConditionsPlaceholder) );
             cudaCheck( cudaFree(gpuIntImageData) );
         }
     };
@@ -212,13 +202,12 @@ namespace {
 
 
 __global__
-void delete_objects(MoveGenerator *moveGenerator, MoveFilter *moveFilter, ImageBoundaryConditions *boundaryConditions) {
+void delete_objects(MoveGenerator *moveGenerator, MoveFilter *moveFilter) {
     if (!CUDA_IS_IT_FIRST_THREAD)
         return;
 
     delete moveGenerator;
     delete moveFilter;
-    delete boundaryConditions;
 }
 
 
@@ -236,7 +225,6 @@ GPURandomWalkerFactory::GPURandomWalkerFactory(unsigned long seed, const WalkerP
 
     this->moveGenerator = gpuMoveGeneratorFactory.moveGenerator;
     this->moveFilter = gpuMoveFilterFactory.moveFilter;
-    this->imageBoundaryConditions = gpuMoveFilterFactory.boundaryConditions;
 
     this->randomWalker.reset(new GPURandomWalker(this->numberOfWalksInSeries, walkerParameters.walkParameters,
                                                  gpuMoveFilterFactory.numberOfSetupThreads, this->moveGenerator,
@@ -244,7 +232,7 @@ GPURandomWalkerFactory::GPURandomWalkerFactory(unsigned long seed, const WalkerP
 }
 
 GPURandomWalkerFactory::~GPURandomWalkerFactory() {
-    delete_objects<<<1, 32>>>(this->moveGenerator, this->moveFilter, this->imageBoundaryConditions);
+    delete_objects<<<1, 32>>>(this->moveGenerator, this->moveFilter);
     cudaCheck( cudaDeviceSynchronize() );
 }
 

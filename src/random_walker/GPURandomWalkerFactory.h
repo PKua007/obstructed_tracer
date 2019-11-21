@@ -13,7 +13,6 @@
 
 #include "simulation/RandomWalkerFactory.h"
 #include "GPURandomWalker.h"
-#include "move_filter/image_move_filter/ImageBoundaryConditions.h"
 
 /**
  * @brief A class which prepares GPURandomWalker.
@@ -29,7 +28,6 @@ private:
     std::mt19937 seedGenerator;
     MoveGenerator *moveGenerator;
     MoveFilter *moveFilter;
-    ImageBoundaryConditions *imageBoundaryConditions;
     std::unique_ptr<GPURandomWalker> randomWalker;
 
 public:
