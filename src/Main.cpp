@@ -61,10 +61,15 @@ namespace {
         MSDData msdData;
         msdData.restore(msdFile);
 
-        Analyzer analyzer(parameters);
-        Analyzer::Result result = analyzer.analyze(msdData);
-        std::cout << "[analyze] Results: D = " << result.D << ", α = " << result.alpha << ", R² = " << result.R2;
+        Analyzer analyzer(parameters, 0.01, 1.);    // For a while hardcoded range [t_max/100, t_max]
+        analyzer.analyze(msdData);
+        Analyzer::Result rSquare = analyzer.getRSquareResult();
+        Analyzer::Result rVariance = analyzer.getRVarianceResult();
+
+        std::cout << "[analyze] <r²>: D = " << rSquare.D << ", α = " << rSquare.alpha << ", R² = " << rSquare.R2;
         std::cout << std::endl;
+        std::cout << "[analyze] <var(x) + var(y)>: D = " << rVariance.D << ", α = " << rVariance.alpha << ", R² = ";
+        std::cout << rVariance.R2 << std::endl;
 
         return EXIT_SUCCESS;
     }
