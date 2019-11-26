@@ -48,6 +48,10 @@ private:
     double relativeRangeEnd{};
     Result rSquareResult;
     Result rVarianceResult;
+    double lastPointCorrelation{};
+    double middlePointCorrelation{};
+
+    double calculateCorrelation(MSDData::Entry msdEntry);
 
 public:
     /**
@@ -82,7 +86,7 @@ public:
     void analyze(const MSDData &msdData);
 
     /**
-     * @brief Returns the result of &lt;r<sup>2</sup>&gt;(t) fit
+     * @brief Returns the result of &lt;r<sup>2</sup>&gt;(t) fit.
      * @return the result of &lt;r<sup>2</sup>&gt;(t) fit
      */
     const Result& getRSquareResult() const {
@@ -90,11 +94,27 @@ public:
     }
 
     /**
-     * @brief Returns the result of &lt;var(x)+var(y)&gt;(t) fit
+     * @brief Returns the result of &lt;var(x)+var(y)&gt;(t) fit.
      * @return the result of &lt;var(x)+var(y)&gt;(t) fit
      */
     const Result& getRVarianceResult() const {
         return rVarianceResult;
+    }
+
+    /**
+     * @brief Returns the correlation cov(x, y)/&radic;(var(x) var(y)) for the last point in MSD data.
+     * @return the correlation cov(x, y)/&radic;(var(x) var(y)) for the last point in MSD data
+     */
+    double getLastPointCorrelation() const {
+        return lastPointCorrelation;
+    }
+
+    /**
+     * @brief Returns the correlation cov(x, y)/&radic;(var(x) var(y)) for the middle point in log scale in MSD data.
+     * @return the correlation cov(x, y)/&radic;(var(x) var(y)) forthe middle point in log scale in MSD data
+     */
+    double getMiddlePointCorrelation() const {
+        return middlePointCorrelation;
     }
 };
 

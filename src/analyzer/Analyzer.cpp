@@ -5,10 +5,12 @@
  *      Author: pkua
  */
 
+#include <iostream>
+#include <cmath>
+
 #include "Analyzer.h"
 #include "PowerRegression.h"
 #include "utils/Assertions.h"
-#include <iostream>
 
 void Analyzer::analyze(const MSDData &msdData) {
     std::size_t trajectorySize = msdData.size();
@@ -35,4 +37,17 @@ void Analyzer::analyze(const MSDData &msdData) {
     this->rVarianceResult.D = regression.getMultiplier();
     this->rVarianceResult.alpha = regression.getExponent();
     this->rVarianceResult.R2 = regression.getR2();
+
+    std::size_t middleIndex = static_cast<size_t>(std::exp(std::log(static_cast<double>(trajectorySize)) / 2.));
+    Assert(middleIndex >= 0 && middleIndex < trajectorySize);
+    this->lastPointCorrelation = this->calculateCorrelation(msdData[trajectorySize - 1]);
+    this->middlePointCorrelation = this->calculateCorrelation(msdData[middleIndex]);
+}
+
+double Analyzer::calculateCorrelation(MSDData::Entry msdEntry) {
+    double covXY = msdEntry.xy - msdEntry.x*msdEntry.y;
+    double varX = msdEntry.x2 - msdEntry.x*msdEntry.x;
+    double varY = msdEntry.y2 - msdEntry.y*msdEntry.y;
+
+    return covXY/std::sqrt(varX*varY);
 }
