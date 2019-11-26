@@ -23,20 +23,40 @@ fi
 
 inputPattern='^'"$particleSignature"'__[0-9.\-]+_([0-9.\-]+)__([0-9.]+)_([0-9.-]+)$'
 
+echo '"sigma" "drift t" "drift θ" "<r²> D" "<r²> dD" "<r²> α" "<r²> dα" "<r²> R²" "Σvar D" "Σvar dD" "Σvar α" "Σvar dα" "Σvar R²" "last p. corr" "middle p. corr"'
+
 for file in $(ls $dataFolder) ; do
     if [[ $file =~ $inputPattern ]] ; then
         sigma=${BASH_REMATCH[1]}
         driftR=${BASH_REMATCH[2]}
         driftTheta=${BASH_REMATCH[3]}
 
-        resultArray=($(./obstructed_tracer analyze ${dataFolder}/${file}/input.txt ${dataFolder}/${file}_msd.txt \
-            | sed -r -n 's/^.*D = ([0-9.e+-]+) ± ([0-9.e+-]+), α = ([0-9.e+-]+) ± ([0-9.e+-]+), R² = ([0-9.e+-]+)$/\1 \2 \3 \4 \5/p'))
-        D=${resultArray[0]}
-        dD=${resultArray[1]}
-        alpha=${resultArray[2]}
-        dAlpha=${resultArray[3]}
-        R2=${resultArray[4]}
+        ./obstructed_tracer analyze ${dataFolder}/${file}/input.txt ${dataFolder}/${file}_msd.txt > tmp_analyze_output.txt
+        
+        if [[ $? -ne 0 ]] ; then
+            echo "Analyzis failed. Stdout in tmp_analyze_output.txt"
+            exit 1
+        fi
+	
+	r2ResultArray=($(sed -r -n 's/<r²> : D = ([0-9.e+-]+) ± ([0-9.e+-]+), α = ([0-9.e+-]+) ± ([0-9.e+-]+), R² = ([0-9.e+-]+)$/\1 \2 \3 \4 \5/p' < tmp_analyze_output.txt))
+	rVarResultArray=($(sed -r -n 's/var\(x\)\+var\(y\) : D = ([0-9.e+-]+) ± ([0-9.e+-]+), α = ([0-9.e+-]+) ± ([0-9.e+-]+), R² = ([0-9.e+-]+)$/\1 \2 \3 \4 \5/p' < tmp_analyze_output.txt))
+        lastPointCorr=($(sed -r -n 's/last point corr : ([0-9.e+-]+)$/\1/p' < tmp_analyze_output.txt))
+        middlePointCorr=($(sed -r -n 's/middle point corr : ([0-9.e+-]+)$/\1/p' < tmp_analyze_output.txt))
 
-        echo $sigma $driftR $driftTheta $D $dD $alpha $dAlpha $R2
+	rm tmp_analyze_output.txt
+
+        r2D=${r2ResultArray[0]}
+        r2dD=${r2ResultArray[1]}
+        r2alpha=${r2ResultArray[2]}
+        r2dAlpha=${r2ResultArray[3]}
+        r2R2=${r2ResultArray[4]}
+        
+	rVarD=${rVarResultArray[0]}
+        rVardD=${rVarResultArray[1]}
+        rVaralpha=${rVarResultArray[2]}
+        rVardAlpha=${rVarResultArray[3]}
+        rVarR2=${rVarResultArray[4]}
+        
+	echo $sigma $driftR $driftTheta $r2D $r2dD $r2alpha $r2dAlpha $r2R2 $rVarD $rVardD $rVaralpha $rVardAlpha $rVarR2 $lastPointCorr $middlePointCorr
     fi
 done

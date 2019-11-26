@@ -73,7 +73,6 @@ public:
      * @param intImageData the array of 0xFFFFFFFF-like colors
      * @param width width of the image used
      * @param height height of the image used
-     * @param imageBC ImageBoundaryConditions to be used. For GPU it should be allocated on the GPU
      * @param seed seed to be used for sampling random valid tracers
      * @param numberOfTrajectories number of trajectories which will be generated in parallel for GPU version to
      * prepare independent random generators for each

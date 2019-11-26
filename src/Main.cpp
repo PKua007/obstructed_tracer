@@ -61,10 +61,17 @@ namespace {
         MSDData msdData;
         msdData.restore(msdFile);
 
-        Analyzer analyzer(parameters);
-        Analyzer::Result result = analyzer.analyze(msdData);
-        std::cout << "[analyze] Results: D = " << result.D << ", α = " << result.alpha << ", R² = " << result.R2;
+        Analyzer analyzer(parameters, 0.01, 1.);    // For a while hardcoded range [t_max/100, t_max]
+        analyzer.analyze(msdData);
+        Analyzer::Result rSquare = analyzer.getRSquareResult();
+        Analyzer::Result rVariance = analyzer.getRVarianceResult();
+
+        std::cout << "             <r²> : D = " << rSquare.D << ", α = " << rSquare.alpha << ", R² = " << rSquare.R2;
         std::cout << std::endl;
+        std::cout << "    var(x)+var(y) : D = " << rVariance.D << ", α = " << rVariance.alpha << ", R² = ";
+        std::cout << rVariance.R2 << std::endl;
+        std::cout << "  last point corr : " << analyzer.getLastPointCorrelation() << std::endl;
+        std::cout << "middle point corr : " << analyzer.getMiddlePointCorrelation() << std::endl;
 
         return EXIT_SUCCESS;
     }
@@ -89,8 +96,9 @@ namespace {
  *         <p><b>analyze</b>
  *         <p><em>arguments: [input file] [msd file]</em>
  *         <p>It reads the parameters from [input file] and calculates the diffusion coefficient D and exponent &alpha;
- *         for last two orders of [msd file] mean square displacement data. It assumes that this file was generated
- *         using the same input file.
+ *         for last two orders of &lt;r<sup>2</sup>&gt;(t) and &lt;var(x)+var(y)&gt;(t) from [msd file]. It also
+ *         computes the correlation of x and y for the last point and for the middle one on the log scale. It assumes
+ *         that this file was generated using the same input file as given.
  *     </li>
  * </ul>
  */
