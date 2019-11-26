@@ -15,14 +15,14 @@ Mode can be one of:
  
 It reads the parameters from input file and performs random walk. The output mean square displacement data and, if desired, trajectories data will be saved as
 
-> [output files prefix]_msd.tx
+> [output files prefix]\_msd.tx
     
 and
     
-> [output files prefix]_[simulation index]_[trajectory_index].txt
+> [output files prefix]\_[simulation index]\_[trajectory_index].txt
 
 ### analyze
 *(mode specific arguments): [input file] [msd file]*
     
-It reads the parameters from [input file] and calculates the diffusion coefficient D and exponent α for last two orders of [msd file] mean square displacement data. It assumes that this file was generated using the same input file.
+It reads the parameters from [input file] and calculates the diffusion coefficient D and exponent &alpha; for last two orders of &lt;r<sup>2</sup>&gt;(t) and &lt;var(x)+var(y)&gt;(t) from [msd file]. It also computes the correlation of x and y for the last point and for the middle one on the log scale. It assumes that [msd file] file was generated using the same input file as given.
 
