@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "simulation/RandomWalker.h"
-#include "TrajectoryImpl.h"
+#include "Trajectory.h"
 
 /**
  * @brief RandomWalker, which encapsulated another RandomWalker, and performs walks in parts.
@@ -26,7 +26,7 @@ private:
     std::size_t numberOfSplits{};
     std::size_t numberOfTrajectories{};
     RandomWalker &randomWalker;
-    std::vector<TrajectoryImpl> trajectories;
+    std::vector<Trajectory> trajectories;
 
 public:
     SplitRandomWalker(std::size_t numberOfSplits, RandomWalker &randomWalker);

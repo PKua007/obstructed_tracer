@@ -10,7 +10,7 @@
 
 #include <random>
 
-#include "random_walker/MoveGenerator.h"
+#include "simulation/MoveGenerator.h"
 
 /**
  * @brief Generates moves on CPU according to normal distribution in radius and uniform distribution in angle.

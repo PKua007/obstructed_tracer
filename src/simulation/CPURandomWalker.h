@@ -13,7 +13,7 @@
 #include <random>
 
 #include "simulation/RandomWalker.h"
-#include "TrajectoryImpl.h"
+#include "Trajectory.h"
 #include "MoveGenerator.h"
 #include "MoveFilter.h"
 
@@ -32,9 +32,9 @@ private:
     Move            drift{};
     MoveGenerator   *moveGenerator{};
     MoveFilter      *moveFilter{};
-    std::vector<TrajectoryImpl> trajectories;
+    std::vector<Trajectory> trajectories;
 
-    TrajectoryImpl runSingleTrajectory(Tracer initialTracer);
+    Trajectory runSingleTrajectory(Tracer initialTracer);
 
 public:
     /**

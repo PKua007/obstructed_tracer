@@ -17,9 +17,9 @@
 #include "utils/OMPDefines.h"
 #include "utils/Assertions.h"
 #include "utils/CudaCheck.h"
-#include "random_walker/CPURandomWalkerFactory.h"
-#include "random_walker/GPURandomWalkerFactory.h"
-#include "random_walker/SplitRandomWalker.h"
+#include "CPURandomWalkerFactory.h"
+#include "GPURandomWalkerFactory.h"
+#include "SplitRandomWalker.h"
 #include "Timer.h"
 
 

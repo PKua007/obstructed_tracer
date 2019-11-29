@@ -17,7 +17,7 @@
 #include "AccumulatingMSDDataCalculator.h"
 
 /**
- * @brief The concrete implementation of a simulation.
+ * @brief The concrete implementation of Simulation.
  *
  * <p>Based on parameters, it chooses the GPU or CPU simulation model and performs walks in series. Walks in the series
  * are performed in parallel and after they end, the obtained trajectories are added to resulting MSDData. It takes care

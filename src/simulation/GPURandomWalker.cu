@@ -77,7 +77,7 @@ GPURandomWalker::TrajectoriesOnGPU::~TrajectoriesOnGPU() {
 }
 
 
-void GPURandomWalker::TrajectoriesOnGPU::copyToCPU(std::vector<TrajectoryImpl> &trajectories) {
+void GPURandomWalker::TrajectoriesOnGPU::copyToCPU(std::vector<Trajectory> &trajectories) {
     cudaCheck( cudaMemcpy(this->cpuVectorOfAcceptedSteps.data(), this->gpuArrayOfAcceptedSteps,
                           this->numberOfTrajectories*sizeof(size_t), cudaMemcpyDeviceToHost) );
 

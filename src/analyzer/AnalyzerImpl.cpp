@@ -8,11 +8,11 @@
 #include <iostream>
 #include <cmath>
 
-#include "Analyzer.h"
+#include "AnalyzerImpl.h"
 #include "PowerRegression.h"
 #include "utils/Assertions.h"
 
-void Analyzer::analyze(const MSDData &msdData) {
+void AnalyzerImpl::analyze(const MSDData &msdData) {
     std::size_t trajectorySize = msdData.size();
     std::size_t startIndex = static_cast<std::size_t>(trajectorySize*this->relativeRangeStart);
     std::size_t endIndex = static_cast<std::size_t>(trajectorySize*this->relativeRangeEnd);
@@ -44,7 +44,7 @@ void Analyzer::analyze(const MSDData &msdData) {
     this->middlePointCorrelation = this->calculateCorrelation(msdData[middleIndex]);
 }
 
-double Analyzer::calculateCorrelation(MSDData::Entry msdEntry) {
+double AnalyzerImpl::calculateCorrelation(MSDData::Entry msdEntry) {
     double covXY = msdEntry.xy - msdEntry.x*msdEntry.y;
     double varX = msdEntry.x2 - msdEntry.x*msdEntry.x;
     double varY = msdEntry.y2 - msdEntry.y*msdEntry.y;
