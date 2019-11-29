@@ -11,7 +11,7 @@
 
 #include <curand_kernel.h>
 
-#include "random_walker/MoveGenerator.h"
+#include "simulation/MoveGenerator.h"
 
 /**
  * @brief A `__device__` class generating moves on CPU according to normal distribution in radius and uniform

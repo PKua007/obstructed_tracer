@@ -8,7 +8,7 @@
 #ifndef DEFAULTMOVEFILTER_H_
 #define DEFAULTMOVEFILTER_H_
 
-#include "random_walker/MoveFilter.h"
+#include "simulation/MoveFilter.h"
 
 /**
  * @brief A `__host__` `__device__` filter accepting all moves.
