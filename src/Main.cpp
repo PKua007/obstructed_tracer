@@ -19,8 +19,8 @@
 #include "MSDData.h"
 #include "Simulation.h"
 #include "utils/Utils.h"
-#include "analyzer/Analyzer.h"
 
+#include "analyzer/AnalyzerImpl.h"
 #include "simulation/SimulationImpl.h"
 
 namespace {
@@ -32,9 +32,9 @@ namespace {
 
         std::string outputFilePrefix = argv[3];
 
-        auto simulation = std::unique_ptr<Simulation>(new SimulationImpl(parameters, outputFilePrefix, std::cout));
-        simulation->run(std::cout);
-        MSDData &msdData = simulation->getMSDData();
+        SimulationImpl simulation(parameters, outputFilePrefix, std::cout);
+        simulation.run(std::cout);
+        MSDData &msdData = simulation.getMSDData();
 
         std::string msdFilename = outputFilePrefix + "_msd.txt";
         std::ofstream msdFile(msdFilename);
@@ -61,7 +61,7 @@ namespace {
         MSDData msdData;
         msdData.restore(msdFile);
 
-        Analyzer analyzer(parameters, 0.01, 1.);    // For a while hardcoded range [t_max/100, t_max]
+        AnalyzerImpl analyzer(parameters, 0.01, 1.);    // For a while hardcoded range [t_max/100, t_max]
         analyzer.analyze(msdData);
         Analyzer::Result rSquare = analyzer.getRSquareResult();
         Analyzer::Result rVariance = analyzer.getRVarianceResult();

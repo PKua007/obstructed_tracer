@@ -1,20 +1,19 @@
 /*
  * Analyzer.h
  *
- *  Created on: 22 wrz 2019
+ *  Created on: 29 lis 2019
  *      Author: pkua
  */
 
 #ifndef ANALYZER_H_
 #define ANALYZER_H_
 
-#include "Parameters.h"
+#include "Analyzer.h"
 #include "MSDData.h"
-#include "Quantity.h"
-#include "utils/Assertions.h"
+#include "utils/Quantity.h"
 
 /**
- * @brief A class calculating D and &alpha; from the simulations performed eariler.
+ * @brief An interface of class calculating D and &alpha; from the simulations performed eariler.
  *
  * It performs power fit y = Dx<sup>&alpha;</sup> to last two orders of point (namely [x<sub>max</sub>/100,
  * x<sub>max</sub>] range). The instance is created for specific Parameters and the incoming MSDData is expected to have
@@ -42,37 +41,6 @@ public:
         double R2{};
     };
 
-private:
-    Parameters parameters;
-    double relativeRangeStart{};
-    double relativeRangeEnd{};
-    Result rSquareResult;
-    Result rVarianceResult;
-    double lastPointCorrelation{};
-    double middlePointCorrelation{};
-
-    double calculateCorrelation(MSDData::Entry msdEntry);
-
-public:
-    /**
-     * @brief Creates analyzer for simulations performed using @a parameters.
-     *
-     * For other simulations it may not work properly.
-     *
-     * @param parameters the parameters used to perform simulation which will be analyzed
-     * @param relativeRangeStart start of the fitting range given as fraction of total number of points, so from
-     * [0, 1] interval
-     * @param relativeRangeEnd start of the fitting range given as fraction of total number of points, so from
-     * [0, 1] interval
-     */
-    Analyzer(const Parameters &parameters, double relativeRangeStart, double relativeRangeEnd)
-            : parameters(parameters), relativeRangeStart{relativeRangeStart}, relativeRangeEnd{relativeRangeEnd}
-    {
-        Expects(relativeRangeStart >= 0. && relativeRangeStart <= 1.);
-        Expects(relativeRangeEnd >= 0. && relativeRangeEnd <= 1.);
-        Expects(relativeRangeStart < relativeRangeEnd);
-    }
-
     /**
      * @brief Performs the power fit to last two orders of points &lt;r<sup>2</sup>&gt;(t) and
      * &lt;var(x)+var(y)&gt;(t).
@@ -83,39 +51,31 @@ public:
      *
      * @param msdData mean square displacement data to be analyzed
      */
-    void analyze(const MSDData &msdData);
+    virtual void analyze(const MSDData &msdData) = 0;
 
     /**
      * @brief Returns the result of &lt;r<sup>2</sup>&gt;(t) fit.
      * @return the result of &lt;r<sup>2</sup>&gt;(t) fit
      */
-    const Result& getRSquareResult() const {
-        return rSquareResult;
-    }
+    virtual const Result& getRSquareResult() const = 0;
 
     /**
      * @brief Returns the result of &lt;var(x)+var(y)&gt;(t) fit.
      * @return the result of &lt;var(x)+var(y)&gt;(t) fit
      */
-    const Result& getRVarianceResult() const {
-        return rVarianceResult;
-    }
+    virtual const Result& getRVarianceResult() const = 0;
 
     /**
      * @brief Returns the correlation cov(x, y)/&radic;(var(x) var(y)) for the last point in MSD data.
      * @return the correlation cov(x, y)/&radic;(var(x) var(y)) for the last point in MSD data
      */
-    double getLastPointCorrelation() const {
-        return lastPointCorrelation;
-    }
+    virtual double getLastPointCorrelation() const = 0;
 
     /**
      * @brief Returns the correlation cov(x, y)/&radic;(var(x) var(y)) for the middle point in log scale in MSD data.
      * @return the correlation cov(x, y)/&radic;(var(x) var(y)) forthe middle point in log scale in MSD data
      */
-    double getMiddlePointCorrelation() const {
-        return middlePointCorrelation;
-    }
+    virtual double getMiddlePointCorrelation() const = 0;
 };
 
 #endif /* ANALYZER_H_ */

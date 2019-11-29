@@ -11,7 +11,7 @@
 #include <vector>
 #include <limits>
 
-#include "Quantity.h"
+#include "utils/Quantity.h"
 
 /**
  * @brief A class performing power fit to points.
