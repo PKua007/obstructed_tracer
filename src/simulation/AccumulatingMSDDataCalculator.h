@@ -11,7 +11,7 @@
 #include <iosfwd>
 #include <vector>
 
-#include "MSDData.h"
+#include "frontend/MSDData.h"
 #include "RandomWalker.h"
 
 /**

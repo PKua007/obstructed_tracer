@@ -8,9 +8,9 @@
 #ifndef ANALYZERIMPL_H_
 #define ANALYZERIMPL_H_
 
-#include "Analyzer.h"
-#include "Parameters.h"
-#include "MSDData.h"
+#include "frontend/Analyzer.h"
+#include "frontend/Parameters.h"
+#include "frontend/MSDData.h"
 #include "utils/Quantity.h"
 #include "utils/Assertions.h"
 
