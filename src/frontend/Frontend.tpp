@@ -5,22 +5,18 @@
  *      Author: pkua
  */
 
-#include <iostream>
 #include <iomanip>
 #include <cstdlib>
 #include <fstream>
 #include <algorithm>
 
-#include "Frontend.h"
 #include "MSDData.h"
 #include "Simulation.h"
 #include "utils/Utils.h"
 
-#include "analyzer/AnalyzerImpl.h"
-#include "simulation/SimulationImpl.h"
 
-
-Frontend::Frontend(int argc, char** argv) {
+template <typename ConcreteSimulation, typename ConcreteAnalyzer>
+Frontend<ConcreteSimulation, ConcreteAnalyzer>::Frontend(int argc, char** argv, std::ostream &logger) : logger{logger} {
     this->command = argv[0];
     if (argc < 3)
         throw std::runtime_error("[main] Usage: " + command + " [mode] [input file] {mode specific arguments}");
@@ -33,22 +29,23 @@ Frontend::Frontend(int argc, char** argv) {
         throw std::runtime_error("[main] Cannot open " + inputFilename + " to read parameters");
 
     this->parameters = Parameters(inputFile);
-    std::cout << "[main] Parameters loaded from " + inputFilename << ":" << std::endl;
-    this->parameters.print(std::cout);
-    std::cout << std::endl;
+    this->logger << "[main] Parameters loaded from " + inputFilename << ":" << std::endl;
+    this->parameters.print(this->logger);
+    this->logger << std::endl;
 
     std::copy(argv + 3, argv + argc, std::back_inserter(this->additionalArguments));
 }
 
 /* Mode performing random walk. See main for the description. Returns exit code for main. */
-int Frontend::perform_walk() {
+template <typename ConcreteSimulation, typename ConcreteAnalyzer>
+int Frontend<ConcreteSimulation, ConcreteAnalyzer>::perform_walk() {
     if (this->additionalArguments.empty())
         throw std::runtime_error("[perform_walk] Usage: " + this->command + " perform_walk [input file] [output files prefix]");
 
     std::string outputFilePrefix = this->additionalArguments[0];
 
-    SimulationImpl simulation(parameters, outputFilePrefix, std::cout);
-    simulation.run(std::cout);
+    ConcreteSimulation simulation(parameters, outputFilePrefix, this->logger);
+    simulation.run(this->logger);
     MSDData &msdData = simulation.getMSDData();
 
     std::string msdFilename = outputFilePrefix + "_msd.txt";
@@ -56,14 +53,15 @@ int Frontend::perform_walk() {
     if (!msdFile)
         throw std::runtime_error("[perform_walk] Cannot open " + msdFilename + " to store mean square displacement data");
     msdData.store(msdFile);
-    std::cout << "[perform_walk] Mean square displacement data stored to " + msdFilename << std::endl;
+    this->logger << "[perform_walk] Mean square displacement data stored to " + msdFilename << std::endl;
 
-    std::cout << "[perform_walk] Run finished." << std::endl;
+    this->logger << "[perform_walk] Run finished." << std::endl;
     return EXIT_SUCCESS;
 }
 
 /* Mode analyzing the results. See main for the description. Returns exit code for main. */
-int Frontend::analyze() {
+template <typename ConcreteSimulation, typename ConcreteAnalyzer>
+int Frontend<ConcreteSimulation, ConcreteAnalyzer>::analyze() {
     if (this->additionalArguments.empty())
         throw std::runtime_error("[analyze] Usage: " + this->command + " analyze [input file] [msd file]");
 
@@ -75,22 +73,23 @@ int Frontend::analyze() {
     MSDData msdData;
     msdData.restore(msdFile);
 
-    AnalyzerImpl analyzer(parameters, 0.01, 1.);    // For a while hardcoded range [t_max/100, t_max]
+    ConcreteAnalyzer analyzer(parameters, 0.01, 1.);    // For a while hardcoded range [t_max/100, t_max]
     analyzer.analyze(msdData);
     Analyzer::Result rSquare = analyzer.getRSquareResult();
     Analyzer::Result rVariance = analyzer.getRVarianceResult();
 
-    std::cout << "             <r²> : D = " << rSquare.D << ", α = " << rSquare.alpha << ", R² = " << rSquare.R2;
-    std::cout << std::endl;
-    std::cout << "    var(x)+var(y) : D = " << rVariance.D << ", α = " << rVariance.alpha << ", R² = ";
-    std::cout << rVariance.R2 << std::endl;
-    std::cout << "  last point corr : " << analyzer.getLastPointCorrelation() << std::endl;
-    std::cout << "middle point corr : " << analyzer.getMiddlePointCorrelation() << std::endl;
+    this->logger << "             <r²> : D = " << rSquare.D << ", α = " << rSquare.alpha << ", R² = " << rSquare.R2;
+    this->logger << std::endl;
+    this->logger << "    var(x)+var(y) : D = " << rVariance.D << ", α = " << rVariance.alpha << ", R² = ";
+    this->logger << rVariance.R2 << std::endl;
+    this->logger << "  last point corr : " << analyzer.getLastPointCorrelation() << std::endl;
+    this->logger << "middle point corr : " << analyzer.getMiddlePointCorrelation() << std::endl;
 
     return EXIT_SUCCESS;
 }
 
-int Frontend::run() {
+template <typename ConcreteSimulation, typename ConcreteAnalyzer>
+int Frontend<ConcreteSimulation, ConcreteAnalyzer>::run() {
     if (this->mode == "perform_walk")
         return this->perform_walk();
     else if (this->mode == "analyze")

@@ -7,7 +7,11 @@
 
 /** @file */
 
+#include <iostream>
+
 #include "frontend/Frontend.h"
+#include "simulation/SimulationImpl.h"
+#include "analyzer/AnalyzerImpl.h"
 
 /**
  * @brief Entry point with two distinct modes: @a perform_walk and @a analyze
@@ -35,7 +39,7 @@
  * </ul>
  */
 int main(int argc, char **argv) {
-    Frontend frontend(argc, argv);
+    Frontend<SimulationImpl, AnalyzerImpl> frontend(argc, argv, std::cout);
     return frontend.run();
 }
 
