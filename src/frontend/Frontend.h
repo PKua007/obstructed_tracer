@@ -18,8 +18,8 @@
 
 template <typename ConcreteSimulation, typename ConcreteAnalyzer>
 class Frontend {
-    static_assert(std::is_base_of<Simulation, ConcreteSimulation>::value);
-    static_assert(std::is_base_of<Analyzer, ConcreteAnalyzer>::value);
+    static_assert(std::is_base_of<Simulation, ConcreteSimulation>::value, "");
+    static_assert(std::is_base_of<Analyzer, ConcreteAnalyzer>::value, "");
 
 private:
     std::string command;
@@ -28,13 +28,17 @@ private:
     std::vector<std::string> additionalArguments;
     std::ostream &logger;
 
-    int perform_walk();
-    int analyze();
+    void perform_walk();
+    void analyze();
 
 public:
+    struct RunException : public std::runtime_error {
+        RunException(const std::string &msg) : std::runtime_error(msg) { }
+    };
+
     Frontend(int argc, char **argv, std::ostream &logger);
 
-    int run();
+    void run();
 };
 
 #include "Frontend.tpp"

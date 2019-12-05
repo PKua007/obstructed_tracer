@@ -1,5 +1,5 @@
 /*
- * Frontend.cpp
+ * Frontend.tpp
  *
  *  Created on: 2 gru 2019
  *      Author: pkua
@@ -19,17 +19,17 @@ template <typename ConcreteSimulation, typename ConcreteAnalyzer>
 Frontend<ConcreteSimulation, ConcreteAnalyzer>::Frontend(int argc, char** argv, std::ostream &logger) : logger{logger} {
     this->command = argv[0];
     if (argc < 3)
-        throw std::runtime_error("[main] Usage: " + command + " [mode] [input file] {mode specific arguments}");
+        throw RunException("[Frontend] Usage: " + command + " [mode] [input file] {mode specific arguments}");
 
     this->mode = argv[1];
 
     std::string inputFilename = argv[2];
     std::ifstream inputFile(inputFilename);
     if (!inputFile)
-        throw std::runtime_error("[main] Cannot open " + inputFilename + " to read parameters");
+        throw RunException("[Frontend] Cannot open " + inputFilename + " to read parameters");
 
     this->parameters = Parameters(inputFile);
-    this->logger << "[main] Parameters loaded from " + inputFilename << ":" << std::endl;
+    this->logger << "[Frontend] Parameters loaded from " + inputFilename << ":" << std::endl;
     this->parameters.print(this->logger);
     this->logger << std::endl;
 
@@ -38,9 +38,11 @@ Frontend<ConcreteSimulation, ConcreteAnalyzer>::Frontend(int argc, char** argv, 
 
 /* Mode performing random walk. See main for the description. Returns exit code for main. */
 template <typename ConcreteSimulation, typename ConcreteAnalyzer>
-int Frontend<ConcreteSimulation, ConcreteAnalyzer>::perform_walk() {
-    if (this->additionalArguments.empty())
-        throw std::runtime_error("[perform_walk] Usage: " + this->command + " perform_walk [input file] [output files prefix]");
+void Frontend<ConcreteSimulation, ConcreteAnalyzer>::perform_walk() {
+    if (this->additionalArguments.empty()) {
+        throw RunException("[Frontend::perform_walk] Usage: " + this->command + " perform_walk [input file] "
+                           "[output files prefix]");
+    }
 
     std::string outputFilePrefix = this->additionalArguments[0];
 
@@ -50,25 +52,28 @@ int Frontend<ConcreteSimulation, ConcreteAnalyzer>::perform_walk() {
 
     std::string msdFilename = outputFilePrefix + "_msd.txt";
     std::ofstream msdFile(msdFilename);
-    if (!msdFile)
-        throw std::runtime_error("[perform_walk] Cannot open " + msdFilename + " to store mean square displacement data");
-    msdData.store(msdFile);
-    this->logger << "[perform_walk] Mean square displacement data stored to " + msdFilename << std::endl;
+    if (!msdFile) {
+        throw RunException("[Frontend::perform_walk] Cannot open " + msdFilename + " to store mean square displacement "
+                           "data");
+    }
 
-    this->logger << "[perform_walk] Run finished." << std::endl;
-    return EXIT_SUCCESS;
+    msdData.store(msdFile);
+    this->logger << "[Frontend::perform_walk] Mean square displacement data stored to " + msdFilename << std::endl;
+    this->logger << "[Frontend::perform_walk] Run finished." << std::endl;
 }
 
 /* Mode analyzing the results. See main for the description. Returns exit code for main. */
 template <typename ConcreteSimulation, typename ConcreteAnalyzer>
-int Frontend<ConcreteSimulation, ConcreteAnalyzer>::analyze() {
+void Frontend<ConcreteSimulation, ConcreteAnalyzer>::analyze() {
     if (this->additionalArguments.empty())
-        throw std::runtime_error("[analyze] Usage: " + this->command + " analyze [input file] [msd file]");
+        throw RunException("[Frontend::analyze] Usage: " + this->command + " analyze [input file] [msd file]");
 
     std::string msdFilename = this->additionalArguments[0];
     std::ifstream msdFile(msdFilename);
-    if (!msdFile)
-        throw std::runtime_error("[analyze] Cannot open " + msdFilename + " to restore mean square displacement data");
+    if (!msdFile) {
+        throw RunException("[Frontend::analyze] Cannot open " + msdFilename + " to restore mean square displacement "
+                           "data");
+    }
 
     MSDData msdData;
     msdData.restore(msdFile);
@@ -84,16 +89,15 @@ int Frontend<ConcreteSimulation, ConcreteAnalyzer>::analyze() {
     this->logger << rVariance.R2 << std::endl;
     this->logger << "  last point corr : " << analyzer.getLastPointCorrelation() << std::endl;
     this->logger << "middle point corr : " << analyzer.getMiddlePointCorrelation() << std::endl;
-
-    return EXIT_SUCCESS;
 }
 
 template <typename ConcreteSimulation, typename ConcreteAnalyzer>
-int Frontend<ConcreteSimulation, ConcreteAnalyzer>::run() {
-    if (this->mode == "perform_walk")
-        return this->perform_walk();
-    else if (this->mode == "analyze")
-        return this->analyze();
-    else
-        throw std::runtime_error("[main] Unknown mode: " + this->mode);
+void Frontend<ConcreteSimulation, ConcreteAnalyzer>::run() {
+    if (this->mode == "perform_walk") {
+        this->perform_walk();
+    } else if (this->mode == "analyze") {
+        this->analyze();
+    } else {
+        throw RunException("[Frontend::run] Unknown mode: " + this->mode);
+    }
 }

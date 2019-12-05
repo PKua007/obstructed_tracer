@@ -1,5 +1,5 @@
 /*
- * ImageMoveFilter.cpp
+ * ImageMoveFilter.tpp
  *
  *  Created on: 29 lip 2019
  *      Author: pkua

@@ -39,7 +39,15 @@
  * </ul>
  */
 int main(int argc, char **argv) {
-    Frontend<SimulationImpl, AnalyzerImpl> frontend(argc, argv, std::cout);
-    return frontend.run();
+    using TheFrontend = Frontend<SimulationImpl, AnalyzerImpl>;
+    try {
+        TheFrontend frontend(argc, argv, std::cout);
+        frontend.run();
+    } catch (TheFrontend::RunException e) {
+        std::cerr << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    EXIT_SUCCESS;
 }
 
