@@ -11,8 +11,8 @@
 #include <memory>
 #include <random>
 
-#include "Simulation.h"
-#include "Parameters.h"
+#include "frontend/Simulation.h"
+#include "frontend/Parameters.h"
 #include "RandomWalkerFactory.h"
 #include "AccumulatingMSDDataCalculator.h"
 

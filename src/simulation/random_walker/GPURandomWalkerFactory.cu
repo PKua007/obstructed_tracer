@@ -11,12 +11,12 @@
 
 #include "GPURandomWalkerFactory.h"
 #include "utils/CudaCheck.h"
-#include "move_generator/gpu/GPUGaussianMoveGenerator.h"
-#include "move_generator/gpu/GPUCauchyMoveGenerator.h"
-#include "move_filter/DefaultMoveFilter.h"
-#include "move_filter/image_move_filter/ImageMoveFilter.h"
-#include "move_filter/image_move_filter/WallBoundaryConditions.h"
-#include "move_filter/image_move_filter/PeriodicBoundaryConditions.h"
+#include "simulation/move_generator/gpu/GPUGaussianMoveGenerator.h"
+#include "simulation/move_generator/gpu/GPUCauchyMoveGenerator.h"
+#include "simulation/move_filter/DefaultMoveFilter.h"
+#include "simulation/move_filter/image_move_filter/ImageMoveFilter.h"
+#include "simulation/move_filter/image_move_filter/WallBoundaryConditions.h"
+#include "simulation/move_filter/image_move_filter/PeriodicBoundaryConditions.h"
 #include "image/PPMImageReader.h"
 #include "utils/Assertions.h"
 

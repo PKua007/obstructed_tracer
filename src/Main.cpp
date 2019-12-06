@@ -2,80 +2,16 @@
  ============================================================================
  Name        : obstructed_tracer.cpp
  Author      : Piotr Kubala
- Version     :
- Copyright   : 
- Description : CUDA compute reciprocals
  ============================================================================
  */
 
 /** @file */
 
 #include <iostream>
-#include <iomanip>
-#include <cstdlib>
-#include <fstream>
 
-#include "Parameters.h"
-#include "MSDData.h"
-#include "Simulation.h"
-#include "utils/Utils.h"
-
-#include "analyzer/AnalyzerImpl.h"
+#include "frontend/Frontend.h"
 #include "simulation/SimulationImpl.h"
-
-namespace {
-    /* Mode performing random walk. See main for the description. Returns exit code for main. */
-    int perform_walk(int argc, char **argv, const Parameters &parameters) {
-        std::string command = argv[0];
-        if (argc < 4)
-            die("[perform_walk] Usage: " + command + " perform_walk [input file] [output files prefix]");
-
-        std::string outputFilePrefix = argv[3];
-
-        SimulationImpl simulation(parameters, outputFilePrefix, std::cout);
-        simulation.run(std::cout);
-        MSDData &msdData = simulation.getMSDData();
-
-        std::string msdFilename = outputFilePrefix + "_msd.txt";
-        std::ofstream msdFile(msdFilename);
-        if (!msdFile)
-            die("[perform_walk] Cannot open " + msdFilename + " to store mean square displacement data");
-        msdData.store(msdFile);
-        std::cout << "[perform_walk] Mean square displacement data stored to " + msdFilename << std::endl;
-
-        std::cout << "[perform_walk] Run finished." << std::endl;
-        return EXIT_SUCCESS;
-    }
-
-    /* Mode analyzing the results. See main for the description. Returns exit code for main. */
-    int analyze(int argc, char **argv, const Parameters &parameters) {
-        std::string command = argv[0];
-        if (argc < 4)
-            die("[analyze] Usage: " + command + " analyze [input file] [msd file]");
-
-        std::string msdFilename = argv[3];
-        std::ifstream msdFile(msdFilename);
-        if (!msdFile)
-            die("[analyze] Cannot open " + msdFilename + " to restore mean square displacement data");
-
-        MSDData msdData;
-        msdData.restore(msdFile);
-
-        AnalyzerImpl analyzer(parameters, 0.01, 1.);    // For a while hardcoded range [t_max/100, t_max]
-        analyzer.analyze(msdData);
-        Analyzer::Result rSquare = analyzer.getRSquareResult();
-        Analyzer::Result rVariance = analyzer.getRVarianceResult();
-
-        std::cout << "             <r²> : D = " << rSquare.D << ", α = " << rSquare.alpha << ", R² = " << rSquare.R2;
-        std::cout << std::endl;
-        std::cout << "    var(x)+var(y) : D = " << rVariance.D << ", α = " << rVariance.alpha << ", R² = ";
-        std::cout << rVariance.R2 << std::endl;
-        std::cout << "  last point corr : " << analyzer.getLastPointCorrelation() << std::endl;
-        std::cout << "middle point corr : " << analyzer.getMiddlePointCorrelation() << std::endl;
-
-        return EXIT_SUCCESS;
-    }
-}
+#include "analyzer/AnalyzerImpl.h"
 
 /**
  * @brief Entry point with two distinct modes: @a perform_walk and @a analyze
@@ -103,26 +39,15 @@ namespace {
  * </ul>
  */
 int main(int argc, char **argv) {
-    std::string command = argv[0];
-    if (argc < 3)
-        die("[main] Usage: " + command + " [mode] [input file] {mode specific arguments}");
+    using TheFrontend = Frontend<SimulationImpl, AnalyzerImpl>;
+    try {
+        TheFrontend frontend(argc, argv, std::cout);
+        frontend.run();
+    } catch (TheFrontend::RunException e) {
+        std::cerr << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 
-    std::string inputFilename = argv[2];
-    std::ifstream inputFile(inputFilename);
-    if (!inputFile)
-        die("[main] Cannot open " + inputFilename + " to read parameters");
-
-    Parameters parameters(inputFile);
-    std::cout << "[main] Parameters loaded from " + inputFilename << ":" << std::endl;
-    parameters.print(std::cout);
-    std::cout << std::endl;
-
-    std::string mode = argv[1];
-    if (mode == "perform_walk")
-        return perform_walk(argc, argv, parameters);
-    else if (mode == "analyze")
-        return analyze(argc, argv, parameters);
-    else
-        die("[main] Unknown mode: " + mode);
+    EXIT_SUCCESS;
 }
 

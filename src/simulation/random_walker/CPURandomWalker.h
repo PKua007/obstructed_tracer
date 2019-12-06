@@ -13,9 +13,9 @@
 #include <random>
 
 #include "simulation/RandomWalker.h"
-#include "Trajectory.h"
-#include "MoveGenerator.h"
-#include "MoveFilter.h"
+#include "simulation/Trajectory.h"
+#include "simulation/MoveGenerator.h"
+#include "simulation/MoveFilter.h"
 
 /**
  * @brief CPU implementation of RandomWalker performing walks in parallel using OpenMP.
