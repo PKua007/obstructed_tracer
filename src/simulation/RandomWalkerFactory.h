@@ -45,7 +45,7 @@ public:
     virtual ~RandomWalkerFactory() = default;
 
     /**
-     * @brief Gets the random walker produced by the factory.
+     * @brief Creates new RandomWalker corresponding to concrete factory.
      */
     virtual std::unique_ptr<RandomWalker> createRandomWalker() = 0;
 };

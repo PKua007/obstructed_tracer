@@ -90,10 +90,8 @@ std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createMoveFilter(const std::
 CPURandomWalkerFactory::CPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters,
                                                std::ostream &logger)
         : walkerParameters{walkerParameters}, numberOfWalksInSeries{walkerParameters.numberOfWalksInSeries},
-          logger{logger}
-{
-    this->seedGenerator.seed(seed);
-}
+          logger{logger}, seedGenerator(seed)
+{ }
 
 std::unique_ptr<RandomWalker> CPURandomWalkerFactory::createRandomWalker() {
     auto moveGenerator = this->createMoveGenerator(walkerParameters.moveGeneratorParameters);

@@ -20,7 +20,7 @@
  * @brief A class which construct CPURandomWalker from given parameters.
  *
  * Before creating the random walker itself, it creates CPU versions of MoveFilter and MoveGenerator based on
- * parameters and hands them to the walker. It also take the responsibility of clearing the memory.
+ * parameters and hands them to the walker.
  */
 class CPURandomWalkerFactory : public RandomWalkerFactory {
 private:
@@ -37,9 +37,8 @@ public:
     /**
      * @brief Constructs the factory based on passed arguments.
      *
-     * MoveGenerator and MoveFilter classes will be created based on WalkerParameters::moveGeneratorParameters and
-     * WalkerParameters::moveFilterParameters textual representations. @a seed is used to create byte generator, which
-     * then samples two new seeds: for MoveGenerator and MoveFilter (for MoveFilter::randomValidTracer).
+     * @a seed is used to create byte generator, which then will samples two new seeds: for MoveGenerator and MoveFilter
+     * during creation of CPURandomWalker.
      *
      * @param seed the seed which will be used in MoveFilter and MoveGenerator
      * @param walkerParameters the parameters of the walker, MoveFilter and MoveGenerator
@@ -47,6 +46,14 @@ public:
      */
     CPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters, std::ostream &logger);
 
+    /**
+     * @brief Creates a new CPURandomWalker based on the parameters passed in the constructor.
+     *
+     * MoveGenerator and MoveFilter classes are created based on WalkerParameters::moveGeneratorParameters and
+     * WalkerParameters::moveFilterParameters textual representations from the constructor.
+     *
+     * @return The random walker created based on the parameters from the constructor of the class
+     */
     std::unique_ptr<RandomWalker> createRandomWalker() override;
 };
 
