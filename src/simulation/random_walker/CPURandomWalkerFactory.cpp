@@ -9,12 +9,12 @@
 #include <sstream>
 
 #include "CPURandomWalkerFactory.h"
-#include "move_generator/cpu/CPUGaussianMoveGenerator.h"
-#include "move_generator/cpu/CPUCauchyMoveGenerator.h"
-#include "move_filter/DefaultMoveFilter.h"
-#include "move_filter/image_move_filter/ImageMoveFilter.h"
-#include "move_filter/image_move_filter/WallBoundaryConditions.h"
-#include "move_filter/image_move_filter/PeriodicBoundaryConditions.h"
+#include "simulation/move_generator/cpu/CPUGaussianMoveGenerator.h"
+#include "simulation/move_generator/cpu/CPUCauchyMoveGenerator.h"
+#include "simulation/move_filter/DefaultMoveFilter.h"
+#include "simulation/move_filter/image_move_filter/ImageMoveFilter.h"
+#include "simulation/move_filter/image_move_filter/WallBoundaryConditions.h"
+#include "simulation/move_filter/image_move_filter/PeriodicBoundaryConditions.h"
 #include "image/PPMImageReader.h"
 #include "utils/Assertions.h"
 

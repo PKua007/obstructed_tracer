@@ -11,9 +11,9 @@
 #include <vector>
 
 #include "simulation/RandomWalker.h"
-#include "Trajectory.h"
-#include "MoveGenerator.h"
-#include "MoveFilter.h"
+#include "simulation/Trajectory.h"
+#include "simulation/MoveGenerator.h"
+#include "simulation/MoveFilter.h"
 #include "simulation/Timer.h"
 
 /**
