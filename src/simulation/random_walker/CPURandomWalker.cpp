@@ -16,10 +16,11 @@
 #include "simulation/Timer.h"
 
 CPURandomWalker::CPURandomWalker(std::size_t numberOfTrajectories, RandomWalker::WalkParameters walkParameters,
-                                 MoveGenerator *moveGenerator, MoveFilter *moveFilter, std::ostream &logger)
+                                 std::unique_ptr<MoveGenerator> moveGenerator, std::unique_ptr<MoveFilter> moveFilter,
+                                 std::ostream &logger)
         : numberOfTrajectories{numberOfTrajectories}, numberOfSteps{walkParameters.numberOfSteps},
-          tracerRadius{walkParameters.tracerRadius}, drift{walkParameters.drift}, moveGenerator{moveGenerator},
-          moveFilter{moveFilter}
+          tracerRadius{walkParameters.tracerRadius}, drift{walkParameters.drift},
+          moveGenerator{std::move(moveGenerator)}, moveFilter{std::move(moveFilter)}
 {
     Expects(this->numberOfTrajectories > 0);
     Expects(this->numberOfSteps > 0);
@@ -81,7 +82,7 @@ std::size_t CPURandomWalker::getNumberOfSteps() const {
 
 std::vector<Tracer> CPURandomWalker::getRandomInitialTracersVector() {
     std::vector<Tracer> result(this->numberOfTrajectories);
-    std::generate(result.begin(), result.end(), std::bind(&MoveFilter::randomValidTracer, this->moveFilter));
+    std::generate(result.begin(), result.end(), std::bind(&MoveFilter::randomValidTracer, this->moveFilter.get()));
     return result;
 }
 

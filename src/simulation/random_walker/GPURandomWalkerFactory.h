@@ -12,6 +12,7 @@
 #include <random>
 
 #include "simulation/RandomWalkerFactory.h"
+#include "image/Image.h"
 #include "GPURandomWalker.h"
 
 /**
@@ -22,13 +23,60 @@
  * plugged into GPURandomWalker, whose rest of the parameters is determined by WalkerParamters. The class takes
  * responsibility of freeing MoveGenerator and MoveFilter memory on GPU.
  */
-class GPURandomWalkerFactory: public RandomWalkerFactory {
+class GPURandomWalkerFactory : public RandomWalkerFactory {
+public:
+    enum MoveGeneratorType {
+        GAUSSIAN,
+        CAUCHY
+    };
+
+    enum MoveFilterType {
+        DEFAULT,
+        IMAGE
+    };
+
+    enum BoundaryConditionsType {
+        WALL,
+        PERIODIC
+    };
+
 private:
-    std::size_t numberOfWalksInSeries{};
+    class MoveGeneratorOnGPUFactory {
+    private:
+        MoveGeneratorType moveGeneratorType{};
+        float sigma{};
+
+    public:
+        MoveGeneratorOnGPUFactory(const std::string &moveGeneratorString);
+
+        MoveGenerator *create(unsigned long seed, std::size_t numberOfWalks);
+    };
+
+
+    class MoveFilterOnGPUFactory {
+    private:
+        MoveFilterType moveFilterType{};
+        BoundaryConditionsType boundaryConditionsType{};
+        Image image{};
+
+        void fetchImageData(std::istringstream &moveFilterStream, std::ostream &logger);
+        void fetchBoundaryConditions(std::istringstream &moveFilterStream);
+
+    public:
+        std::size_t numberOfSetupThreads{};
+
+        MoveFilterOnGPUFactory(const std::string &moveFilterString, std::ostream &logger);
+
+        MoveFilter *create(unsigned long seed, std::size_t numberOfWalks);
+    };
+
+
     std::mt19937 seedGenerator;
-    MoveGenerator *moveGenerator;
-    MoveFilter *moveFilter;
-    std::unique_ptr<GPURandomWalker> randomWalker;
+    WalkerParameters walkerParameters;
+    unsigned long numberOfWalksInSeries{};
+    std::ostream &logger;
+    MoveGeneratorOnGPUFactory gpuMoveGeneratorFactory;
+    MoveFilterOnGPUFactory gpuMoveFilterFactory;
 
 public:
     /**
@@ -45,9 +93,9 @@ public:
      */
     GPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters, std::ostream &logger);
 
-    ~GPURandomWalkerFactory();
+    ~GPURandomWalkerFactory() { };
 
-    RandomWalker &getRandomWalker() override;
+    std::unique_ptr<RandomWalker> createRandomWalker() override;
 };
 
 #endif /* GPURANDOMWALKERFACTORY_H_ */

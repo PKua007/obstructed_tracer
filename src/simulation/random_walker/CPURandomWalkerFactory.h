@@ -25,10 +25,9 @@
 class CPURandomWalkerFactory : public RandomWalkerFactory {
 private:
     std::mt19937 seedGenerator;
+    WalkerParameters walkerParameters;
     unsigned long numberOfWalksInSeries{};
-    std::unique_ptr<MoveGenerator> moveGenerator;
-    std::unique_ptr<MoveFilter> moveFilter;
-    std::unique_ptr<RandomWalker> randomWalker;
+    std::ostream &logger;
 
     std::unique_ptr<MoveGenerator> createMoveGenerator(const std::string &moveGeneratorParameters);
     std::unique_ptr<MoveFilter> createMoveFilter(const std::string &moveFilterParameters, std::ostream &logger);
@@ -48,7 +47,7 @@ public:
      */
     CPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters, std::ostream &logger);
 
-    RandomWalker &getRandomWalker() override;
+    std::unique_ptr<RandomWalker> createRandomWalker() override;
 };
 
 #endif /* CPURANDOMWALKERFACTORY_H_ */

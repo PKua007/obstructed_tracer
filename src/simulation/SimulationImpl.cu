@@ -185,19 +185,18 @@ void SimulationImpl::run(std::ostream &logger) {
         auto walkerParameters = this->walkerParametersTemplate;
         walkerParameters.moveFilterParameters = this->moveFilters[simulationIndex];
 
-        std::unique_ptr<RandomWalkerFactory> randomWalkerFactory;
+        std::unique_ptr<RandomWalker> randomWalker;
         if (this->device == CPU)
-            randomWalkerFactory.reset(new CPURandomWalkerFactory(this->seedGenerator(), walkerParameters, logger));
+            randomWalker = CPURandomWalkerFactory(this->seedGenerator(), walkerParameters, logger).createRandomWalker();
         else if (this->device == GPU)
-            randomWalkerFactory.reset(new GPURandomWalkerFactory(this->seedGenerator(), walkerParameters, logger));
+            randomWalker = GPURandomWalkerFactory(this->seedGenerator(), walkerParameters, logger).createRandomWalker();
         else
             throw std::runtime_error("");
 
-        RandomWalker &randomWalker = randomWalkerFactory->getRandomWalker();
         if (this->parameters.numberOfSplits == 1) {
-            this->runSingleSimulation(simulationIndex, randomWalker, logger);
+            this->runSingleSimulation(simulationIndex, *randomWalker, logger);
         } else {
-            SplitRandomWalker splitRandomWalker(this->parameters.numberOfSplits, randomWalker);
+            SplitRandomWalker splitRandomWalker(this->parameters.numberOfSplits, *randomWalker);
             this->runSingleSimulation(simulationIndex, splitRandomWalker, logger);
         }
     }

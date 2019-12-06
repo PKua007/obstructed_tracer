@@ -53,6 +53,16 @@ void random_valid_tracer_vector(MoveFilter* moveFilter, Tracer *validTracersVect
     validTracersVector[i] = moveFilter->randomValidTracer();
 }
 
+__global__
+void delete_objects(MoveGenerator *moveGenerator, MoveFilter *moveFilter) {
+    if (!CUDA_IS_IT_FIRST_THREAD)
+        return;
+
+    delete moveGenerator;
+    delete moveFilter;
+}
+
+
 GPURandomWalker::TrajectoriesOnGPU::TrajectoriesOnGPU(std::size_t numberOfTrajectories, std::size_t numberOfSteps) :
         numberOfTrajectories{numberOfTrajectories}, numberOfSteps{numberOfSteps},
         cpuVectorOfGPUTrajectories(numberOfTrajectories), cpuVectorOfAcceptedSteps(numberOfTrajectories)
@@ -88,8 +98,8 @@ void GPURandomWalker::TrajectoriesOnGPU::copyToCPU(std::vector<Trajectory> &traj
 }
 
 GPURandomWalker::GPURandomWalker(std::size_t numberOfTrajectories, RandomWalker::WalkParameters walkParameters,
-                                 std::size_t numberOfMoveFilterSetupThreads,  MoveGenerator* moveGenerator,
-                                 MoveFilter* moveFilter, std::ostream &logger) :
+                                 std::size_t numberOfMoveFilterSetupThreads,  MoveGenerator *moveGenerator,
+                                 MoveFilter *moveFilter, std::ostream &logger) :
         numberOfTrajectories{numberOfTrajectories}, walkParameters{walkParameters},
         numberOfMoveFilterSetupThreads{numberOfMoveFilterSetupThreads}, moveGenerator{moveGenerator},
         moveFilter{moveFilter}, trajectoriesOnGPU(numberOfTrajectories, walkParameters.numberOfSteps)
@@ -99,6 +109,11 @@ GPURandomWalker::GPURandomWalker(std::size_t numberOfTrajectories, RandomWalker:
 
     this->trajectories.resize(numberOfTrajectories);
     this->setupMoveFilterForTracerRadius(logger);
+}
+
+GPURandomWalker::~GPURandomWalker() {
+    delete_objects<<<1, 32>>>(this->moveGenerator, this->moveFilter);
+    cudaCheck( cudaDeviceSynchronize() );
 }
 
 void GPURandomWalker::setupMoveFilterForTracerRadius(std::ostream& logger) {

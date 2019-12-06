@@ -89,16 +89,18 @@ std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createMoveFilter(const std::
 
 CPURandomWalkerFactory::CPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters,
                                                std::ostream &logger)
-        : numberOfWalksInSeries{walkerParameters.numberOfWalksInSeries}
+        : walkerParameters{walkerParameters}, numberOfWalksInSeries{walkerParameters.numberOfWalksInSeries},
+          logger{logger}
 {
     this->seedGenerator.seed(seed);
-    this->moveGenerator = this->createMoveGenerator(walkerParameters.moveGeneratorParameters);
-    this->moveFilter = this->createMoveFilter(walkerParameters.moveFilterParameters, logger);
-
-    this->randomWalker.reset(new CPURandomWalker(this->numberOfWalksInSeries, walkerParameters.walkParameters,
-                                                 this->moveGenerator.get(), this->moveFilter.get(), logger));
 }
 
-RandomWalker &CPURandomWalkerFactory::getRandomWalker() {
-    return *this->randomWalker;
+std::unique_ptr<RandomWalker> CPURandomWalkerFactory::createRandomWalker() {
+    auto moveGenerator = this->createMoveGenerator(walkerParameters.moveGeneratorParameters);
+    auto moveFilter = this->createMoveFilter(walkerParameters.moveFilterParameters, logger);
+
+    return std::unique_ptr<RandomWalker>(
+        new CPURandomWalker(this->numberOfWalksInSeries, this->walkerParameters.walkParameters,
+                            std::move(moveGenerator), std::move(moveFilter), this->logger)
+    );
 }

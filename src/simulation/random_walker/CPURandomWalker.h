@@ -11,6 +11,7 @@
 #include <vector>
 #include <array>
 #include <random>
+#include <memory>
 
 #include "simulation/RandomWalker.h"
 #include "simulation/Trajectory.h"
@@ -30,9 +31,9 @@ private:
     std::size_t     numberOfSteps{};
     float           tracerRadius{};
     Move            drift{};
-    MoveGenerator   *moveGenerator{};
-    MoveFilter      *moveFilter{};
-    std::vector<Trajectory> trajectories;
+    std::unique_ptr<MoveGenerator>  moveGenerator;
+    std::unique_ptr<MoveFilter>     moveFilter;
+    std::vector<Trajectory>         trajectories;
 
     Trajectory runSingleTrajectory(Tracer initialTracer);
 
@@ -50,8 +51,9 @@ public:
      * @param moveFilter strategy of accepting moves and choosing starting positions of the tracer
      * @param logger the output stream on which info about preparing @a moveFilter will be printed
      */
-    CPURandomWalker(std::size_t numberOfWalks, WalkParameters walkParameters, MoveGenerator *moveGenerator,
-                    MoveFilter *moveFilter, std::ostream &logger);
+    CPURandomWalker(std::size_t numberOfWalks, WalkParameters walkParameters,
+                    std::unique_ptr<MoveGenerator> moveGenerator, std::unique_ptr<MoveFilter> moveFilter,
+                    std::ostream &logger);
 
     /**
      * @brief Performs random walks which number was set in the constructor in parallel using OpenMP.

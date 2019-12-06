@@ -46,8 +46,8 @@ private:
         TrajectoriesOnGPU(std::size_t numberOfTrajectories, std::size_t numberOfSteps);
 
         ~TrajectoriesOnGPU();
-        TrajectoriesOnGPU(TrajectoriesOnGPU &other) = delete;
-        TrajectoriesOnGPU &operator=(TrajectoriesOnGPU &other) = delete;
+        TrajectoriesOnGPU(const TrajectoriesOnGPU &) = delete;
+        TrajectoriesOnGPU &operator=(const TrajectoriesOnGPU &) = delete;
 
         /* Methods which provide arrays allocated on GPU to be used on GPU */
         Point **getTrajectoriesArray() { return this->gpuArrayOfGPUTrajectories; }
@@ -92,6 +92,10 @@ public:
     GPURandomWalker(std::size_t numberOfWalks, WalkParameters walkParameters,
                     std::size_t numberOfMoveFilterSetupThreads, MoveGenerator *moveGenerator, MoveFilter *moveFilter,
                     std::ostream &logger);
+
+    GPURandomWalker(const GPURandomWalker &) = delete;
+    GPURandomWalker &operator=(const GPURandomWalker &) = delete;
+    ~GPURandomWalker();
 
     /**
      * @brief Performs parallel GPU walks based on parameters given in the constructor.
