@@ -8,6 +8,8 @@
 #ifndef RANDOMWALKERFACTORY_H_
 #define RANDOMWALKERFACTORY_H_
 
+#include <memory>
+
 #include "RandomWalker.h"
 
 /**
@@ -43,9 +45,9 @@ public:
     virtual ~RandomWalkerFactory() = default;
 
     /**
-     * @brief Gets the random walker produced by the factory.
+     * @brief Creates new RandomWalker corresponding to concrete factory.
      */
-    virtual RandomWalker &getRandomWalker() = 0;
+    virtual std::unique_ptr<RandomWalker> createRandomWalker() = 0;
 };
 
 #endif /* RANDOMWALKERFACTORY_H_ */
