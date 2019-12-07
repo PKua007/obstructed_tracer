@@ -19,13 +19,15 @@ CPURandomWalker::CPURandomWalker(std::size_t numberOfTrajectories, RandomWalker:
                                  std::unique_ptr<MoveGenerator> moveGenerator, std::unique_ptr<MoveFilter> moveFilter,
                                  std::ostream &logger)
         : numberOfTrajectories{numberOfTrajectories}, numberOfSteps{walkParameters.numberOfSteps},
-          tracerRadius{walkParameters.tracerRadius}, drift{walkParameters.drift},
-          moveGenerator{std::move(moveGenerator)}, moveFilter{std::move(moveFilter)}
+          tracerRadius{walkParameters.tracerRadius}, moveGenerator{std::move(moveGenerator)},
+          moveFilter{std::move(moveFilter)}
 {
     Expects(this->numberOfTrajectories > 0);
     Expects(this->numberOfSteps > 0);
     Expects(this->tracerRadius >= 0.f);
     this->trajectories.resize(numberOfTrajectories);
+
+    this->rescaledDrift = walkParameters.drift * walkParameters.integrationStep;
 
     logger << "[CPURandomWalker] Preparing MoveFilter... " << std::flush;
     this->moveFilter->setupForTracerRadius(this->tracerRadius);
@@ -38,7 +40,7 @@ Trajectory CPURandomWalker::runSingleTrajectory(Tracer initialTracer) {
     trajectory.addPoint(tracer.getPosition());
 
     for (std::size_t i = 0; i < this->numberOfSteps; i++) {
-        Move move = this->moveGenerator->generateMove() + drift;
+        Move move = this->moveGenerator->generateMove() + this->rescaledDrift;
         if (this->moveFilter->isMoveValid(tracer, move)) {
             tracer += move;
             trajectory.addPoint(tracer.getPosition(), true);

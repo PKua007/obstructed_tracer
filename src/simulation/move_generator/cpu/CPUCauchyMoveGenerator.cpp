@@ -9,9 +9,9 @@
 
 #include "CPUCauchyMoveGenerator.h"
 
-CPUCauchyMoveGenerator::CPUCauchyMoveGenerator(float width, unsigned int seed) {
+CPUCauchyMoveGenerator::CPUCauchyMoveGenerator(float width, float integrationStep, unsigned int seed) {
     this->randomGenerator.seed(seed);
-    this->cauchyDistribution = std::cauchy_distribution<float>(0.f, width);
+    this->cauchyDistribution = std::cauchy_distribution<float>(0.f, width * integrationStep);
     this->uniformAngleDistribution = std::uniform_real_distribution<float>(0.f, 2*M_PI);
 }
 

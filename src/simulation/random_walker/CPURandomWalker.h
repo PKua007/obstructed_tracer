@@ -30,7 +30,7 @@ private:
     std::size_t     numberOfTrajectories{};
     std::size_t     numberOfSteps{};
     float           tracerRadius{};
-    Move            drift{};
+    Move            rescaledDrift{};
     std::unique_ptr<MoveGenerator>  moveGenerator;
     std::unique_ptr<MoveFilter>     moveFilter;
     std::vector<Trajectory>         trajectories;

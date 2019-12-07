@@ -27,8 +27,9 @@ void gpu_random_walk(size_t numberOfTrajectories, RandomWalker::WalkParameters w
     trajectories[i][0] = tracer.getPosition();
 
     acceptedSteps[i] = 0;
+    Move rescaledDrift = walkParameters.drift * walkParameters.integrationStep;
     for (size_t step = 1; step <= walkParameters.numberOfSteps; step++) {
-        Move move = moveGenerator->generateMove() + walkParameters.drift;
+        Move move = moveGenerator->generateMove() + rescaledDrift;
         if (moveFilter->isMoveValid(tracer, move)) {
             tracer += move;
             trajectories[i][step] = tracer.getPosition();

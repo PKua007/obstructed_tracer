@@ -30,10 +30,13 @@ public:
      * The constructor is expected to be called only by the first CUDA thread.
      *
      * @param sigma the standard deviation in normal distribution
+     * @param integrationStep the integration step in the diffusion used to rescale the distribution properly - in
+     * this case by square root of the integration step
      * @param seed the random seed for generators
      * @param numberOfTrajectories the number of trajectories for which independent number will be sampled on GPU
      */
-    CUDA_DEV GPUGaussianMoveGenerator(float sigma, unsigned int seed, size_t numberOfTrajectories);
+    CUDA_DEV GPUGaussianMoveGenerator(float sigma, float integrationStep, unsigned int seed,
+                                      size_t numberOfTrajectories);
 
     CUDA_DEV GPUGaussianMoveGenerator(const GPUGaussianMoveGenerator &other) = delete;
     CUDA_DEV GPUGaussianMoveGenerator operator=(GPUGaussianMoveGenerator other) = delete;

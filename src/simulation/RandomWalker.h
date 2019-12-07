@@ -42,6 +42,11 @@ public:
         float tracerRadius;
 
         /**
+         * @brief The integration step to rescale random kicks and drift
+         */
+        float integrationStep;
+
+        /**
          * @brief A drift to be added to each walk step apart from random move.
          */
         Move drift;

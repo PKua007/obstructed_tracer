@@ -22,7 +22,7 @@
 
 
 __global__
-void create_move_generator(unsigned long seed, float sigma, size_t numberOfTrajectories,
+void create_move_generator(unsigned long seed, float sigma, float integrationStep, size_t numberOfTrajectories,
                            GPURandomWalkerFactory::MoveGeneratorType moveGeneratorType, MoveGenerator **moveGenerator)
 {
     if (!CUDA_IS_IT_FIRST_THREAD)
@@ -31,9 +31,9 @@ void create_move_generator(unsigned long seed, float sigma, size_t numberOfTraje
     using MoveGeneratorType = GPURandomWalkerFactory::MoveGeneratorType;
 
     if (moveGeneratorType == MoveGeneratorType::GAUSSIAN)
-        (*moveGenerator) = new GPUGaussianMoveGenerator(sigma, seed, numberOfTrajectories);
+        (*moveGenerator) = new GPUGaussianMoveGenerator(sigma, integrationStep, seed, numberOfTrajectories);
     else if (moveGeneratorType == MoveGeneratorType::CAUCHY)
-        (*moveGenerator) = new GPUCauchyMoveGenerator(sigma, seed, numberOfTrajectories);
+        (*moveGenerator) = new GPUCauchyMoveGenerator(sigma, integrationStep, seed, numberOfTrajectories);
     else
         (*moveGenerator) = nullptr;
 }
@@ -68,7 +68,12 @@ void create_move_filter(unsigned long seed, size_t numberOfTrajectories,
     }
 }
 
-GPURandomWalkerFactory::MoveGeneratorOnGPUFactory::MoveGeneratorOnGPUFactory(const std::string &moveGeneratorString) {
+GPURandomWalkerFactory::MoveGeneratorOnGPUFactory::MoveGeneratorOnGPUFactory(const std::string &moveGeneratorString,
+                                                                             float integrationStep)
+        : integrationStep{integrationStep}
+{
+    Validate(integrationStep > 0.f);
+
     std::istringstream moveGeneratorStream(moveGeneratorString);
     std::string moveGeneratorName;
     moveGeneratorStream >> moveGeneratorName >> this->sigma;
@@ -89,7 +94,7 @@ MoveGenerator *GPURandomWalkerFactory::MoveGeneratorOnGPUFactory::create(unsigne
 {
     MoveGenerator **moveGeneratorPlaceholder{};
     cudaCheck( cudaMalloc(&moveGeneratorPlaceholder, sizeof(MoveGenerator**)) );
-    create_move_generator<<<1, 32>>>(seed, this->sigma, numberOfWalks, this->moveGeneratorType,
+    create_move_generator<<<1, 32>>>(seed, this->sigma, this->integrationStep, numberOfWalks, this->moveGeneratorType,
                                      moveGeneratorPlaceholder);
     cudaCheck( cudaDeviceSynchronize() );
 
@@ -187,7 +192,9 @@ MoveFilter *GPURandomWalkerFactory::MoveFilterOnGPUFactory::create(unsigned long
 GPURandomWalkerFactory::GPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters,
                                                std::ostream &logger)
         : walkerParameters{walkerParameters}, numberOfWalksInSeries{walkerParameters.numberOfWalksInSeries},
-          logger{logger}, gpuMoveGeneratorFactory(walkerParameters.moveGeneratorParameters),
+          logger{logger},
+          gpuMoveGeneratorFactory(walkerParameters.moveGeneratorParameters,
+                                  walkerParameters.walkParameters.integrationStep),
           gpuMoveFilterFactory(walkerParameters.moveFilterParameters, logger), seedGenerator(seed)
 { }
 

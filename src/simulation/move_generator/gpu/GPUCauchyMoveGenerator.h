@@ -32,10 +32,12 @@ public:
      * The constructor is expected to be called only by the first CUDA thread.
      *
      * @param width the width parameter in Cauchy distribution
+     * @param integrationStep the integration step in the diffusion used to rescale the distribution properly - in this
+     * case by square root of the integration step
      * @param seed the random seed for generators
      * @param numberOfTrajectories the number of trajectories for which independent number will be sampled on GPU
      */
-    CUDA_DEV GPUCauchyMoveGenerator(float width, unsigned int seed, size_t numberOfTrajectories);
+    CUDA_DEV GPUCauchyMoveGenerator(float width, float integrationStep, unsigned int seed, size_t numberOfTrajectories);
 
     CUDA_DEV GPUCauchyMoveGenerator(const GPUCauchyMoveGenerator &other) = delete;
     CUDA_DEV GPUCauchyMoveGenerator operator=(GPUCauchyMoveGenerator other) = delete;

@@ -22,7 +22,7 @@ void AnalyzerImpl::analyze(const MSDData &msdData) {
 
     PowerRegression regression;
     for (std::size_t i = startIndex; i < endIndex; i++)
-        regression.addXY(i, msdData[i].x2 + msdData[i].y2);
+        regression.addXY(i * parameters.integrationStep, msdData[i].x2 + msdData[i].y2);
     regression.calculate();
 
     this->rSquareResult.D = regression.getMultiplier();
@@ -30,8 +30,10 @@ void AnalyzerImpl::analyze(const MSDData &msdData) {
     this->rSquareResult.R2 = regression.getR2();
 
     regression.clear();
-    for (std::size_t i = startIndex; i < endIndex; i++)
-        regression.addXY(i, msdData[i].x2 - msdData[i].x*msdData[i].x + msdData[i].y2 - msdData[i].y*msdData[i].y);
+    for (std::size_t i = startIndex; i < endIndex; i++) {
+        regression.addXY(i * parameters.integrationStep,
+                         msdData[i].x2 - msdData[i].x*msdData[i].x + msdData[i].y2 - msdData[i].y*msdData[i].y);
+    }
     regression.calculate();
 
     this->rVarianceResult.D = regression.getMultiplier();

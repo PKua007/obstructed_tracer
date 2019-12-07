@@ -23,6 +23,8 @@ Parameters::Parameters(std::istream& input) {
             this->moveFilter = config.getString(key);
         else if (key == "moveGenerator")
             this->moveGenerator = config.getString(key);
+        else if (key == "integrationStep")
+            this->integrationStep = config.getFloat(key);
         else if (key == "drift")
             this->drift = config.getString(key);
         else if (key == "numberOfWalksInSeries")
@@ -49,6 +51,7 @@ void Parameters::print(std::ostream& out) {
     out << "tracerRadius          : " << this->tracerRadius << std::endl;
     out << "moveGenerator         : " << this->moveGenerator << std::endl;
     out << "moveFilter            : " << this->moveFilter << std::endl;
+    out << "integrationStep       : " << this->integrationStep << std::endl;
     out << "drift                 : " << this->drift << std::endl;
     out << "numberOfWalksInSeries : " << this->numberOfWalksInSeries << std::endl;
     out << "numberOfSplits        : " << this->numberOfSplits << std::endl;
@@ -59,6 +62,7 @@ void Parameters::print(std::ostream& out) {
 }
 
 void Parameters::validateParameters() const {
+    Validate(this->integrationStep > 0.f);
     Validate(this->numberOfSteps > 0);
     Validate(this->tracerRadius >= 0.f);
     Validate(this->numberOfWalksInSeries > 0);

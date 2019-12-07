@@ -45,9 +45,10 @@ private:
     private:
         MoveGeneratorType moveGeneratorType{};
         float sigma{};
+        float integrationStep{};
 
     public:
-        MoveGeneratorOnGPUFactory(const std::string &moveGeneratorString);
+        MoveGeneratorOnGPUFactory(const std::string &moveGeneratorString, float integrationStep);
 
         MoveGenerator *create(unsigned long seed, std::size_t numberOfWalks);
     };

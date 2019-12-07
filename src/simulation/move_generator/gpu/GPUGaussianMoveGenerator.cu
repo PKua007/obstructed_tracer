@@ -7,11 +7,13 @@
 
 #include "GPUGaussianMoveGenerator.h"
 
-CUDA_DEV GPUGaussianMoveGenerator::GPUGaussianMoveGenerator(float sigma, unsigned int seed,
+CUDA_DEV GPUGaussianMoveGenerator::GPUGaussianMoveGenerator(float sigma, float integrationStep, unsigned int seed,
                                                             size_t numberOfTrajectories)
-        // Divide sigma by sqrt(2), because if we sample x and y with sigma^2, then r is sampled from 2sigma^2
-        : sigma{sigma * float{M_SQRT1_2}}, numberOfTrajectories{numberOfTrajectories}
+        : numberOfTrajectories{numberOfTrajectories}
 {
+    // Divide sigma by sqrt(2), because if we sample x and y with sigma^2, then r is sampled from 2sigma^2
+    // After this, take integration step info account
+    this->sigma = sigma * float{M_SQRT1_2} * sqrtf(integrationStep);
     this->states = new curandState[this->numberOfTrajectories];
     for (size_t i = 0; i < numberOfTrajectories; i++)
         curand_init(seed, i, 0, &(this->states[i]));

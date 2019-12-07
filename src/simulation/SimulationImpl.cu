@@ -54,6 +54,7 @@ SimulationImpl::prepareWalkerParametersTemplate(const Parameters &parameters) co
     // walkParameters.numberOfSteps is for a single walk, so if walks are split we have to divide by number of splits
     walkParameters.numberOfSteps = parameters.numberOfSteps / parameters.numberOfSplits;
     walkParameters.tracerRadius = parameters.tracerRadius;
+    walkParameters.integrationStep = parameters.integrationStep;
 
     RandomWalkerFactory::WalkerParameters walkerParametersTemplate;
     walkerParametersTemplate.moveFilterParameters = "";  // placeholder for specific MoveFilters

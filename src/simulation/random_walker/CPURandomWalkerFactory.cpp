@@ -18,7 +18,9 @@
 #include "image/PPMImageReader.h"
 #include "utils/Assertions.h"
 
-std::unique_ptr<MoveGenerator> CPURandomWalkerFactory::createMoveGenerator(const std::string &moveGeneratorParameters) {
+std::unique_ptr<MoveGenerator> CPURandomWalkerFactory::createMoveGenerator(const std::string &moveGeneratorParameters,
+                                                                           float integrationStep)
+{
     std::istringstream moveGeneratorStream(moveGeneratorParameters);
     std::string moveGeneratorType;
     float sigma;
@@ -27,12 +29,17 @@ std::unique_ptr<MoveGenerator> CPURandomWalkerFactory::createMoveGenerator(const
         throw std::runtime_error("Malformed MoveGenerator parameters");
     Validate(sigma >= 0.f);
 
-    if (moveGeneratorType == "GaussianMoveGenerator")
-        return std::unique_ptr<MoveGenerator>(new CPUGaussianMoveGenerator(sigma, this->seedGenerator()));
-    else if (moveGeneratorType == "CauchyMoveGenerator")
-        return std::unique_ptr<MoveGenerator>(new CPUCauchyMoveGenerator(sigma, this->seedGenerator()));
-    else
+    if (moveGeneratorType == "GaussianMoveGenerator") {
+        return std::unique_ptr<MoveGenerator>(
+            new CPUGaussianMoveGenerator(sigma, integrationStep, this->seedGenerator())
+        );
+    } else if (moveGeneratorType == "CauchyMoveGenerator") {
+        return std::unique_ptr<MoveGenerator>(
+            new CPUCauchyMoveGenerator(sigma, integrationStep, this->seedGenerator())
+        );
+    } else{
         throw std::runtime_error("Unknown MoveGenerator: " + moveGeneratorType);
+    }
 }
 
 std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createImageMoveFilter(std::istringstream &moveFilterStream,
@@ -94,7 +101,8 @@ CPURandomWalkerFactory::CPURandomWalkerFactory(unsigned long seed, const WalkerP
 { }
 
 std::unique_ptr<RandomWalker> CPURandomWalkerFactory::createRandomWalker() {
-    auto moveGenerator = this->createMoveGenerator(walkerParameters.moveGeneratorParameters);
+    float integrationStep = this->walkerParameters.walkParameters.integrationStep;
+    auto moveGenerator = this->createMoveGenerator(walkerParameters.moveGeneratorParameters, integrationStep);
     auto moveFilter = this->createMoveFilter(walkerParameters.moveFilterParameters, logger);
 
     return std::unique_ptr<RandomWalker>(

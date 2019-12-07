@@ -29,7 +29,8 @@ private:
     unsigned long numberOfWalksInSeries{};
     std::ostream &logger;
 
-    std::unique_ptr<MoveGenerator> createMoveGenerator(const std::string &moveGeneratorParameters);
+    std::unique_ptr<MoveGenerator> createMoveGenerator(const std::string &moveGeneratorParameters,
+                                                       float integrationStep);
     std::unique_ptr<MoveFilter> createMoveFilter(const std::string &moveFilterParameters, std::ostream &logger);
     std::unique_ptr<MoveFilter> createImageMoveFilter(std::istringstream &moveFilterStream, std::ostream &logger);
 

@@ -9,8 +9,9 @@
 
 #include "GPUCauchyMoveGenerator.h"
 
-CUDA_DEV GPUCauchyMoveGenerator::GPUCauchyMoveGenerator(float width, unsigned int seed, size_t numberOfTrajectories)
-        : width{width}, numberOfTrajectories{numberOfTrajectories}
+CUDA_DEV GPUCauchyMoveGenerator::GPUCauchyMoveGenerator(float width, float integrationStep, unsigned int seed,
+                                                        size_t numberOfTrajectories)
+        : width{width * integrationStep}, numberOfTrajectories{numberOfTrajectories}
 {
     this->states = new curandState[this->numberOfTrajectories];
     for (size_t i = 0; i < numberOfTrajectories; i++)
