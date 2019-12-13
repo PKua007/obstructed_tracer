@@ -5,17 +5,22 @@
  *      Author: pkua
  */
 
-#include <iostream>
 #include <cmath>
 
 #include "AnalyzerImpl.h"
 #include "PowerRegression.h"
 #include "utils/Assertions.h"
 
-void AnalyzerImpl::analyze(const MSDData &msdData) {
+void AnalyzerImpl::analyze(const MSDData &msdData, const Parameters &parameters, double relativeRangeStart,
+                           double relativeRangeEnd)
+{
+    Expects(relativeRangeStart >= 0. && relativeRangeStart <= 1.);
+    Expects(relativeRangeEnd >= 0. && relativeRangeEnd <= 1.);
+    Expects(relativeRangeStart < relativeRangeEnd);
+
     std::size_t trajectorySize = msdData.size();
-    std::size_t startIndex = static_cast<std::size_t>(trajectorySize*this->relativeRangeStart);
-    std::size_t endIndex = static_cast<std::size_t>(trajectorySize*this->relativeRangeEnd);
+    std::size_t startIndex = static_cast<std::size_t>(trajectorySize*relativeRangeStart);
+    std::size_t endIndex = static_cast<std::size_t>(trajectorySize*relativeRangeEnd);
     Assert(startIndex > 0);
     Assert(endIndex <= trajectorySize);
     Assert(startIndex < endIndex);
@@ -40,9 +45,10 @@ void AnalyzerImpl::analyze(const MSDData &msdData) {
     this->rVarianceResult.alpha = regression.getExponent();
     this->rVarianceResult.R2 = regression.getR2();
 
-    std::size_t middleIndex = static_cast<size_t>(std::exp(std::log(static_cast<double>(trajectorySize)) / 2.));
-    Assert(middleIndex >= 0 && middleIndex < trajectorySize);
-    this->lastPointCorrelation = this->calculateCorrelation(msdData[trajectorySize - 1]);
+    // Middle point in log time scale - so index corresponding to sqrt(t_max)
+    std::size_t middleIndex = static_cast<size_t>(std::sqrt(endIndex / parameters.integrationStep));
+    Assert(middleIndex >= 0 && middleIndex < endIndex);
+    this->lastPointCorrelation = this->calculateCorrelation(msdData[endIndex - 1]);
     this->middlePointCorrelation = this->calculateCorrelation(msdData[middleIndex]);
 }
 

@@ -65,8 +65,19 @@ void Frontend<ConcreteSimulation, ConcreteAnalyzer>::perform_walk() {
 /* Mode analyzing the results. See main for the description. Returns exit code for main. */
 template <typename ConcreteSimulation, typename ConcreteAnalyzer>
 void Frontend<ConcreteSimulation, ConcreteAnalyzer>::analyze() {
-    if (this->additionalArguments.empty())
-        throw RunException("[Frontend::analyze] Usage: " + this->command + " analyze [input file] [msd file]");
+    if (this->additionalArguments.empty()) {
+        throw RunException("[Frontend::analyze] Usage: " + this->command + " analyze [input file] [msd file] "
+                           "(relative fit start = 0.01) (relative fit end = 1)");
+    }
+
+    double relativeFitStart = 0.01;
+    double relativeFitEnd = 1;
+    if (this->additionalArguments.size() > 1)
+        relativeFitStart = std::stod(this->additionalArguments[1]);
+    if (this->additionalArguments.size() > 2)
+        relativeFitEnd = std::stod(this->additionalArguments[2]);
+    if (relativeFitStart <= 0 || relativeFitStart >= relativeFitEnd || relativeFitEnd > 1)
+        throw RunException("[Frontend::analyze] Relative fit endpoints must be: 0 < start < end <= 1");
 
     std::string msdFilename = this->additionalArguments[0];
     std::ifstream msdFile(msdFilename);
@@ -78,8 +89,8 @@ void Frontend<ConcreteSimulation, ConcreteAnalyzer>::analyze() {
     MSDData msdData;
     msdData.restore(msdFile);
 
-    ConcreteAnalyzer analyzer(parameters, 0.01, 1.);    // For a while hardcoded range [t_max/100, t_max]
-    analyzer.analyze(msdData);
+    ConcreteAnalyzer analyzer;
+    analyzer.analyze(msdData, this->parameters, relativeFitStart, relativeFitEnd);
     Analyzer::Result rSquare = analyzer.getRSquareResult();
     Analyzer::Result rVariance = analyzer.getRVarianceResult();
 
