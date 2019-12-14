@@ -20,12 +20,18 @@ if [ $# == 0 ] ; then
     echo
 fi
 
-if [ $# != 1 ] ; then 
-    echo "Usage: $0 [folder]"
+if [[ $# < 1 || $# > 2 ]] ; then 
+    echo "Usage: $0 [folder] (tracer input file pattern)"
     exit
 fi
 
 folder=$1
+tracerInputFile=$2
+
+if [[ "${tracerInputFile}" == "" ]] ; then
+    tracerInputFile=tracer_input_pattern.txt	
+fi
+
 pattern='^.*_([0-9.]+)_([0-9.\-]+)$'
 if [[ $folder =~ $pattern ]] ; then
     driftR=${BASH_REMATCH[1]}
@@ -43,10 +49,10 @@ for image in $(bash -c "cd $folder && ls *.ppm") ; do
     ((numberOfMoveFilters++))
 done
 
-cat tracer_input_pattern.txt | sed "s/move_filter_placeholder/${moveFilter}/g
-                                    s/drift_r_placeholder/${driftR}/g
-                                    s/drift_theta_placeholder/${driftTheta}/g" \
-                              > "${folder}/input.txt"
+cat "${tracerInputFile}" | sed "s/move_filter_placeholder/${moveFilter}/g
+                                s/drift_r_placeholder/${driftR}/g
+                                s/drift_theta_placeholder/${driftTheta}/g" \
+                          > "${folder}/input.txt"
 
 outputPrefix="${folder}"
 echo "Prepared ${numberOfMoveFilters} simulations. Run them using command:"

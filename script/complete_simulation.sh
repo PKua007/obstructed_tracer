@@ -6,10 +6,12 @@ if [[ $# == 0 ]] ; then
     echo "folder, images in the folder with the name of"
     echo "<particle>_<additional attr>__<angle>_<sigma>_<drift r>_..."
     echo "...<drift theta>, rsa data in the rsa subolder"
+    echo
 fi
 
-if [[ $# != 7 ]] ; then
-    echo "Usage: $0 (particle) (angle) (sigma) (additional attr) (drift r) (drift theta) (image resoultion)"
+if [[ $# < 7 || $# > 9 ]] ; then
+    echo "Usage: $0 [particle] [angle] [sigma] [additional attr] [drift r] [drift theta] [image resoultion] (tracer input pattern file) (rsa input pattern file)"
+    echo "Arguments in (...) are optional"
     exit 1
 fi
 
@@ -20,6 +22,15 @@ attributes=$4
 driftR=$5
 driftTheta=$6
 imageResolution=$7
+tracerInputFile=$8
+rsaInputFile=$9
+
+if [[ "${tracerInputFile}" == "" ]] ; then
+    tracerInputFilte=tracer_input_pattern.txt
+fi
+if [[ "${rsaInputFile}" == "" ]] ; then
+    rsaInputFile=rsa_input_pattern.txt
+fi
 
 if [ "${attributes}" == "" ] ; then
     fullAttributes="${angle} ${sigma}"
@@ -37,9 +48,9 @@ packingFileName="packing_${particleInPackingFileName}_*"
 
 echo "******** Preparing rsa_input ********"
 
-cat rsa_input_pattern.txt | sed "s/particle_placeholder/${particle}/g
-                                 s/attributes_placeholder/${fullAttributes}/g" \
-                          > rsa_input.txt
+cat "${rsaInputFile}" | sed "s/particle_placeholder/${particle}/g
+                             s/attributes_placeholder/${fullAttributes}/g" \
+                      > rsa_input.txt
 
 if [[ $? -ne 0 ]] ; then
     echo "Could not prepare rsa_input.txt, aborting packing generation"
@@ -76,7 +87,7 @@ fi
 
 echo "******** Starting random walk ********"
 
-walkCommand=$(./walk_in_folder.sh ${folderName} | sed -n 2p)
+walkCommand=$(./walk_in_folder.sh ${folderName} ${tracerInputFile} | sed -n 2p)
 bash -c "$walkCommand"
 
 if [[ $? -ne 0 ]] ; then
