@@ -13,13 +13,11 @@
 #include <iterator>
 
 #include "SimulationImpl.h"
+#include "random_walker/RandomWalkerFactoryImpl.h"
 #include "utils/Utils.h"
 #include "utils/OMPDefines.h"
 #include "utils/Assertions.h"
 #include "utils/CudaCheck.h"
-#include "random_walker/CPURandomWalkerFactory.h"
-#include "random_walker/GPURandomWalkerFactory.h"
-#include "random_walker/SplitRandomWalker.h"
 #include "Timer.h"
 
 
@@ -132,6 +130,12 @@ void SimulationImpl::store_trajectories(const RandomWalker &randomWalker, const 
        logger << ", final position: " << trajectory.getLast() << std::endl;
    }
 }
+
+SimulationImpl::SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix,
+                               std::ostream &logger)
+        : SimulationImpl(parameters, std::unique_ptr<RandomWalkerFactory>(new RandomWalkerFactoryImpl(logger)),
+                         outputFilePrefix, logger)
+{ }
 
 SimulationImpl::SimulationImpl(const Parameters &parameters, std::unique_ptr<RandomWalkerFactory> randomWalkerFactory,
                                const std::string &outputFilePrefix, std::ostream &logger)

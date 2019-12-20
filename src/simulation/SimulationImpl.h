@@ -55,6 +55,14 @@ private:
 
 public:
     /**
+     * @brief Constructor using the default RandomWalkerFactory - RandomWalkerFactoryImpl.
+     *
+     * @see SimulationImpl::SimulationImpl(const Parameters &, std::unique_ptr<RandomWalkerFactory>,
+     * const std::string &, std::ostream &)
+     */
+    SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix, std::ostream &logger);
+
+    /**
      * @brief Constructs the simulation based on @a parameters.
      *
      * It creates the proper - GPU or CPU simulation model. It takes care of selecting the random generator seed and
