@@ -1,19 +1,19 @@
 /*
- * GPURandomWalkerFactory.h
+ * GPURandomWalkerBuilder.h
  *
  *  Created on: 26 sie 2019
  *      Author: pkua
  */
 
-#ifndef GPURANDOMWALKERFACTORY_H_
-#define GPURANDOMWALKERFACTORY_H_
+#ifndef GPURANDOMWALKERBUILDER_H_
+#define GPURANDOMWALKERBUILDER_H_
 
 #include <memory>
 #include <random>
 
-#include "simulation/RandomWalkerFactory.h"
 #include "image/Image.h"
 #include "GPURandomWalker.h"
+#include "../RandomWalkerFactory.h"
 
 /**
  * @brief A class which prepares GPURandomWalker.
@@ -23,7 +23,7 @@
  * its generator. The GPU-allocated strategies are plugged into GPURandomWalker, whose rest of the parameters is
  * determined by WalkerParamters.
  */
-class GPURandomWalkerFactory : public RandomWalkerFactory {
+class GPURandomWalkerBuilder {
 public:
     enum MoveGeneratorType {
         GAUSSIAN,
@@ -73,7 +73,7 @@ private:
 
 
     std::mt19937 seedGenerator;
-    WalkerParameters walkerParameters;
+    RandomWalkerFactory::WalkerParameters walkerParameters;
     unsigned long numberOfWalksInSeries{};
     std::ostream &logger;
     MoveGeneratorOnGPUFactory gpuMoveGeneratorFactory;
@@ -81,7 +81,7 @@ private:
 
 public:
     /**
-     * @brief Constructs the factory.
+     * @brief Constructs the builder.
      *
      * @a seed is used to create byte generator, which then will be used to sample two new seeds: for MoveGenerator and
      * MoveFilter (for MoveFilter::randomValidTracer).
@@ -90,9 +90,10 @@ public:
      * @param walkerParameters the parameters of the random walk, RandomWalker, MoveGenerator and MoveFilter
      * @param logger the output stream for some info on initializing strategies and GPURandomWalker
      */
-    GPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters, std::ostream &logger);
+    GPURandomWalkerBuilder(unsigned long seed, const RandomWalkerFactory::WalkerParameters &walkerParameters,
+                           std::ostream &logger);
 
-    ~GPURandomWalkerFactory() { };
+    ~GPURandomWalkerBuilder() { };
 
     /**
      * @brief Creates GPURandomWalker based on the paramters passed in the constructor of the class.
@@ -103,7 +104,7 @@ public:
      *
      * @return GPURandomWalker based on the parameters passed in the constructor of the class
      */
-    std::unique_ptr<RandomWalker> createRandomWalker() override;
+    std::unique_ptr<RandomWalker> build();
 };
 
-#endif /* GPURANDOMWALKERFACTORY_H_ */
+#endif /* GPURANDOMWALKERBUILDER_H_ */

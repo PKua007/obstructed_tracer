@@ -9,6 +9,7 @@
 #define SPLITRANDOMWALKER_H_
 
 #include <vector>
+#include <memory>
 
 #include "simulation/RandomWalker.h"
 #include "simulation/Trajectory.h"
@@ -25,11 +26,11 @@ private:
     std::size_t numberOfStepsPerSplit{};
     std::size_t numberOfSplits{};
     std::size_t numberOfTrajectories{};
-    RandomWalker &randomWalker;
+    std::unique_ptr<RandomWalker> randomWalker;
     std::vector<Trajectory> trajectories;
 
 public:
-    SplitRandomWalker(std::size_t numberOfSplits, RandomWalker &randomWalker);
+    SplitRandomWalker(std::size_t numberOfSplits, std::unique_ptr<RandomWalker> randomWalker);
 
     std::vector<Tracer> getRandomInitialTracersVector() override;
 

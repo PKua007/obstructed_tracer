@@ -13,13 +13,11 @@
 #include <iterator>
 
 #include "SimulationImpl.h"
+#include "random_walker/RandomWalkerFactoryImpl.h"
 #include "utils/Utils.h"
 #include "utils/OMPDefines.h"
 #include "utils/Assertions.h"
 #include "utils/CudaCheck.h"
-#include "random_walker/CPURandomWalkerFactory.h"
-#include "random_walker/GPURandomWalkerFactory.h"
-#include "random_walker/SplitRandomWalker.h"
 #include "Timer.h"
 
 
@@ -133,9 +131,16 @@ void SimulationImpl::store_trajectories(const RandomWalker &randomWalker, const 
    }
 }
 
-SimulationImpl::SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix, std::ostream &logger)
-        : outputFilePrefix{outputFilePrefix}, parameters{parameters}, msdDataCalculator(parameters.numberOfSteps),
-          msdData(parameters.numberOfSteps)
+SimulationImpl::SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix,
+                               std::ostream &logger)
+        : SimulationImpl(parameters, std::unique_ptr<RandomWalkerFactory>(new RandomWalkerFactoryImpl(logger)),
+                         outputFilePrefix, logger)
+{ }
+
+SimulationImpl::SimulationImpl(const Parameters &parameters, std::unique_ptr<RandomWalkerFactory> randomWalkerFactory,
+                               const std::string &outputFilePrefix, std::ostream &logger)
+        : outputFilePrefix{outputFilePrefix}, randomWalkerFactory{std::move(randomWalkerFactory)},
+          parameters{parameters}, msdDataCalculator(parameters.numberOfSteps), msdData(parameters.numberOfSteps)
 {
     ValidateMsg(parameters.numberOfSteps % parameters.numberOfSplits == 0,
                 "Cannot split " + std::to_string(parameters.numberOfSteps) + " in "
@@ -188,18 +193,18 @@ void SimulationImpl::run(std::ostream &logger) {
 
         std::unique_ptr<RandomWalker> randomWalker;
         if (this->device == CPU)
-            randomWalker = CPURandomWalkerFactory(this->seedGenerator(), walkerParameters, logger).createRandomWalker();
+            randomWalker = this->randomWalkerFactory->createCPURandomWalker(this->seedGenerator(), walkerParameters);
         else if (this->device == GPU)
-            randomWalker = GPURandomWalkerFactory(this->seedGenerator(), walkerParameters, logger).createRandomWalker();
+            randomWalker = this->randomWalkerFactory->createGPURandomWalker(this->seedGenerator(), walkerParameters);
         else
             throw std::runtime_error("");
 
-        if (this->parameters.numberOfSplits == 1) {
-            this->runSingleSimulation(simulationIndex, *randomWalker, logger);
-        } else {
-            SplitRandomWalker splitRandomWalker(this->parameters.numberOfSplits, *randomWalker);
-            this->runSingleSimulation(simulationIndex, splitRandomWalker, logger);
+        if (this->parameters.numberOfSplits != 1) {
+            randomWalker = this->randomWalkerFactory->createSplitRandomWalker(this->parameters.numberOfSplits,
+                                                                              std::move(randomWalker));
         }
+
+        this->runSingleSimulation(simulationIndex, *randomWalker, logger);
     }
 
     this->msdData = this->msdDataCalculator.fetchMSDData();

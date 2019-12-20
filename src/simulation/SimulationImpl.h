@@ -34,13 +34,15 @@ private:
         GPU
     };
 
-    Device device;
-    std::mt19937 seedGenerator;
     Parameters parameters;
-    std::vector<std::string> moveFilters;
+    Device device;
     RandomWalkerFactory::WalkerParameters walkerParametersTemplate;
+    std::mt19937 seedGenerator;
+    std::vector<std::string> moveFilters;
     std::string outputFilePrefix;
+
     AccumulatingMSDDataCalculator msdDataCalculator;
+    std::unique_ptr<RandomWalkerFactory> randomWalkerFactory;
     MSDData msdData;
 
     Move parseDrift(const std::string &driftString) const;
@@ -54,17 +56,27 @@ private:
 
 public:
     /**
+     * @brief Constructor using the default RandomWalkerFactory - RandomWalkerFactoryImpl.
+     *
+     * @see SimulationImpl::SimulationImpl(const Parameters &, std::unique_ptr<RandomWalkerFactory>,
+     * const std::string &, std::ostream &)
+     */
+    SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix, std::ostream &logger);
+
+    /**
      * @brief Constructs the simulation based on @a parameters.
      *
      * It creates the proper - GPU or CPU simulation model. It takes care of selecting the random generator seed and
      * setting the size of GPU heap. The info how @a parameters fields are interpreted is in input.txt file (seeParameters to know how input.txt entries are mapped to Parameters fields).
      *
      * @param parameters parameters of the simulation
+     * @param randomWalkerFactory RandomWalkerFactory used to produce concrete RandomWalker-s
      * @param outputFilePrefix the prefix of trajectory file name which will be saved if @a parameters want saving
      * trajectories
      * @param logger output stream to show information such as list of MoveFilter parameters for each simulation
      */
-    SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix, std::ostream &logger);
+    SimulationImpl(const Parameters &parameters, std::unique_ptr<RandomWalkerFactory> randomWalkerFactory,
+                   const std::string &outputFilePrefix, std::ostream &logger);
 
     /**
      * @brief Performs one or more simulations, based on number of MoveFilter instances used.
