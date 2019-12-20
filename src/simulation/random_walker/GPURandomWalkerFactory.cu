@@ -189,7 +189,8 @@ MoveFilter *GPURandomWalkerFactory::MoveFilterOnGPUFactory::create(unsigned long
 }
 
 
-GPURandomWalkerFactory::GPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters,
+GPURandomWalkerFactory::GPURandomWalkerFactory(unsigned long seed,
+                                               const RandomWalkerFactory::WalkerParameters &walkerParameters,
                                                std::ostream &logger)
         : walkerParameters{walkerParameters}, numberOfWalksInSeries{walkerParameters.numberOfWalksInSeries},
           logger{logger},

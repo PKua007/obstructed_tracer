@@ -22,10 +22,10 @@
  * Before creating the random walker itself, it creates CPU versions of MoveFilter and MoveGenerator based on
  * parameters and hands them to the walker.
  */
-class CPURandomWalkerFactory : public RandomWalkerFactory {
+class CPURandomWalkerFactory {
 private:
     std::mt19937 seedGenerator;
-    WalkerParameters walkerParameters;
+    RandomWalkerFactory::WalkerParameters walkerParameters;
     unsigned long numberOfWalksInSeries{};
     std::ostream &logger;
 
@@ -45,7 +45,8 @@ public:
      * @param walkerParameters the parameters of the walker, MoveFilter and MoveGenerator
      * @param logger the output stream which will be passed to RandomWalker to show info
      */
-    CPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters, std::ostream &logger);
+    CPURandomWalkerFactory(unsigned long seed, const RandomWalkerFactory::WalkerParameters &walkerParameters,
+                           std::ostream &logger);
 
     /**
      * @brief Creates a new CPURandomWalker based on the parameters passed in the constructor.
@@ -55,7 +56,7 @@ public:
      *
      * @return The random walker created based on the parameters from the constructor of the class
      */
-    std::unique_ptr<RandomWalker> createRandomWalker() override;
+    std::unique_ptr<RandomWalker> createRandomWalker();
 };
 
 #endif /* CPURANDOMWALKERFACTORY_H_ */

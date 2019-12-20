@@ -13,6 +13,7 @@
 #include "MSDData.h"
 #include "Simulation.h"
 #include "utils/Utils.h"
+#include "simulation/random_walker/RandomWalkerFactoryImpl.h"
 
 
 template <typename ConcreteSimulation, typename ConcreteAnalyzer>
@@ -46,7 +47,8 @@ void Frontend<ConcreteSimulation, ConcreteAnalyzer>::perform_walk() {
 
     std::string outputFilePrefix = this->additionalArguments[0];
 
-    ConcreteSimulation simulation(parameters, outputFilePrefix, this->logger);
+    auto randomWalkerFactory = std::unique_ptr<RandomWalkerFactory>(new RandomWalkerFactoryImpl(this->logger));
+    ConcreteSimulation simulation(parameters, std::move(randomWalkerFactory), outputFilePrefix, this->logger);
     simulation.run(this->logger);
     MSDData &msdData = simulation.getMSDData();
 

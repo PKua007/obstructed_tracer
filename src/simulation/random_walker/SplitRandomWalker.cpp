@@ -12,9 +12,9 @@
 #include "simulation/Timer.h"
 #include "utils/Assertions.h"
 
-SplitRandomWalker::SplitRandomWalker(std::size_t numberOfSplits, RandomWalker &randomWalker)
-        : randomWalker{randomWalker}, numberOfTrajectories{randomWalker.getNumberOfTrajectories()},
-          numberOfStepsPerSplit{randomWalker.getNumberOfSteps()}, numberOfSplits{numberOfSplits}
+SplitRandomWalker::SplitRandomWalker(std::size_t numberOfSplits, std::unique_ptr<RandomWalker> randomWalker)
+        : randomWalker{std::move(randomWalker)}, numberOfTrajectories{randomWalker->getNumberOfTrajectories()},
+          numberOfStepsPerSplit{randomWalker->getNumberOfSteps()}, numberOfSplits{numberOfSplits}
 {
     Expects(this->numberOfSplits > 0);
     this->trajectories.resize(this->numberOfTrajectories);
@@ -23,7 +23,7 @@ SplitRandomWalker::SplitRandomWalker(std::size_t numberOfSplits, RandomWalker &r
 }
 
 std::vector<Tracer> SplitRandomWalker::getRandomInitialTracersVector() {
-    return this->randomWalker.getRandomInitialTracersVector();
+    return this->randomWalker->getRandomInitialTracersVector();
 }
 
 void SplitRandomWalker::run(std::ostream &logger, const std::vector<Tracer> &initialTracers) {
@@ -40,9 +40,9 @@ void SplitRandomWalker::run(std::ostream &logger, const std::vector<Tracer> &ini
         logger << "[SplitRandomWalker::run] Simulating steps " << startStep << " - " << endStep << " out of ";
         logger << totalNumberOfSteps << std::endl;
 
-        this->randomWalker.run(logger, currentInitialTracers);
+        this->randomWalker->run(logger, currentInitialTracers);
         for (std::size_t j = 0; j < this->numberOfTrajectories; j++)
-            this->trajectories[j].appendAnotherTrajectory(this->randomWalker.getTrajectory(j));
+            this->trajectories[j].appendAnotherTrajectory(this->randomWalker->getTrajectory(j));
 
         if (i < this->numberOfSplits - 1) {
             std::transform(this->trajectories.begin(), this->trajectories.end(), currentInitialTracers.begin(),

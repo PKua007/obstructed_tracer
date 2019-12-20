@@ -94,7 +94,8 @@ std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createMoveFilter(const std::
         throw std::runtime_error("Unknown MoveFilter: " + moveFilterType);
 }
 
-CPURandomWalkerFactory::CPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters,
+CPURandomWalkerFactory::CPURandomWalkerFactory(unsigned long seed,
+                                               const RandomWalkerFactory::WalkerParameters &walkerParameters,
                                                std::ostream &logger)
         : walkerParameters{walkerParameters}, numberOfWalksInSeries{walkerParameters.numberOfWalksInSeries},
           logger{logger}, seedGenerator(seed)

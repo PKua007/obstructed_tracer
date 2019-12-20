@@ -23,7 +23,7 @@
  * its generator. The GPU-allocated strategies are plugged into GPURandomWalker, whose rest of the parameters is
  * determined by WalkerParamters.
  */
-class GPURandomWalkerFactory : public RandomWalkerFactory {
+class GPURandomWalkerFactory {
 public:
     enum MoveGeneratorType {
         GAUSSIAN,
@@ -73,7 +73,7 @@ private:
 
 
     std::mt19937 seedGenerator;
-    WalkerParameters walkerParameters;
+    RandomWalkerFactory::WalkerParameters walkerParameters;
     unsigned long numberOfWalksInSeries{};
     std::ostream &logger;
     MoveGeneratorOnGPUFactory gpuMoveGeneratorFactory;
@@ -90,7 +90,8 @@ public:
      * @param walkerParameters the parameters of the random walk, RandomWalker, MoveGenerator and MoveFilter
      * @param logger the output stream for some info on initializing strategies and GPURandomWalker
      */
-    GPURandomWalkerFactory(unsigned long seed, const WalkerParameters &walkerParameters, std::ostream &logger);
+    GPURandomWalkerFactory(unsigned long seed, const RandomWalkerFactory::WalkerParameters &walkerParameters,
+                           std::ostream &logger);
 
     ~GPURandomWalkerFactory() { };
 
@@ -103,7 +104,7 @@ public:
      *
      * @return GPURandomWalker based on the parameters passed in the constructor of the class
      */
-    std::unique_ptr<RandomWalker> createRandomWalker() override;
+    std::unique_ptr<RandomWalker> createRandomWalker();
 };
 
 #endif /* GPURANDOMWALKERFACTORY_H_ */
