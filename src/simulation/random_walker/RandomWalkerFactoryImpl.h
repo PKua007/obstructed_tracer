@@ -11,8 +11,8 @@
 #include <iosfwd>
 
 #include "../RandomWalkerFactory.h"
-#include "CPURandomWalkerFactory.h"
-#include "GPURandomWalkerFactory.h"
+#include "CPURandomWalkerBuilder.h"
+#include "GPURandomWalkerBuilder.h"
 #include "SplitRandomWalker.h"
 
 class RandomWalkerFactoryImpl : public RandomWalkerFactory {
@@ -24,11 +24,11 @@ public:
     virtual ~RandomWalkerFactoryImpl() { };
 
     std::unique_ptr<RandomWalker> createCPURandomWalker(unsigned long seed, const WalkerParameters &walkerParameters) {
-        return CPURandomWalkerFactory(seed, walkerParameters, this->logger).createRandomWalker();
+        return CPURandomWalkerBuilder(seed, walkerParameters, this->logger).build();
     }
 
     std::unique_ptr<RandomWalker> createGPURandomWalker(unsigned long seed, const WalkerParameters &walkerParameters) {
-        return GPURandomWalkerFactory(seed, walkerParameters, this->logger).createRandomWalker();
+        return GPURandomWalkerBuilder(seed, walkerParameters, this->logger).build();
     }
 
     std::unique_ptr<RandomWalker> createSplitRandomWalker(std::size_t numberOfSplits,

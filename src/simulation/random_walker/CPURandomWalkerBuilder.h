@@ -1,19 +1,19 @@
 /*
- * CPURandomWalkerFactory.h
+ * CPURandomWalkerBuilder.h
  *
  *  Created on: 22 sie 2019
  *      Author: pkua
  */
 
-#ifndef CPURANDOMWALKERFACTORY_H_
-#define CPURANDOMWALKERFACTORY_H_
+#ifndef CPURANDOMWALKERBUILDER_H_
+#define CPURANDOMWALKERBUILDER_H_
 
 #include <memory>
 #include <iosfwd>
 
-#include "simulation/RandomWalkerFactory.h"
-#include "simulation/MoveGenerator.h"
-#include "simulation/MoveFilter.h"
+#include "../RandomWalkerFactory.h"
+#include "../MoveGenerator.h"
+#include "../MoveFilter.h"
 #include "CPURandomWalker.h"
 
 /**
@@ -22,7 +22,7 @@
  * Before creating the random walker itself, it creates CPU versions of MoveFilter and MoveGenerator based on
  * parameters and hands them to the walker.
  */
-class CPURandomWalkerFactory {
+class CPURandomWalkerBuilder {
 private:
     std::mt19937 seedGenerator;
     RandomWalkerFactory::WalkerParameters walkerParameters;
@@ -36,7 +36,7 @@ private:
 
 public:
     /**
-     * @brief Constructs the factory based on passed arguments.
+     * @brief Constructs the builder based on passed arguments.
      *
      * @a seed is used to create byte generator, which then will samples two new seeds: for MoveGenerator and MoveFilter
      * during creation of CPURandomWalker.
@@ -45,7 +45,7 @@ public:
      * @param walkerParameters the parameters of the walker, MoveFilter and MoveGenerator
      * @param logger the output stream which will be passed to RandomWalker to show info
      */
-    CPURandomWalkerFactory(unsigned long seed, const RandomWalkerFactory::WalkerParameters &walkerParameters,
+    CPURandomWalkerBuilder(unsigned long seed, const RandomWalkerFactory::WalkerParameters &walkerParameters,
                            std::ostream &logger);
 
     /**
@@ -56,7 +56,7 @@ public:
      *
      * @return The random walker created based on the parameters from the constructor of the class
      */
-    std::unique_ptr<RandomWalker> createRandomWalker();
+    std::unique_ptr<RandomWalker> build();
 };
 
-#endif /* CPURANDOMWALKERFACTORY_H_ */
+#endif /* CPURANDOMWALKERBUILDER_H_ */

@@ -8,7 +8,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "CPURandomWalkerFactory.h"
+#include "CPURandomWalkerBuilder.h"
 #include "simulation/move_generator/cpu/CPUGaussianMoveGenerator.h"
 #include "simulation/move_generator/cpu/CPUCauchyMoveGenerator.h"
 #include "simulation/move_filter/DefaultMoveFilter.h"
@@ -18,7 +18,7 @@
 #include "image/PPMImageReader.h"
 #include "utils/Assertions.h"
 
-std::unique_ptr<MoveGenerator> CPURandomWalkerFactory::createMoveGenerator(const std::string &moveGeneratorParameters,
+std::unique_ptr<MoveGenerator> CPURandomWalkerBuilder::createMoveGenerator(const std::string &moveGeneratorParameters,
                                                                            float integrationStep)
 {
     std::istringstream moveGeneratorStream(moveGeneratorParameters);
@@ -42,7 +42,7 @@ std::unique_ptr<MoveGenerator> CPURandomWalkerFactory::createMoveGenerator(const
     }
 }
 
-std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createImageMoveFilter(std::istringstream &moveFilterStream,
+std::unique_ptr<MoveFilter> CPURandomWalkerBuilder::createImageMoveFilter(std::istringstream &moveFilterStream,
                                                                           std::ostream &logger)
 {
     std::string imageFilename;
@@ -80,7 +80,7 @@ std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createImageMoveFilter(std::i
     }
 }
 
-std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createMoveFilter(const std::string &moveFilterParameters,
+std::unique_ptr<MoveFilter> CPURandomWalkerBuilder::createMoveFilter(const std::string &moveFilterParameters,
                                                                      std::ostream &logger)
 {
     std::istringstream moveFilterStream(moveFilterParameters);
@@ -94,14 +94,14 @@ std::unique_ptr<MoveFilter> CPURandomWalkerFactory::createMoveFilter(const std::
         throw std::runtime_error("Unknown MoveFilter: " + moveFilterType);
 }
 
-CPURandomWalkerFactory::CPURandomWalkerFactory(unsigned long seed,
+CPURandomWalkerBuilder::CPURandomWalkerBuilder(unsigned long seed,
                                                const RandomWalkerFactory::WalkerParameters &walkerParameters,
                                                std::ostream &logger)
         : walkerParameters{walkerParameters}, numberOfWalksInSeries{walkerParameters.numberOfWalksInSeries},
           logger{logger}, seedGenerator(seed)
 { }
 
-std::unique_ptr<RandomWalker> CPURandomWalkerFactory::createRandomWalker() {
+std::unique_ptr<RandomWalker> CPURandomWalkerBuilder::build() {
     float integrationStep = this->walkerParameters.walkParameters.integrationStep;
     auto moveGenerator = this->createMoveGenerator(walkerParameters.moveGeneratorParameters, integrationStep);
     auto moveFilter = this->createMoveFilter(walkerParameters.moveFilterParameters, logger);

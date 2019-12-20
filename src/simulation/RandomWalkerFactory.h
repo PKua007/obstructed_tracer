@@ -13,7 +13,7 @@
 #include "RandomWalker.h"
 
 /**
- * @brief A class which can produce RandomWalker instances using CPU, GPU and some decorators.
+ * @brief A class which can produce RandomWalker instances using CPU, GPU and splitting RandomWalker.
  */
 class RandomWalkerFactory {
 public:
@@ -70,6 +70,8 @@ public:
      *
      * @param numberOfSplits number of parts to divide trajectories into
      * @param randomWalker underlying RandomWalker to use
+     *
+     * @see SplitRandomWalker
      */
     virtual std::unique_ptr<RandomWalker> createSplitRandomWalker(std::size_t numberOfSplits,
                                                                   std::unique_ptr<RandomWalker> randomWalker) = 0;

@@ -34,14 +34,15 @@ private:
         GPU
     };
 
-    Device device;
-    std::mt19937 seedGenerator;
     Parameters parameters;
-    std::vector<std::string> moveFilters;
-    std::unique_ptr<RandomWalkerFactory> randomWalkerFactory;
+    Device device;
     RandomWalkerFactory::WalkerParameters walkerParametersTemplate;
+    std::mt19937 seedGenerator;
+    std::vector<std::string> moveFilters;
     std::string outputFilePrefix;
+
     AccumulatingMSDDataCalculator msdDataCalculator;
+    std::unique_ptr<RandomWalkerFactory> randomWalkerFactory;
     MSDData msdData;
 
     Move parseDrift(const std::string &driftString) const;
