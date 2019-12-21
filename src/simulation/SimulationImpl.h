@@ -67,7 +67,8 @@ public:
      * @brief Constructs the simulation based on @a parameters.
      *
      * It creates the proper - GPU or CPU simulation model. It takes care of selecting the random generator seed and
-     * setting the size of GPU heap. The info how @a parameters fields are interpreted is in input.txt file (seeParameters to know how input.txt entries are mapped to Parameters fields).
+     * setting the size of GPU heap. The info how @a parameters fields are interpreted is in input.txt file (see
+     * Parameters to know how input.txt entries are mapped to Parameters fields).
      *
      * @param parameters parameters of the simulation
      * @param randomWalkerFactory RandomWalkerFactory used to produce concrete RandomWalker-s

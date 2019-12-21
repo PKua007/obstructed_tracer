@@ -19,6 +19,9 @@
  * Subsequent elements correspond to mean values of subsequent trajectory steps. See MSDData::Entry to know what data
  * is contained. The class gives some basic methods to access and edit elements, as well as iterators and printing,
  * saving to file and reading from file.
+ *
+ * @see operator<<(std::ostream &, const MSDData &)
+ * @see operator>>(std::istream &, MSDData::Entry &)
  */
 class MSDData {
 public:
@@ -101,26 +104,31 @@ public:
      */
     const_iterator end() const { return this->data.end(); }
 
-    /**
-     * @brief Stores the MSD data in @a out stream.
-     *
-     * Each line contains one entry, and things in the entry are separated by spaces in the order the same as in
-     * MSDData::Entry.
-     *
-     * @param out stream to write to
-     */
-    void store(std::ostream &out) const;
-
-    /**
-     * @brief Restores the MSD data from @a in stream.
-     *
-     * Required format: each line contains one entry, and things in the entry are separated by spaces in the order the
-     * same as in MSDData::Entry.
-     *
-     * @param in stream to read from
-     */
-    void restore(std::istream &in);
+    friend std::ostream &operator<<(std::ostream &, const MSDData &);
+    friend std::istream &operator>>(std::istream &, MSDData &);
 };
+
+/**
+ * @brief Stores the @a msdData in @a out stream.
+ *
+ * Each line contains one entry, and things in the entry are separated by spaces in the order the same as in
+ * MSDData::Entry.
+ *
+ * @param out stream to write to
+ * @param msdData MSDData to store
+ */
+std::ostream &operator<<(std::ostream &out, const MSDData &msdData);
+
+/**
+ * @brief Restores the MSD data from @a in stream.
+ *
+ * Required format: each line contains one entry, and things in the entry are separated by spaces in the order the
+ * same as in MSDData::Entry.
+ *
+ * @param in stream to read from
+ * @param msdData MSDData to restore
+ */
+std::istream &operator>>(std::istream &in, MSDData &msdData);
 
 /**
  * @brief Sums all fields of two MSDData::Entry objects.

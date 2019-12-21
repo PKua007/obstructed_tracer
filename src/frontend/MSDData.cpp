@@ -49,11 +49,15 @@ std::istream &operator>>(std::istream &in, MSDData::Entry &entry) {
     return in;
 }
 
-void MSDData::store(std::ostream &out) const {
-    std::copy(this->data.begin(), this->data.end(), std::ostream_iterator<Entry>(out, "\n"));
+std::ostream &operator<<(std::ostream &out, const MSDData &msdData) {
+    std::copy(msdData.data.begin(), msdData.data.end(), std::ostream_iterator<MSDData::Entry>(out, "\n"));
+    return out;
 }
 
-void MSDData::restore(std::istream &out) {
-    this->data.clear();
-    std::copy(std::istream_iterator<Entry>(out), std::istream_iterator<Entry>(), std::back_inserter(this->data));
+std::istream &operator>>(std::istream &in, MSDData &msdData) {
+    msdData.data.clear();
+    std::copy(std::istream_iterator<MSDData::Entry>(in), std::istream_iterator<MSDData::Entry>(),
+              std::back_inserter(msdData.data));
+    return in;
 }
+

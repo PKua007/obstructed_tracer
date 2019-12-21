@@ -10,6 +10,8 @@
 #ifndef MOVE_H_
 #define MOVE_H_
 
+#include <ostream>
+
 #include "utils/CudaDefines.h"
 
 /**
@@ -19,8 +21,11 @@
  * @see operator*(float, Move)
  */
 struct Move {
-    float x;
-    float y;
+    float x{};
+    float y{};
+
+    CUDA_HOSTDEV Move() { };
+    CUDA_HOSTDEV Move(float x, float y) : x{x}, y{y} { }
 };
 
 /**
@@ -51,6 +56,31 @@ CUDA_HOSTDEV inline Move operator*(float s, Move m) {
  */
 CUDA_HOSTDEV inline Move operator*(Move m, float s) {
     return s*m;
+}
+
+/**
+ * @brief Checks if @a m1 and @a m2 are equal.
+ */
+inline bool operator==(Move m1, Move m2) {
+    return m1.x == m2.x && m1.y == m2.y;
+}
+
+/**
+ * @brief Checks if @a m1 and @a m2 are not equal.
+ */
+inline bool operator!=(Move m1, Move m2) {
+    return !(m1 == m2);
+}
+
+/**
+ * @brief Stream insertion operator printing move in form "x y"
+ * @param out stream to print the move to
+ * @param move move to be printed
+ * @return the reference to @a out
+ */
+inline std::ostream &operator<<(std::ostream &out, Move move) {
+    out << move.x << " " << move.y;
+    return out;
 }
 
 #endif /* MOVE_H_ */

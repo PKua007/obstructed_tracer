@@ -12,12 +12,17 @@
 #include "utils/Assertions.h"
 #include "utils/OMPDefines.h"
 
+
 void AccumulatingMSDDataCalculator::addTrajectories(const RandomWalker &randomWalker) {
     std::size_t numberOfNewTrajectories = randomWalker.getNumberOfTrajectories();
     Assert(numberOfNewTrajectories > 0);
 
     std::size_t trajectorySize = randomWalker.getTrajectory(0).getSize();
     Assert(trajectorySize > 0);
+
+    if (this->data.size() == 0)
+        this->data = MSDData(trajectorySize - 1);
+    Assert(trajectorySize == this->data.size());
 
     std::vector<std::vector<MSDData::Entry>> threadPartialSums(_OMP_MAXTHREADS);
     for (auto &partialSum : threadPartialSums)
@@ -51,12 +56,15 @@ void AccumulatingMSDDataCalculator::addTrajectories(const RandomWalker &randomWa
 }
 
 MSDData AccumulatingMSDDataCalculator::fetchMSDData() {
+    if (this->numberOfTrajectories == 0)
+        return this->data;
+
     std::size_t dataSize = this->data.size();
     MSDData movedData = std::move(this->data);
     for (auto &entry : movedData)
         entry /= this->numberOfTrajectories;
 
     this->numberOfTrajectories = 0;
-    this->data = MSDData(dataSize);
+    this->data = MSDData(dataSize - 1);
     return movedData;
 }
