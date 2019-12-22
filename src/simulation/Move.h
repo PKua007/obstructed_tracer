@@ -61,14 +61,14 @@ CUDA_HOSTDEV inline Move operator*(Move m, float s) {
 /**
  * @brief Checks if @a m1 and @a m2 are equal.
  */
-inline bool operator==(Move m1, Move m2) {
+CUDA_HOSTDEV inline bool operator==(Move m1, Move m2) {
     return m1.x == m2.x && m1.y == m2.y;
 }
 
 /**
  * @brief Checks if @a m1 and @a m2 are not equal.
  */
-inline bool operator!=(Move m1, Move m2) {
+CUDA_HOSTDEV inline bool operator!=(Move m1, Move m2) {
     return !(m1 == m2);
 }
 

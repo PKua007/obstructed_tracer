@@ -65,6 +65,16 @@ public:
         this->position += move;
         return *this;
     }
+
+    friend CUDA_HOSTDEV bool operator==(const Tracer &, const Tracer &);
 };
+
+/**
+ * @brief Compares two Tracer-s.
+ */
+inline CUDA_HOSTDEV bool operator==(const Tracer &t1, const Tracer &t2) {
+    return t1.position == t2.position
+           && t1.radius == t2.radius;
+}
 
 #endif /* TRACER_H_ */

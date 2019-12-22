@@ -28,6 +28,19 @@
  * average over different ImageMoveFilter instances.
  */
 class SimulationImpl : public Simulation {
+public:
+    /**
+     * @brief A class which prints trajectory to file.
+     *
+     * It is exctracted for unit testing. Printing method can be overrided.
+     */
+    class TrajectoryPrinter {
+    public:
+        virtual ~TrajectoryPrinter() { }
+
+        virtual void print(const Trajectory &trajectory, const std::string &filename);
+    };
+
 private:
     enum Device {
         CPU,
@@ -43,6 +56,7 @@ private:
 
     AccumulatingMSDDataCalculator msdDataCalculator;
     std::unique_ptr<RandomWalkerFactory> randomWalkerFactory;
+    std::unique_ptr<TrajectoryPrinter> trajectoryPrinter;
     MSDData msdData;
 
     Move parseDrift(const std::string &driftString) const;
@@ -56,7 +70,8 @@ private:
 
 public:
     /**
-     * @brief Constructor using the default RandomWalkerFactory - RandomWalkerFactoryImpl.
+     * @brief Constructor using the default RandomWalkerFactory - RandomWalkerFactoryImpl and default
+     * TrajectoryPrinter.
      *
      * @see SimulationImpl::SimulationImpl(const Parameters &, std::unique_ptr<RandomWalkerFactory>,
      * const std::string &, std::ostream &)
@@ -72,12 +87,34 @@ public:
      *
      * @param parameters parameters of the simulation
      * @param randomWalkerFactory RandomWalkerFactory used to produce concrete RandomWalker-s
+     * @param trajectoryPrinter TrajectoryPrinter which prints the trajectory
      * @param outputFilePrefix the prefix of trajectory file name which will be saved if @a parameters want saving
      * trajectories
      * @param logger output stream to show information such as list of MoveFilter parameters for each simulation
      */
     SimulationImpl(const Parameters &parameters, std::unique_ptr<RandomWalkerFactory> randomWalkerFactory,
-                   const std::string &outputFilePrefix, std::ostream &logger);
+                   std::unique_ptr<TrajectoryPrinter> trajectoryPrinter, const std::string &outputFilePrefix,
+                   std::ostream &logger);
+
+    /**
+     * @brief Returns the number of simulations to be performed.
+     *
+     * The number of simulations is determined by the number of MoveFilter passed in Parameters.
+     *
+     * @return the number of simulations to be performed
+     */
+    std::size_t getNumberOfSimulations() const;
+
+    /**
+     * @brief Returns random walker parameters prepared from Parameters for simulation of index @a simulationIndex.
+     *
+     * Parameters for different indices may differ only in MoveFilters.
+     *
+     * @param simulationIndex index of simulation to prepare parameters for. The number of simulations is determined by
+     * the number of MoveFilter passed in Parameters
+     * @return random walker parameters prepared from Parameters for simulation of index @a simulationIndex
+     */
+    RandomWalkerFactory::WalkerParameters getWalkerParametersForSimulation(std::size_t simulationIndex) const;
 
     /**
      * @brief Performs one or more simulations, based on number of MoveFilter instances used.
@@ -92,7 +129,6 @@ public:
 
     /**
      * @brief Fetches the mean square displacement data calculated from all simulations performed.
-     *
      * @return mean square displacement data calculated from all simulations performed
      */
     MSDData &getMSDData() override { return this->msdData; }
