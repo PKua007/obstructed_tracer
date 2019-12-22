@@ -26,6 +26,21 @@ std::vector<Tracer> SplitRandomWalker::getRandomInitialTracersVector() {
     return this->randomWalker->getRandomInitialTracersVector();
 }
 
+void SplitRandomWalker::printRangeInfo(std::size_t i, std::ostream &logger) const {
+    std::size_t startStep = i * this->numberOfStepsPerSplit;
+    std::size_t endStep = startStep + this->numberOfStepsPerSplit - 1;
+    std::size_t totalNumberOfSteps = this->numberOfStepsPerSplit * this->numberOfSplits;
+    logger << "[SplitRandomWalker::run] Simulating steps " << startStep << " - " << endStep << " out of ";
+    logger << totalNumberOfSteps << std::endl;
+}
+
+void SplitRandomWalker::printTimerInfo(const Timer &timer, std::ostream &logger) const {
+    auto simulationTimeInMus = timer.countMicroseconds();
+    auto singleRunTimeInMus = simulationTimeInMus / this->numberOfTrajectories;
+    logger << "[SplitRadnomWalker::run] Whole trajectories finished after " << simulationTimeInMus;
+    logger << " μs, which gives " << singleRunTimeInMus << " μs per trajectory on average." << std::endl;
+}
+
 void SplitRandomWalker::run(std::ostream &logger, const std::vector<Tracer> &initialTracers) {
     for (auto &trajectory : this->trajectories)
         trajectory.clear();
@@ -34,11 +49,7 @@ void SplitRandomWalker::run(std::ostream &logger, const std::vector<Tracer> &ini
     timer.start();
     std::vector<Tracer> currentInitialTracers(initialTracers.begin(), initialTracers.end());
     for (std::size_t i = 0; i < this->numberOfSplits; i++) {
-        std::size_t startStep = i * numberOfStepsPerSplit;
-        std::size_t endStep = startStep + numberOfStepsPerSplit - 1;
-        std::size_t totalNumberOfSteps = numberOfStepsPerSplit * numberOfSplits;
-        logger << "[SplitRandomWalker::run] Simulating steps " << startStep << " - " << endStep << " out of ";
-        logger << totalNumberOfSteps << std::endl;
+        this->printRangeInfo(i, logger);
 
         this->randomWalker->run(logger, currentInitialTracers);
         for (std::size_t j = 0; j < this->numberOfTrajectories; j++)
@@ -50,11 +61,7 @@ void SplitRandomWalker::run(std::ostream &logger, const std::vector<Tracer> &ini
         }
     }
     timer.stop();
-
-    auto simulationTimeInMus = timer.countMicroseconds();
-    auto singleRunTimeInMus = simulationTimeInMus / this->numberOfTrajectories;
-    logger << "[SplitRadnomWalker::run] Whole trajectories finished after " << simulationTimeInMus;
-    logger << " μs, which gives " << singleRunTimeInMus << " μs per trajectory on average." << std::endl;
+    this->printTimerInfo(timer, logger);
 }
 
 std::size_t SplitRandomWalker::getNumberOfTrajectories() const {

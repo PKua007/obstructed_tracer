@@ -13,6 +13,7 @@
 
 #include "simulation/RandomWalker.h"
 #include "simulation/Trajectory.h"
+#include "simulation/Timer.h"
 
 /**
  * @brief RandomWalker, which encapsulated another RandomWalker, and performs walks in parts.
@@ -28,6 +29,9 @@ private:
     std::size_t numberOfTrajectories{};
     std::unique_ptr<RandomWalker> randomWalker;
     std::vector<Trajectory> trajectories;
+
+    void printRangeInfo(std::size_t i, std::ostream &logger) const;
+    void printTimerInfo(const Timer &timer, std::ostream& logger) const;
 
 public:
     SplitRandomWalker(std::size_t numberOfSplits, std::unique_ptr<RandomWalker> randomWalker);
