@@ -11,6 +11,8 @@
 #include <catch2/catch.hpp>
 #include <algorithm>
 
+#include "frontend/MSDData.h"
+
 class MSDDataApproxEqualMatcher : public Catch::MatcherBase<MSDData> {
 private:
     const MSDData &expected;
