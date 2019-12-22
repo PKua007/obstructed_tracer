@@ -24,6 +24,7 @@ CPURandomWalker::CPURandomWalker(std::size_t numberOfTrajectories, RandomWalker:
 {
     Expects(this->numberOfTrajectories > 0);
     Expects(this->numberOfSteps > 0);
+    Expects(walkParameters.integrationStep > 0);
     Expects(this->tracerRadius >= 0.f);
     this->trajectories.resize(numberOfTrajectories);
 

@@ -67,14 +67,26 @@ public:
     }
 
     friend CUDA_HOSTDEV bool operator==(const Tracer &, const Tracer &);
+    friend std::ostream &operator<<(std::ostream &, const Tracer &);
 };
 
 /**
  * @brief Compares two Tracer-s.
  */
 inline CUDA_HOSTDEV bool operator==(const Tracer &t1, const Tracer &t2) {
-    return t1.position == t2.position
-           && t1.radius == t2.radius;
+    return t1.position == t2.position && t1.radius == t2.radius;
+}
+
+/**
+ * @brief Stream insertion operator printing tracer.
+ * @param out stream to print to
+ * @param tracer tracer to be printed
+ * @return the reference to @a out
+ */
+inline std::ostream &operator<<(std::ostream &out, const Tracer &tracer) {
+    out << "{position: " << tracer.getPosition()
+        << ", radius: " << tracer.getRadius() << "}";
+    return out;
 }
 
 #endif /* TRACER_H_ */
