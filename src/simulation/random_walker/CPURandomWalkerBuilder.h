@@ -17,12 +17,37 @@
 #include "CPURandomWalker.h"
 
 /**
+ * @brief Traits for concrete realization of CPURandomWalkerBuilder.
+ *
+ * They describe concrete types of MoveFilter and MoveGenerators to instantiate: @a GaussianMoveGenerator_t,
+ * @a CauchyMoveGenerator_t, @a DefaultMoveFilter_t, @a ImageMoveFilterPeriodicBC_t, @a ImageMoveFilterWallBC_t.
+ *
+ * @tparam CPURandomWalkerBuilder_t CPURandomWalkerBuilder for which we define traits
+ */
+template<typename CPURandomWalkerBuilder_t>
+struct CPURandomWalkerBuilderTraits {
+
+};
+
+/**
  * @brief A class which construct CPURandomWalker from given parameters.
  *
  * Before creating the random walker itself, it creates CPU versions of MoveFilter and MoveGenerator based on
  * parameters and hands them to the walker.
+ *
+ * @tparam CPURandomWalker_t concrete CPURandomWalker to instantiate
  */
+template<typename CPURandomWalker_t>
 class CPURandomWalkerBuilder {
+public:
+    using TypeTraits = CPURandomWalkerBuilderTraits<CPURandomWalkerBuilder>;
+
+    using GaussianMoveGenerator_t = typename TypeTraits::GaussianMoveGenerator_t;
+    using CauchyMoveGenerator_t = typename TypeTraits::CauchyMoveGenerator_t;
+    using DefaultMoveFilter_t = typename TypeTraits::DefaultMoveFilter_t;
+    using ImageMoveFilterPeriodicBC_t = typename TypeTraits::ImageMoveFilterPeriodicBC_t;
+    using ImageMoveFilterWallBC_t = typename TypeTraits::ImageMoveFilterWallBC_t;
+
 private:
     std::mt19937 seedGenerator;
     RandomWalkerFactory::WalkerParameters walkerParameters;
@@ -58,5 +83,8 @@ public:
      */
     std::unique_ptr<RandomWalker> build();
 };
+
+
+#include "CPURandomWalkerBuilder.tpp"
 
 #endif /* CPURANDOMWALKERBUILDER_H_ */

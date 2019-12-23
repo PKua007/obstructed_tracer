@@ -1,5 +1,5 @@
 /*
- * CPURandomWalkerFactory.cpp
+ * CPURandomWalkerFactory.tpp
  *
  *  Created on: 22 sie 2019
  *      Author: pkua
@@ -8,18 +8,13 @@
 #include <fstream>
 #include <sstream>
 
-#include "CPURandomWalkerBuilder.h"
-#include "simulation/move_generator/cpu/CPUGaussianMoveGenerator.h"
-#include "simulation/move_generator/cpu/CPUCauchyMoveGenerator.h"
-#include "simulation/move_filter/DefaultMoveFilter.h"
-#include "simulation/move_filter/image_move_filter/ImageMoveFilter.h"
-#include "simulation/move_filter/image_move_filter/WallBoundaryConditions.h"
-#include "simulation/move_filter/image_move_filter/PeriodicBoundaryConditions.h"
 #include "image/PPMImageReader.h"
 #include "utils/Assertions.h"
 
-std::unique_ptr<MoveGenerator> CPURandomWalkerBuilder::createMoveGenerator(const std::string &moveGeneratorParameters,
-                                                                           float integrationStep)
+template<typename CPURandomWalker_t>
+std::unique_ptr<MoveGenerator>
+CPURandomWalkerBuilder<CPURandomWalker_t>::createMoveGenerator(const std::string &moveGeneratorParameters,
+                                                               float integrationStep)
 {
     std::istringstream moveGeneratorStream(moveGeneratorParameters);
     std::string moveGeneratorType;
@@ -31,19 +26,21 @@ std::unique_ptr<MoveGenerator> CPURandomWalkerBuilder::createMoveGenerator(const
 
     if (moveGeneratorType == "GaussianMoveGenerator") {
         return std::unique_ptr<MoveGenerator>(
-            new CPUGaussianMoveGenerator(sigma, integrationStep, this->seedGenerator())
+            new GaussianMoveGenerator_t(sigma, integrationStep, this->seedGenerator())
         );
     } else if (moveGeneratorType == "CauchyMoveGenerator") {
         return std::unique_ptr<MoveGenerator>(
-            new CPUCauchyMoveGenerator(sigma, integrationStep, this->seedGenerator())
+            new CauchyMoveGenerator_t(sigma, integrationStep, this->seedGenerator())
         );
     } else{
         throw std::runtime_error("Unknown MoveGenerator: " + moveGeneratorType);
     }
 }
 
-std::unique_ptr<MoveFilter> CPURandomWalkerBuilder::createImageMoveFilter(std::istringstream &moveFilterStream,
-                                                                          std::ostream &logger)
+template<typename CPURandomWalker_t>
+std::unique_ptr<MoveFilter>
+CPURandomWalkerBuilder<CPURandomWalker_t>::createImageMoveFilter(std::istringstream &moveFilterStream,
+                                                                 std::ostream &logger)
 {
     std::string imageFilename;
     moveFilterStream >> imageFilename;
@@ -66,48 +63,52 @@ std::unique_ptr<MoveFilter> CPURandomWalkerBuilder::createImageMoveFilter(std::i
         throw std::runtime_error("Malformed ImageMoveFilter parameters");
 
     if (imageBCType == "WallBoundaryConditions") {
-        return std::unique_ptr<ImageMoveFilter<WallBoundaryConditions>>(
-            new ImageMoveFilter<WallBoundaryConditions>(imageData.data(), image.getWidth(), image.getHeight(),
-                                                        this->seedGenerator(), this->numberOfWalksInSeries)
+        return std::unique_ptr<MoveFilter>(
+            new ImageMoveFilterWallBC_t(imageData.data(), image.getWidth(), image.getHeight(), this->seedGenerator(),
+                                        this->numberOfWalksInSeries)
         );
     } else if (imageBCType == "PeriodicBoundaryConditions") {
-        return std::unique_ptr<ImageMoveFilter<PeriodicBoundaryConditions>>(
-            new ImageMoveFilter<PeriodicBoundaryConditions>(imageData.data(), image.getWidth(), image.getHeight(),
-                                                            this->seedGenerator(), this->numberOfWalksInSeries)
+        return std::unique_ptr<MoveFilter>(
+            new ImageMoveFilterPeriodicBC_t(imageData.data(), image.getWidth(), image.getHeight(),
+                                            this->seedGenerator(), this->numberOfWalksInSeries)
         );
     } else {
         throw std::runtime_error("Unknown ImageBoundaryConditions: " + imageBCType);
     }
 }
 
-std::unique_ptr<MoveFilter> CPURandomWalkerBuilder::createMoveFilter(const std::string &moveFilterParameters,
-                                                                     std::ostream &logger)
+template<typename CPURandomWalker_t>
+std::unique_ptr<MoveFilter>
+CPURandomWalkerBuilder<CPURandomWalker_t>::createMoveFilter(const std::string &moveFilterParameters,
+                                                            std::ostream &logger)
 {
     std::istringstream moveFilterStream(moveFilterParameters);
     std::string moveFilterType;
     moveFilterStream >> moveFilterType;
     if (moveFilterType == "DefaultMoveFilter")
-        return std::unique_ptr<MoveFilter>(new DefaultMoveFilter());
+        return std::unique_ptr<MoveFilter>(new DefaultMoveFilter_t());
     else if (moveFilterType == "ImageMoveFilter")
         return createImageMoveFilter(moveFilterStream, logger);
     else
         throw std::runtime_error("Unknown MoveFilter: " + moveFilterType);
 }
 
-CPURandomWalkerBuilder::CPURandomWalkerBuilder(unsigned long seed,
-                                               const RandomWalkerFactory::WalkerParameters &walkerParameters,
-                                               std::ostream &logger)
+template<typename CPURandomWalker_t>
+CPURandomWalkerBuilder<CPURandomWalker_t>::CPURandomWalkerBuilder(unsigned long seed,
+                                                                  const RandomWalkerFactory::WalkerParameters &
+                                                                  walkerParameters, std::ostream &logger)
         : walkerParameters{walkerParameters}, numberOfWalksInSeries{walkerParameters.numberOfWalksInSeries},
           logger{logger}, seedGenerator(seed)
 { }
 
-std::unique_ptr<RandomWalker> CPURandomWalkerBuilder::build() {
+template<typename CPURandomWalker_t>
+std::unique_ptr<RandomWalker> CPURandomWalkerBuilder<CPURandomWalker_t>::build() {
     float integrationStep = this->walkerParameters.walkParameters.integrationStep;
     auto moveGenerator = this->createMoveGenerator(walkerParameters.moveGeneratorParameters, integrationStep);
     auto moveFilter = this->createMoveFilter(walkerParameters.moveFilterParameters, logger);
 
     return std::unique_ptr<RandomWalker>(
-        new CPURandomWalker(this->numberOfWalksInSeries, this->walkerParameters.walkParameters,
-                            std::move(moveGenerator), std::move(moveFilter), this->logger)
+        new CPURandomWalker_t(this->numberOfWalksInSeries, this->walkerParameters.walkParameters,
+                              std::move(moveGenerator), std::move(moveFilter), this->logger)
     );
 }
