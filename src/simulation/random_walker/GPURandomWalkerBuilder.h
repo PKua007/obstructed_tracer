@@ -16,15 +16,39 @@
 #include "../RandomWalkerFactory.h"
 
 /**
+ * @brief Traits for concrete realization of GPURandomWalkerBuilder.
+ *
+ * They describe concrete types of MoveFilter and MoveGenerators to instantiate: @a GaussianMoveGenerator_t,
+ * @a CauchyMoveGenerator_t, @a DefaultMoveFilter_t, @a ImageMoveFilterPeriodicBC_t, @a ImageMoveFilterWallBC_t.
+ *
+ * @tparam GPURandomWalkerBuilder_t GPURandomWalkerBuilder for which we define traits
+ */
+template<typename GPURandomWalkerBuilder_t>
+struct GPURandomWalkerBuilderTraits {
+
+};
+
+/**
  * @brief A class which prepares GPURandomWalker.
  *
  * It has to allocate MoveGenerator and MoveFilter on GPU based on textual representations from
  * RandomWalkerFactory::WalkerParameters, which is quite a verbose process. MoveGenerator is supplied with a seed for
  * its generator. The GPU-allocated strategies are plugged into GPURandomWalker, whose rest of the parameters is
  * determined by WalkerParamters.
+ *
+ * @tparam GPURandomWalker_t concrete GPURandomWalker to instantiate
  */
+template<typename GPURandomWalker_t>
 class GPURandomWalkerBuilder {
 public:
+    using TypeTraits = GPURandomWalkerBuilderTraits<GPURandomWalkerBuilder>;
+
+    using GaussianMoveGenerator_t = typename TypeTraits::GaussianMoveGenerator_t;
+    using CauchyMoveGenerator_t = typename TypeTraits::CauchyMoveGenerator_t;
+    using DefaultMoveFilter_t = typename TypeTraits::DefaultMoveFilter_t;
+    using ImageMoveFilterPeriodicBC_t = typename TypeTraits::ImageMoveFilterPeriodicBC_t;
+    using ImageMoveFilterWallBC_t = typename TypeTraits::ImageMoveFilterWallBC_t;
+
     enum MoveGeneratorType {
         GAUSSIAN,
         CAUCHY
@@ -106,5 +130,8 @@ public:
      */
     std::unique_ptr<RandomWalker> build();
 };
+
+
+#include "GPURandomWalkerBuilder.tpp"
 
 #endif /* GPURANDOMWALKERBUILDER_H_ */

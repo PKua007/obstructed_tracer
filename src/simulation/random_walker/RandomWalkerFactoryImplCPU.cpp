@@ -7,7 +7,6 @@
 
 #include "RandomWalkerFactoryImpl.h"
 #include "CPURandomWalkerBuilder.h"
-#include "GPURandomWalkerBuilder.h"
 #include "SplitRandomWalker.h"
 #include "simulation/move_generator/cpu/CPUGaussianMoveGenerator.h"
 #include "simulation/move_generator/cpu/CPUCauchyMoveGenerator.h"
@@ -30,12 +29,6 @@ std::unique_ptr<RandomWalker> RandomWalkerFactoryImpl::createCPURandomWalker(uns
                                                                              const WalkerParameters &walkerParameters)
 {
     return CPURandomWalkerBuilder<CPURandomWalker>(seed, walkerParameters, this->logger).build();
-}
-
-std::unique_ptr<RandomWalker> RandomWalkerFactoryImpl::createGPURandomWalker(unsigned long seed,
-                                                                             const WalkerParameters &walkerParameters)
-{
-    return GPURandomWalkerBuilder(seed, walkerParameters, this->logger).build();
 }
 
 std::unique_ptr<RandomWalker>
