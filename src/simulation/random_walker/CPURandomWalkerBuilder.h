@@ -9,24 +9,37 @@
 #define CPURANDOMWALKERBUILDER_H_
 
 #include <memory>
+#include <random>
 #include <iosfwd>
 
 #include "../RandomWalkerFactory.h"
 #include "../MoveGenerator.h"
 #include "../MoveFilter.h"
-#include "CPURandomWalker.h"
+
+/* Forward declarations for CPURandomWalkerBuilderTraits */
+class CPUGaussianMoveGenerator;
+class CPUCauchyMoveGenerator;
+class DefaultMoveFilter;
+template <typename ImageBoundaryConditions> class ImageMoveFilter;
+class PeriodicBoundaryConditions;
+class WallBoundaryConditions;
 
 /**
  * @brief Traits for concrete realization of CPURandomWalkerBuilder.
  *
  * They describe concrete types of MoveFilter and MoveGenerators to instantiate: @a GaussianMoveGenerator_t,
  * @a CauchyMoveGenerator_t, @a DefaultMoveFilter_t, @a ImageMoveFilterPeriodicBC_t, @a ImageMoveFilterWallBC_t.
+ * The default values can be altered by explicit specialization.
  *
  * @tparam CPURandomWalkerBuilder_t CPURandomWalkerBuilder for which we define traits
  */
 template<typename CPURandomWalkerBuilder_t>
 struct CPURandomWalkerBuilderTraits {
-
+    using GaussianMoveGenerator_t = CPUGaussianMoveGenerator;
+    using CauchyMoveGenerator_t = CPUCauchyMoveGenerator;
+    using DefaultMoveFilter_t = DefaultMoveFilter;
+    using ImageMoveFilterPeriodicBC_t = ImageMoveFilter<PeriodicBoundaryConditions>;
+    using ImageMoveFilterWallBC_t = ImageMoveFilter<WallBoundaryConditions>;
 };
 
 /**
@@ -83,8 +96,5 @@ public:
      */
     std::unique_ptr<RandomWalker> build();
 };
-
-
-#include "CPURandomWalkerBuilder.tpp"
 
 #endif /* CPURANDOMWALKERBUILDER_H_ */

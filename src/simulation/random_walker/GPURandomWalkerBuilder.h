@@ -11,21 +11,35 @@
 #include <memory>
 #include <random>
 
-#include "image/Image.h"
-#include "GPURandomWalker.h"
+#include "../MoveGenerator.h"
+#include "../MoveFilter.h"
 #include "../RandomWalkerFactory.h"
+#include "image/Image.h"
+
+/* Forward declarations for GPURandomWalkerBuilderTraits */
+class GPUGaussianMoveGenerator;
+class GPUCauchyMoveGenerator;
+class DefaultMoveFilter;
+template <typename ImageBoundaryConditions> class ImageMoveFilter;
+class PeriodicBoundaryConditions;
+class WallBoundaryConditions;
 
 /**
  * @brief Traits for concrete realization of GPURandomWalkerBuilder.
  *
  * They describe concrete types of MoveFilter and MoveGenerators to instantiate: @a GaussianMoveGenerator_t,
  * @a CauchyMoveGenerator_t, @a DefaultMoveFilter_t, @a ImageMoveFilterPeriodicBC_t, @a ImageMoveFilterWallBC_t.
+ * The default values can be altered by explicit specialization.
  *
  * @tparam GPURandomWalkerBuilder_t GPURandomWalkerBuilder for which we define traits
  */
 template<typename GPURandomWalkerBuilder_t>
 struct GPURandomWalkerBuilderTraits {
-
+    using GaussianMoveGenerator_t = GPUGaussianMoveGenerator;
+    using CauchyMoveGenerator_t = GPUCauchyMoveGenerator;
+    using DefaultMoveFilter_t = DefaultMoveFilter;
+    using ImageMoveFilterPeriodicBC_t = ImageMoveFilter<PeriodicBoundaryConditions>;
+    using ImageMoveFilterWallBC_t = ImageMoveFilter<WallBoundaryConditions>;
 };
 
 /**
@@ -131,7 +145,5 @@ public:
     std::unique_ptr<RandomWalker> build();
 };
 
-
-#include "GPURandomWalkerBuilder.tpp"
 
 #endif /* GPURANDOMWALKERBUILDER_H_ */

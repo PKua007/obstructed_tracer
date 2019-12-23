@@ -23,14 +23,16 @@
 template<typename GPURandomWalker_t>
 __global__
 void create_move_generator(unsigned long seed, float sigma, float integrationStep, size_t numberOfTrajectories,
-                           typename GPURandomWalkerBuilder<GPURandomWalker_t>::MoveGeneratorType moveGeneratorType, MoveGenerator **moveGenerator)
+                           typename GPURandomWalkerBuilder<GPURandomWalker_t>::MoveGeneratorType moveGeneratorType,
+                           MoveGenerator **moveGenerator)
 {
     if (!CUDA_IS_IT_FIRST_THREAD)
         return;
 
-    using MoveGeneratorType = typename GPURandomWalkerBuilder<GPURandomWalker_t>::MoveGeneratorType;
-    using GaussianMoveGenerator = typename GPURandomWalkerBuilder<GPURandomWalker_t>::GaussianMoveGenerator_t;
-    using CauchyMoveGenerator = typename GPURandomWalkerBuilder<GPURandomWalker_t>::CauchyMoveGenerator_t;
+    using GPURandomWalkerBuilder_t = GPURandomWalkerBuilder<GPURandomWalker_t>;
+    using MoveGeneratorType = typename GPURandomWalkerBuilder_t::MoveGeneratorType;
+    using GaussianMoveGenerator = typename GPURandomWalkerBuilder_t::GaussianMoveGenerator_t;
+    using CauchyMoveGenerator = typename GPURandomWalkerBuilder_t::CauchyMoveGenerator_t;
 
     if (moveGeneratorType == MoveGeneratorType::GAUSSIAN)
         (*moveGenerator) = new GPUGaussianMoveGenerator(sigma, integrationStep, seed, numberOfTrajectories);
@@ -43,18 +45,20 @@ void create_move_generator(unsigned long seed, float sigma, float integrationSte
 template<typename GPURandomWalker_t>
 __global__
 void create_move_filter(unsigned long seed, size_t numberOfTrajectories,
-                        typename GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterType moveFilterType, uint32_t *intImageData, size_t width,
-                        size_t height, typename GPURandomWalkerBuilder<GPURandomWalker_t>::BoundaryConditionsType boundaryConditionsType,
-                        MoveFilter **moveFilter)
+                        typename GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterType moveFilterType,
+                        uint32_t *intImageData, size_t width, size_t height,
+                        typename GPURandomWalkerBuilder<GPURandomWalker_t>::BoundaryConditionsType
+                        boundaryConditionsType, MoveFilter **moveFilter)
 {
     if (!CUDA_IS_IT_FIRST_THREAD)
         return;
 
-    using MoveFilterType = typename GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterType;
-    using BoundaryConditionsType = typename GPURandomWalkerBuilder<GPURandomWalker_t>::BoundaryConditionsType;
-    using DefaultMoveFilter = typename GPURandomWalkerBuilder<GPURandomWalker_t>::DefaultMoveFilter_t;
-    using ImageMoveFilterWallBC = typename GPURandomWalkerBuilder<GPURandomWalker_t>::ImageMoveFilterWallBC_t;
-    using ImageMoveFilterPeriodicBC = typename GPURandomWalkerBuilder<GPURandomWalker_t>::ImageMoveFilterPeriodicBC_t;
+    using GPURandomWalkerBuilder_t = GPURandomWalkerBuilder<GPURandomWalker_t>;
+    using MoveFilterType = typename GPURandomWalkerBuilder_t::MoveFilterType;
+    using BoundaryConditionsType = typename GPURandomWalkerBuilder_t::BoundaryConditionsType;
+    using DefaultMoveFilter = typename GPURandomWalkerBuilder_t::DefaultMoveFilter_t;
+    using ImageMoveFilterWallBC = typename GPURandomWalkerBuilder_t::ImageMoveFilterWallBC_t;
+    using ImageMoveFilterPeriodicBC = typename GPURandomWalkerBuilder_t::ImageMoveFilterPeriodicBC_t;
 
     if (moveFilterType == MoveFilterType::DEFAULT) {
         (*moveFilter) = new DefaultMoveFilter();
@@ -71,9 +75,9 @@ void create_move_filter(unsigned long seed, size_t numberOfTrajectories,
 }
 
 template<typename GPURandomWalker_t>
-GPURandomWalkerBuilder<GPURandomWalker_t>::MoveGeneratorOnGPUFactory::MoveGeneratorOnGPUFactory(const std::string &moveGeneratorString,
-                                                                             float integrationStep)
-        : integrationStep{integrationStep}
+GPURandomWalkerBuilder<GPURandomWalker_t>::MoveGeneratorOnGPUFactory
+    ::MoveGeneratorOnGPUFactory(const std::string &moveGeneratorString,float integrationStep)
+            : integrationStep{integrationStep}
 {
     Validate(integrationStep > 0.f);
 
@@ -93,13 +97,14 @@ GPURandomWalkerBuilder<GPURandomWalker_t>::MoveGeneratorOnGPUFactory::MoveGenera
 }
 
 template<typename GPURandomWalker_t>
-MoveGenerator *GPURandomWalkerBuilder<GPURandomWalker_t>::MoveGeneratorOnGPUFactory::create(unsigned long seed,
-                                                                         std::size_t numberOfWalks)
+MoveGenerator *
+GPURandomWalkerBuilder<GPURandomWalker_t>::MoveGeneratorOnGPUFactory
+    ::create(unsigned long seed, std::size_t numberOfWalks)
 {
     MoveGenerator **moveGeneratorPlaceholder{};
     cudaCheck( cudaMalloc(&moveGeneratorPlaceholder, sizeof(MoveGenerator**)) );
-    create_move_generator<GPURandomWalker_t><<<1, 32>>>(seed, this->sigma, this->integrationStep, numberOfWalks, this->moveGeneratorType,
-                                     moveGeneratorPlaceholder);
+    create_move_generator<GPURandomWalker_t><<<1, 32>>>(seed, this->sigma, this->integrationStep, numberOfWalks,
+                                                        this->moveGeneratorType, moveGeneratorPlaceholder);
     cudaCheck( cudaDeviceSynchronize() );
 
     MoveGenerator *moveGenerator;
@@ -111,8 +116,9 @@ MoveGenerator *GPURandomWalkerBuilder<GPURandomWalker_t>::MoveGeneratorOnGPUFact
 }
 
 template<typename GPURandomWalker_t>
-void GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory::fetchImageData(std::istringstream &moveFilterStream,
-                                                                    std::ostream &logger)
+void
+GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory
+    ::fetchImageData(std::istringstream &moveFilterStream, std::ostream &logger)
 {
     std::string imageFilename;
     moveFilterStream >> imageFilename;
@@ -130,7 +136,10 @@ void GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory::fetchIma
 }
 
 template<typename GPURandomWalker_t>
-void GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory::fetchBoundaryConditions(std::istringstream &moveFilterStream) {
+void
+GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory
+    ::fetchBoundaryConditions(std::istringstream &moveFilterStream)
+{
     std::string imageBCType;
     moveFilterStream >> imageBCType;
     if (!moveFilterStream)
@@ -145,8 +154,8 @@ void GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory::fetchBou
 }
 
 template<typename GPURandomWalker_t>
-GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory::MoveFilterOnGPUFactory(const std::string &moveFilterString,
-                                                                       std::ostream &logger)
+GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory
+    ::MoveFilterOnGPUFactory(const std::string &moveFilterString, std::ostream &logger)
 {
     std::istringstream moveFilterStream(moveFilterString);
     std::string moveFilterName;
@@ -169,7 +178,10 @@ GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory::MoveFilterOnG
 }
 
 template<typename GPURandomWalker_t>
-MoveFilter *GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory::create(unsigned long seed, std::size_t numberOfWalks) {
+MoveFilter *
+GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory
+    ::create(unsigned long seed, std::size_t numberOfWalks)
+{
     MoveFilter **moveFilterPlaceholder{};
     uint32_t *gpuIntImageData{};
 
@@ -183,8 +195,8 @@ MoveFilter *GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory::c
     }
 
     create_move_filter<GPURandomWalker_t><<<1, 32>>>(seed, numberOfWalks, this->moveFilterType, gpuIntImageData,
-                                  this->image.getWidth(), this->image.getHeight(), this->boundaryConditionsType,
-                                  moveFilterPlaceholder);
+                                                     this->image.getWidth(), this->image.getHeight(),
+                                                     this->boundaryConditionsType, moveFilterPlaceholder);
     cudaCheck( cudaDeviceSynchronize() );
 
     MoveFilter *moveFilter;
@@ -197,14 +209,14 @@ MoveFilter *GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory::c
 }
 
 template<typename GPURandomWalker_t>
-GPURandomWalkerBuilder<GPURandomWalker_t>::GPURandomWalkerBuilder(unsigned long seed,
-                                               const RandomWalkerFactory::WalkerParameters &walkerParameters,
-                                               std::ostream &logger)
-        : walkerParameters{walkerParameters}, numberOfWalksInSeries{walkerParameters.numberOfWalksInSeries},
-          logger{logger},
-          gpuMoveGeneratorFactory(walkerParameters.moveGeneratorParameters,
-                                  walkerParameters.walkParameters.integrationStep),
-          gpuMoveFilterFactory(walkerParameters.moveFilterParameters, logger), seedGenerator(seed)
+GPURandomWalkerBuilder<GPURandomWalker_t>
+    ::GPURandomWalkerBuilder(unsigned long seed, const RandomWalkerFactory::WalkerParameters &walkerParameters,
+                             std::ostream &logger)
+            : walkerParameters{walkerParameters}, numberOfWalksInSeries{walkerParameters.numberOfWalksInSeries},
+              logger{logger},
+              gpuMoveGeneratorFactory(walkerParameters.moveGeneratorParameters,
+                                      walkerParameters.walkParameters.integrationStep),
+              gpuMoveFilterFactory(walkerParameters.moveFilterParameters, logger), seedGenerator(seed)
 { }
 
 template<typename GPURandomWalker_t>
