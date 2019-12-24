@@ -10,12 +10,6 @@
 #include <vector>
 
 #include "utils/CudaCheck.h"
-#include "simulation/move_generator/gpu/GPUGaussianMoveGenerator.h"
-#include "simulation/move_generator/gpu/GPUCauchyMoveGenerator.h"
-#include "simulation/move_filter/DefaultMoveFilter.h"
-#include "simulation/move_filter/image_move_filter/ImageMoveFilter.h"
-#include "simulation/move_filter/image_move_filter/WallBoundaryConditions.h"
-#include "simulation/move_filter/image_move_filter/PeriodicBoundaryConditions.h"
 #include "image/PPMImageReader.h"
 #include "utils/Assertions.h"
 
@@ -86,7 +80,7 @@ GPURandomWalkerBuilder<GPURandomWalker_t>::MoveGeneratorOnGPUFactory
     moveGeneratorStream >> moveGeneratorName >> this->sigma;
     if (!moveGeneratorStream)
         throw std::runtime_error("Malformed MoveGenerator parameters");
-    Validate(this->sigma >= 0.f);
+    Validate(this->sigma > 0.f);
 
     if (moveGeneratorName == "GaussianMoveGenerator")
         this->moveGeneratorType = GAUSSIAN;

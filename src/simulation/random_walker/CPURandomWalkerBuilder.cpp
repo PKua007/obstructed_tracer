@@ -14,5 +14,6 @@
 #include "simulation/move_filter/image_move_filter/ImageMoveFilter.h"
 #include "simulation/move_filter/image_move_filter/WallBoundaryConditions.h"
 #include "simulation/move_filter/image_move_filter/PeriodicBoundaryConditions.h"
+#include "image/PPMImageReader.h"
 
 template class CPURandomWalkerBuilder<CPURandomWalker>;

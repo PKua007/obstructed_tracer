@@ -8,7 +8,6 @@
 #include <fstream>
 #include <sstream>
 
-#include "image/PPMImageReader.h"
 #include "utils/Assertions.h"
 
 template<typename CPURandomWalker_t>
@@ -22,7 +21,7 @@ CPURandomWalkerBuilder<CPURandomWalker_t>::createMoveGenerator(const std::string
     moveGeneratorStream >> moveGeneratorType >> sigma;
     if (!moveGeneratorStream)
         throw std::runtime_error("Malformed MoveGenerator parameters");
-    Validate(sigma >= 0.f);
+    Validate(sigma > 0.f);
 
     if (moveGeneratorType == "GaussianMoveGenerator") {
         return std::unique_ptr<MoveGenerator>(
@@ -32,7 +31,7 @@ CPURandomWalkerBuilder<CPURandomWalker_t>::createMoveGenerator(const std::string
         return std::unique_ptr<MoveGenerator>(
             new CauchyMoveGenerator_t(sigma, integrationStep, this->seedGenerator())
         );
-    } else{
+    } else {
         throw std::runtime_error("Unknown MoveGenerator: " + moveGeneratorType);
     }
 }
@@ -47,12 +46,9 @@ CPURandomWalkerBuilder<CPURandomWalker_t>::createImageMoveFilter(std::istringstr
     if (!moveFilterStream)
         throw std::runtime_error("Malformed ImageMoveFilter parameters");
 
-    std::ifstream imageFile(imageFilename);
-    if (!imageFile)
-        throw std::runtime_error("Cannot open " + imageFilename + " to load image");
-
-    PPMImageReader imageReader;
-    Image image = imageReader.read(imageFile);
+    this->fileIstreamProvider->setFileDescription("PPM image for MoveFilter");
+    auto imageIstream = this->fileIstreamProvider->openFile(imageFilename);
+    Image image = this->imageReader->read(*imageIstream);
     auto imageData = image.getIntData();
     logger << "[CPURandomWalkerFactory] Loaded image " << imageFilename << " (" << image.getWidth() << "px x ";
     logger << image.getHeight() << "px)" << std::endl;
@@ -94,11 +90,13 @@ CPURandomWalkerBuilder<CPURandomWalker_t>::createMoveFilter(const std::string &m
 }
 
 template<typename CPURandomWalker_t>
-CPURandomWalkerBuilder<CPURandomWalker_t>::CPURandomWalkerBuilder(unsigned long seed,
-                                                                  const RandomWalkerFactory::WalkerParameters &
-                                                                  walkerParameters, std::ostream &logger)
+CPURandomWalkerBuilder<CPURandomWalker_t>
+    ::CPURandomWalkerBuilder(unsigned long seed, const RandomWalkerFactory::WalkerParameters &walkerParameters,
+            std::unique_ptr<FileIstreamProvider> fileIstreamProvider, std::unique_ptr<ImageReader> imageReader,
+            std::ostream &logger)
         : walkerParameters{walkerParameters}, numberOfWalksInSeries{walkerParameters.numberOfWalksInSeries},
-          logger{logger}, seedGenerator(seed)
+          fileIstreamProvider{std::move(fileIstreamProvider)}, imageReader{std::move(imageReader)}, logger{logger},
+          seedGenerator(seed)
 { }
 
 template<typename CPURandomWalker_t>

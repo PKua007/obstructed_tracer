@@ -11,10 +11,13 @@
 #include <memory>
 #include <random>
 #include <iosfwd>
+#include <fstream>
 
 #include "../RandomWalkerFactory.h"
 #include "../MoveGenerator.h"
 #include "../MoveFilter.h"
+#include "image/PPMImageReader.h"
+#include "utils/FileUtils.h"
 
 /* Forward declarations for CPURandomWalkerBuilderTraits */
 class CPUGaussianMoveGenerator;
@@ -65,6 +68,9 @@ private:
     std::mt19937 seedGenerator;
     RandomWalkerFactory::WalkerParameters walkerParameters;
     unsigned long numberOfWalksInSeries{};
+
+    std::unique_ptr<FileIstreamProvider> fileIstreamProvider;
+    std::unique_ptr<ImageReader> imageReader;
     std::ostream &logger;
 
     std::unique_ptr<MoveGenerator> createMoveGenerator(const std::string &moveGeneratorParameters,
@@ -81,10 +87,25 @@ public:
      *
      * @param seed the seed which will be used in MoveFilter and MoveGenerator
      * @param walkerParameters the parameters of the walker, MoveFilter and MoveGenerator
+     * @param fileIstreamProvider the class opening file to read (for image loading)
      * @param logger the output stream which will be passed to RandomWalker to show info
      */
     CPURandomWalkerBuilder(unsigned long seed, const RandomWalkerFactory::WalkerParameters &walkerParameters,
-                           std::ostream &logger);
+                           std::unique_ptr<FileIstreamProvider> fileIstreamProvider,
+                           std::unique_ptr<ImageReader> imageReader, std::ostream &logger);
+
+    /**
+     * @brief Constructs the builder with a default FileIstreamProvider and ImageReader - PPMImageReader.
+     *
+     * @see CPURandomWalkerBuilder(unsigned long, const RandomWalkerFactory::WalkerParameters &,
+     * std::unique_ptr<FileIstreamProvider>, std::unique_ptr<ImageReader>, std::ostream &)
+     */
+    CPURandomWalkerBuilder(unsigned long seed, const RandomWalkerFactory::WalkerParameters &walkerParameters,
+                          std::ostream &logger)
+            : CPURandomWalkerBuilder(seed, walkerParameters,
+                                     std::unique_ptr<FileIstreamProvider>(new FileIstreamProvider),
+                                     std::unique_ptr<ImageReader>(new PPMImageReader), logger)
+    { }
 
     /**
      * @brief Creates a new CPURandomWalker based on the parameters passed in the constructor.
