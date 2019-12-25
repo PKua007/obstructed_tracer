@@ -13,6 +13,8 @@
 #include "utils/Utils.h"
 #include "../../utils/FileUtilsMocks.h"
 #include "../../image/ImageReaderMock.h"
+#include "move_generator/MoveGeneratorsMocks.h"
+#include "move_filter/MoveFiltersMocks.h"
 
 
 namespace {
@@ -39,72 +41,6 @@ namespace {
         std::size_t getNumberOfTrajectories() const override { return 0; }
         std::size_t getNumberOfSteps() const override { return 0; }
         const Trajectory &getTrajectory(std::size_t index) const override { throw std::runtime_error(""); }
-    };
-
-    struct CPUGaussianMoveGeneratorMock : public MoveGenerator {
-        float sigma;
-        float integrationStep;
-        unsigned int seed;
-
-        CPUGaussianMoveGeneratorMock(float sigma, float integrationStep, unsigned int seed)
-                : sigma{sigma}, integrationStep{integrationStep}, seed{seed}
-        { }
-
-        Move generateMove() override { return Move{}; }
-    };
-
-    struct CPUCauchyMoveGeneratorMock : public MoveGenerator {
-        float width;
-        float integrationStep;
-        unsigned int seed;
-
-        CPUCauchyMoveGeneratorMock(float width, float integrationStep, unsigned int seed)
-                : width{width}, integrationStep{integrationStep}, seed{seed}
-        { }
-
-        Move generateMove() override { return Move{}; }
-    };
-
-    struct DefaultMoveFilterMock : public MoveFilter {
-        bool isMoveValid(Tracer tracer, Move move) const override { return false; }
-        void setupForTracerRadius(float radius) override { }
-        Tracer randomValidTracer() override { return Tracer{Point{0, 0}, 0}; }
-    };
-
-    struct ImageMoveFilterPeriodicBCMock : public MoveFilter {
-        size_t width;
-        size_t height;
-        std::vector<unsigned int> intImageData;
-        unsigned long seed;
-        size_t numberOfTrajectories;
-
-        ImageMoveFilterPeriodicBCMock(unsigned int *intImageData, size_t width, size_t height, unsigned long seed,
-                                      size_t numberOfTrajectories)
-                : width{width}, height{height}, intImageData(intImageData, intImageData + width*height), seed{seed},
-                  numberOfTrajectories{numberOfTrajectories}
-        { }
-
-        bool isMoveValid(Tracer tracer, Move move) const override { return false; }
-        void setupForTracerRadius(float radius) override { }
-        Tracer randomValidTracer() override { return Tracer{Point{0, 0}, 0}; }
-    };
-
-    struct ImageMoveFilterWallBCMock : public MoveFilter {
-        std::vector<uint32_t> intImageData;
-        size_t width;
-        size_t height;
-        unsigned long seed;
-        size_t numberOfTrajectories;
-
-        ImageMoveFilterWallBCMock(unsigned int *intImageData, size_t width, size_t height, unsigned long seed,
-                                  size_t numberOfTrajectories)
-                : width{width}, height{height}, intImageData{intImageData, intImageData+width*height}, seed{seed},
-                  numberOfTrajectories{numberOfTrajectories}
-        { }
-
-        bool isMoveValid(Tracer tracer, Move move) const override { return false; }
-        void setupForTracerRadius(float radius) override { }
-        Tracer randomValidTracer() override { return Tracer{Point{0, 0}, 0}; }
     };
 }
 
@@ -299,7 +235,8 @@ TEST_CASE("CPURandomWalkerBuilder: move filter") {
             REQUIRE(filter->height == 3);
             REQUIRE(filter->numberOfTrajectories == 10);
             auto expectedImageData = image.getIntData();
-            REQUIRE(filter->intImageData == expectedImageData);
+            std::vector<uint32_t> actualImageData(filter->intImageData, filter->intImageData + 6);
+            REQUIRE(actualImageData == expectedImageData);
         }
 
         SECTION("PeriodicBoundaryConditions") {
