@@ -51,8 +51,8 @@ using CPURandomWalkerBuilderUnderTest = CPURandomWalkerBuilder<CPURandomWalkerMo
  */
 template<>
 struct CPURandomWalkerBuilderTraits<CPURandomWalkerBuilderUnderTest> {
-    using GaussianMoveGenerator_t = CPUGaussianMoveGeneratorMock;
-    using CauchyMoveGenerator_t = CPUCauchyMoveGeneratorMock;
+    using GaussianMoveGenerator_t = GaussianMoveGeneratorMock;
+    using CauchyMoveGenerator_t = CauchyMoveGeneratorMock;
     using DefaultMoveFilter_t = DefaultMoveFilterMock;
     using ImageMoveFilterPeriodicBC_t = ImageMoveFilterPeriodicBCMock;
     using ImageMoveFilterWallBC_t = ImageMoveFilterWallBCMock;
@@ -75,7 +75,7 @@ TEST_CASE("CPURandomWalkerBuilder: basic parameters") {
     auto walker = CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build();
     auto walkerMock = dynamic_cast<CPURandomWalkerMock*>(walker.get());
 
-    REQUIRE(is_instance_of<CPUGaussianMoveGeneratorMock>(walkerMock->moveGenerator.get()));
+    REQUIRE(is_instance_of<GaussianMoveGeneratorMock>(walkerMock->moveGenerator.get()));
     REQUIRE(is_instance_of<DefaultMoveFilterMock>(walkerMock->moveFilter.get()));
     REQUIRE(walkerMock->numberOfWalks == 10);
     REQUIRE(walkerMock->walkParameters.numberOfSteps == 100);
@@ -100,8 +100,8 @@ TEST_CASE("CPURandomWalkerBuilder: move gererator") {
             auto walker = CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build();
             auto walkerMock = dynamic_cast<CPURandomWalkerMock*>(walker.get());
 
-            REQUIRE(is_instance_of<CPUGaussianMoveGeneratorMock>(walkerMock->moveGenerator.get()));
-            auto generator = dynamic_cast<CPUGaussianMoveGeneratorMock*>(walkerMock->moveGenerator.get());
+            REQUIRE(is_instance_of<GaussianMoveGeneratorMock>(walkerMock->moveGenerator.get()));
+            auto generator = dynamic_cast<GaussianMoveGeneratorMock*>(walkerMock->moveGenerator.get());
             REQUIRE(generator->sigma == 3);
         }
 
@@ -144,8 +144,8 @@ TEST_CASE("CPURandomWalkerBuilder: move gererator") {
             auto walker = CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build();
             auto walkerMock = dynamic_cast<CPURandomWalkerMock*>(walker.get());
 
-            REQUIRE(is_instance_of<CPUCauchyMoveGeneratorMock>(walkerMock->moveGenerator.get()));
-            auto generator = dynamic_cast<CPUCauchyMoveGeneratorMock*>(walkerMock->moveGenerator.get());
+            REQUIRE(is_instance_of<CauchyMoveGeneratorMock>(walkerMock->moveGenerator.get()));
+            auto generator = dynamic_cast<CauchyMoveGeneratorMock*>(walkerMock->moveGenerator.get());
             REQUIRE(generator->width == 3);
         }
 
@@ -205,7 +205,7 @@ TEST_CASE("CPURandomWalkerBuilder: move filter") {
         auto walker = CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build();
         auto walkerMock = dynamic_cast<CPURandomWalkerMock*>(walker.get());
 
-        REQUIRE(is_instance_of<CPUGaussianMoveGeneratorMock>(walkerMock->moveGenerator.get()));
+        REQUIRE(is_instance_of<GaussianMoveGeneratorMock>(walkerMock->moveGenerator.get()));
     }
 
     SECTION("image") {

@@ -11,25 +11,37 @@
 #include "simulation/MoveGenerator.h"
 #include "utils/CudaDefines.h"
 
-struct CPUGaussianMoveGeneratorMock : public MoveGenerator {
+struct GaussianMoveGeneratorMock : public MoveGenerator {
     float sigma;
     float integrationStep;
     unsigned int seed;
+    size_t numberOfTrajectories;
 
-    CUDA_HOSTDEV CPUGaussianMoveGeneratorMock(float sigma, float integrationStep, unsigned int seed)
+    CUDA_HOST GaussianMoveGeneratorMock(float sigma, float integrationStep, unsigned int seed)
             : sigma{sigma}, integrationStep{integrationStep}, seed{seed}
+    { }
+
+    CUDA_DEV GaussianMoveGeneratorMock(float sigma, float integrationStep, unsigned int seed,
+                                       size_t numberOfTrajectories)
+            : sigma{sigma}, integrationStep{integrationStep}, seed{seed}, numberOfTrajectories{numberOfTrajectories}
     { }
 
     CUDA_HOSTDEV Move generateMove() override { return Move{}; }
 };
 
-struct CPUCauchyMoveGeneratorMock : public MoveGenerator {
+struct CauchyMoveGeneratorMock : public MoveGenerator {
     float width;
     float integrationStep;
     unsigned int seed;
+    size_t numberOfTrajectories;
 
-    CUDA_HOSTDEV CPUCauchyMoveGeneratorMock(float width, float integrationStep, unsigned int seed)
+    CUDA_HOST CauchyMoveGeneratorMock(float width, float integrationStep, unsigned int seed)
             : width{width}, integrationStep{integrationStep}, seed{seed}
+    { }
+
+    CUDA_DEV CauchyMoveGeneratorMock(float width, float integrationStep, unsigned int seed,
+                                     size_t numberOfTrajectories)
+            : width{width}, integrationStep{integrationStep}, seed{seed}, numberOfTrajectories{numberOfTrajectories}
     { }
 
     CUDA_HOSTDEV Move generateMove() override { return Move{}; }
