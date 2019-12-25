@@ -59,7 +59,7 @@ namespace {
         std::size_t timesInvoked{};
 
     public:
-        CUDA_DEV virtual Move generateMove() override {
+        CUDA_HOSTDEV virtual Move generateMove() override {
             if (this->timesInvoked == 0) {
                 this->timesInvoked++;
                 return Move{3, 4};

@@ -29,9 +29,9 @@ void create_move_generator(unsigned long seed, float sigma, float integrationSte
     using CauchyMoveGenerator = typename GPURandomWalkerBuilder_t::CauchyMoveGenerator_t;
 
     if (moveGeneratorType == MoveGeneratorType::GAUSSIAN)
-        (*moveGenerator) = new GPUGaussianMoveGenerator(sigma, integrationStep, seed, numberOfTrajectories);
+        (*moveGenerator) = new GaussianMoveGenerator(sigma, integrationStep, seed, numberOfTrajectories);
     else if (moveGeneratorType == MoveGeneratorType::CAUCHY)
-        (*moveGenerator) = new GPUCauchyMoveGenerator(sigma, integrationStep, seed, numberOfTrajectories);
+        (*moveGenerator) = new CauchyMoveGenerator(sigma, integrationStep, seed, numberOfTrajectories);
     else
         (*moveGenerator) = nullptr;
 }
@@ -70,7 +70,7 @@ void create_move_filter(unsigned long seed, size_t numberOfTrajectories,
 
 template<typename GPURandomWalker_t>
 GPURandomWalkerBuilder<GPURandomWalker_t>::MoveGeneratorOnGPUFactory
-    ::MoveGeneratorOnGPUFactory(const std::string &moveGeneratorString,float integrationStep)
+    ::MoveGeneratorOnGPUFactory(const std::string &moveGeneratorString, float integrationStep)
             : integrationStep{integrationStep}
 {
     Validate(integrationStep > 0.f);
@@ -119,12 +119,9 @@ GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory
     if (!moveFilterStream)
         throw std::runtime_error("Malformed ImageMoveFilter parameters");
 
-    std::ifstream imageFile(imageFilename);
-    if (!imageFile)
-        throw std::runtime_error("Cannot open " + imageFilename + " to load image");
-
-    PPMImageReader imageReader;
-    this->image = imageReader.read(imageFile);
+    this->fileIstreamProvider->setFileDescription("PPM image for MoveFilter");
+    auto imageIstream = this->fileIstreamProvider->openFile(imageFilename);
+    Image image = this->imageReader->read(*imageIstream);
     logger << "[GPURandomWalkerFactory] Loaded image " << imageFilename << " (" << this->image.getWidth();
     logger << "px x " << this->image.getHeight() << "px)" << std::endl;
 }
@@ -149,7 +146,10 @@ GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory
 
 template<typename GPURandomWalker_t>
 GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory
-    ::MoveFilterOnGPUFactory(const std::string &moveFilterString, std::ostream &logger)
+    ::MoveFilterOnGPUFactory(const std::string &moveFilterString, std::ostream &logger,
+                             std::unique_ptr<FileIstreamProvider> fileIstreamProvider,
+                             std::unique_ptr<ImageReader> imageReader)
+            : fileIstreamProvider{std::move(fileIstreamProvider)}, imageReader{std::move(imageReader)}
 {
     std::istringstream moveFilterStream(moveFilterString);
     std::string moveFilterName;
@@ -205,12 +205,14 @@ GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory
 template<typename GPURandomWalker_t>
 GPURandomWalkerBuilder<GPURandomWalker_t>
     ::GPURandomWalkerBuilder(unsigned long seed, const RandomWalkerFactory::WalkerParameters &walkerParameters,
-                             std::ostream &logger)
+                             std::unique_ptr<FileIstreamProvider> fileIstreamProvider,
+                             std::unique_ptr<ImageReader> imageReader, std::ostream &logger)
             : walkerParameters{walkerParameters}, numberOfWalksInSeries{walkerParameters.numberOfWalksInSeries},
               logger{logger},
               gpuMoveGeneratorFactory(walkerParameters.moveGeneratorParameters,
                                       walkerParameters.walkParameters.integrationStep),
-              gpuMoveFilterFactory(walkerParameters.moveFilterParameters, logger), seedGenerator(seed)
+              gpuMoveFilterFactory(walkerParameters.moveFilterParameters, logger, std::move(fileIstreamProvider),
+                                  std::move(imageReader)), seedGenerator(seed)
 { }
 
 template<typename GPURandomWalker_t>

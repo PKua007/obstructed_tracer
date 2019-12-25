@@ -20,8 +20,8 @@
 #include "utils/FileUtils.h"
 
 /* Forward declarations for CPURandomWalkerBuilderTraits */
-class CPUGaussianMoveGenerator;
-class CPUCauchyMoveGenerator;
+class GaussianMoveGenerator;
+class CauchyMoveGenerator;
 class DefaultMoveFilter;
 template <typename ImageBoundaryConditions> class ImageMoveFilter;
 class PeriodicBoundaryConditions;
@@ -38,8 +38,8 @@ class WallBoundaryConditions;
  */
 template<typename CPURandomWalkerBuilder_t>
 struct CPURandomWalkerBuilderTraits {
-    using GaussianMoveGenerator_t = CPUGaussianMoveGenerator;
-    using CauchyMoveGenerator_t = CPUCauchyMoveGenerator;
+    using GaussianMoveGenerator_t = GaussianMoveGenerator;
+    using CauchyMoveGenerator_t = CauchyMoveGenerator;
     using DefaultMoveFilter_t = DefaultMoveFilter;
     using ImageMoveFilterPeriodicBC_t = ImageMoveFilter<PeriodicBoundaryConditions>;
     using ImageMoveFilterWallBC_t = ImageMoveFilter<WallBoundaryConditions>;

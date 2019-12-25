@@ -15,10 +15,13 @@
 #include "../MoveFilter.h"
 #include "../RandomWalkerFactory.h"
 #include "image/Image.h"
+#include "image/PPMImageReader.h"
+#include "utils/FileUtils.h"
+
 
 /* Forward declarations for GPURandomWalkerBuilderTraits */
-class GPUGaussianMoveGenerator;
-class GPUCauchyMoveGenerator;
+class GaussianMoveGenerator;
+class CauchyMoveGenerator;
 class DefaultMoveFilter;
 template <typename ImageBoundaryConditions> class ImageMoveFilter;
 class PeriodicBoundaryConditions;
@@ -35,8 +38,8 @@ class WallBoundaryConditions;
  */
 template<typename GPURandomWalkerBuilder_t>
 struct GPURandomWalkerBuilderTraits {
-    using GaussianMoveGenerator_t = GPUGaussianMoveGenerator;
-    using CauchyMoveGenerator_t = GPUCauchyMoveGenerator;
+    using GaussianMoveGenerator_t = GaussianMoveGenerator;
+    using CauchyMoveGenerator_t = CauchyMoveGenerator;
     using DefaultMoveFilter_t = DefaultMoveFilter;
     using ImageMoveFilterPeriodicBC_t = ImageMoveFilter<PeriodicBoundaryConditions>;
     using ImageMoveFilterWallBC_t = ImageMoveFilter<WallBoundaryConditions>;
@@ -98,13 +101,18 @@ private:
         BoundaryConditionsType boundaryConditionsType{};
         Image image{};
 
+        std::unique_ptr<FileIstreamProvider> fileIstreamProvider;
+        std::unique_ptr<ImageReader> imageReader;
+
         void fetchImageData(std::istringstream &moveFilterStream, std::ostream &logger);
         void fetchBoundaryConditions(std::istringstream &moveFilterStream);
 
     public:
         std::size_t numberOfSetupThreads{};
 
-        MoveFilterOnGPUFactory(const std::string &moveFilterString, std::ostream &logger);
+        MoveFilterOnGPUFactory(const std::string &moveFilterString, std::ostream &logger,
+                               std::unique_ptr<FileIstreamProvider> fileIstreamProvider,
+                               std::unique_ptr<ImageReader> imageReader);
 
         MoveFilter *create(unsigned long seed, std::size_t numberOfWalks);
     };
@@ -114,6 +122,7 @@ private:
     RandomWalkerFactory::WalkerParameters walkerParameters;
     unsigned long numberOfWalksInSeries{};
     std::ostream &logger;
+
     MoveGeneratorOnGPUFactory gpuMoveGeneratorFactory;
     MoveFilterOnGPUFactory gpuMoveFilterFactory;
 
@@ -126,10 +135,26 @@ public:
      *
      * @param seed the random generator seed for @a moveFilter
      * @param walkerParameters the parameters of the random walk, RandomWalker, MoveGenerator and MoveFilter
+     * @param walkerParameters the parameters of the walker, MoveFilter and MoveGenerator
+     * @param fileIstreamProvider the class opening file to read (for image loading)
      * @param logger the output stream for some info on initializing strategies and GPURandomWalker
      */
     GPURandomWalkerBuilder(unsigned long seed, const RandomWalkerFactory::WalkerParameters &walkerParameters,
-                           std::ostream &logger);
+                           std::unique_ptr<FileIstreamProvider> fileIstreamProvider,
+                           std::unique_ptr<ImageReader> imageReader, std::ostream &logger);
+
+    /**
+     * @brief Constructs the builder with a default FileIstreamProvider and ImageReader - PPMImageReader.
+     *
+     * @see GPURandomWalkerBuilder(unsigned long, const RandomWalkerFactory::WalkerParameters &,
+     * std::unique_ptr<FileIstreamProvider>, std::unique_ptr<ImageReader>, std::ostream &)
+     */
+    GPURandomWalkerBuilder(unsigned long seed, const RandomWalkerFactory::WalkerParameters &walkerParameters,
+                          std::ostream &logger)
+            : GPURandomWalkerBuilder(seed, walkerParameters,
+                                     std::unique_ptr<FileIstreamProvider>(new FileIstreamProvider),
+                                     std::unique_ptr<ImageReader>(new PPMImageReader), logger)
+    { }
 
     ~GPURandomWalkerBuilder() { };
 
