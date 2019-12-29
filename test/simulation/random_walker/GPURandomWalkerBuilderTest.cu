@@ -79,14 +79,49 @@ TEST_CASE("GPURandomWalkerBuilder: basic parameters") {
 
     REQUIRE(CUDA_IS_INSTANCE_OF(walkerMock->moveGenerator, GaussianMoveGeneratorMock));
     REQUIRE(CUDA_IS_INSTANCE_OF(walkerMock->moveFilter, DefaultMoveFilterMock));
-    //REQUIRE(walkerMock->numberOfWalks == 10);
-    //REQUIRE(walkerMock->walkParameters.numberOfSteps == 100);
-    //REQUIRE(walkerMock->walkParameters.tracerRadius == 3);
-    //REQUIRE(walkerMock->walkParameters.drift == Move{1, 2});
-    //REQUIRE(walkerMock->walkParameters.integrationStep == Approx(0.1));
+    REQUIRE(walkerMock->numberOfWalks == 10);
+    REQUIRE(walkerMock->walkParameters.numberOfSteps == 100);
+    REQUIRE(walkerMock->walkParameters.tracerRadius == 3);
+    REQUIRE(walkerMock->walkParameters.drift == Move{1, 2});
+    REQUIRE(walkerMock->walkParameters.integrationStep == Approx(0.1));
 }
 
-/*TEST_CASE("CPURandomWalkerBuilder: move gererator") {
+__global__
+void gpu_move_object_to_global_memory(const void *object, void *globalDest, size_t size) {
+    if (!CUDA_IS_IT_FIRST_THREAD)
+        return;
+
+    memcpy(globalDest, object, size);
+}
+
+template<typename T>
+struct CharMemoryDeleter {
+    void operator()(T *ptr) const {
+        char *charPtr = reinterpret_cast<char*>(ptr);
+        delete [] charPtr;
+    }
+};
+
+template<typename Derived, typename Base = Derived>
+std::unique_ptr<Derived, CharMemoryDeleter<Derived>> get_cpu_data_accessor(const Base *gpuObject) {
+    Derived *gpuGlobalMemoryObject;
+    cudaCheck( cudaMalloc(&gpuGlobalMemoryObject, sizeof(Derived)) );
+    gpu_move_object_to_global_memory<<<1, 32>>>(gpuObject, gpuGlobalMemoryObject, sizeof(Derived));
+
+    char *memory = new char[sizeof(Derived)];
+    auto cpuObject = reinterpret_cast<Derived*>(memory);
+    cudaCheck( cudaMemcpy(cpuObject, gpuGlobalMemoryObject, sizeof(Derived), cudaMemcpyDeviceToHost) );
+    cudaCheck( cudaFree(gpuGlobalMemoryObject) );
+
+    return std::unique_ptr<Derived, CharMemoryDeleter<Derived>>(cpuObject);
+}
+
+template<typename T>
+std::unique_ptr<T, CharMemoryDeleter<T>> get_cpu_data_accessor(const T *gpuObject) {
+    return get_cpu_data_accessor<T, T>(gpuObject);
+}
+
+TEST_CASE("GPURandomWalkerBuilder: move gererator") {
     RandomWalkerFactory::WalkerParameters walkerParameters;
     walkerParameters.moveFilterParameters           = "DefaultMoveFilter";
     walkerParameters.numberOfWalksInSeries          = 10;
@@ -99,15 +134,15 @@ TEST_CASE("GPURandomWalkerBuilder: basic parameters") {
     SECTION("gaussian") {
         SECTION("correct sigma") {
             walkerParameters.moveGeneratorParameters = "GaussianMoveGenerator 3";
-            auto walker = CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build();
-            auto walkerMock = dynamic_cast<CPURandomWalkerMock*>(walker.get());
+            auto walker = GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build();
+            auto walkerMock = dynamic_cast<GPURandomWalkerMock*>(walker.get());
 
-            REQUIRE(is_instance_of<CPUGaussianMoveGeneratorMock>(walkerMock->moveGenerator.get()));
-            auto generator = dynamic_cast<CPUGaussianMoveGeneratorMock*>(walkerMock->moveGenerator.get());
+            REQUIRE(CUDA_IS_INSTANCE_OF(walkerMock->moveGenerator, GaussianMoveGeneratorMock));
+            auto generator = get_cpu_data_accessor<GaussianMoveGeneratorMock>(walkerMock->moveGenerator);
             REQUIRE(generator->sigma == 3);
         }
 
-        SECTION("incorrect sigma") {
+        /*SECTION("incorrect sigma") {
             SECTION("zero") {
                 walkerParameters.moveGeneratorParameters = "GaussianMoveGenerator 0";
 
@@ -137,10 +172,10 @@ TEST_CASE("GPURandomWalkerBuilder: basic parameters") {
                 REQUIRE_THROWS_WITH(CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
                                     Contains("Malformed"));
             }
-        }
+        }*/
     }
 
-    SECTION("cauchy") {
+    /*SECTION("cauchy") {
         SECTION("correct width") {
             walkerParameters.moveGeneratorParameters = "CauchyMoveGenerator 3";
             auto walker = CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build();
@@ -189,10 +224,10 @@ TEST_CASE("GPURandomWalkerBuilder: basic parameters") {
 
         REQUIRE_THROWS_WITH(CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
                             Contains("Unknown"));
-    }
+    }*/
 }
 
-TEST_CASE("CPURandomWalkerBuilder: move filter") {
+/*TEST_CASE("CPURandomWalkerBuilder: move filter") {
     RandomWalkerFactory::WalkerParameters walkerParameters;
     walkerParameters.moveGeneratorParameters        = "GaussianMoveGenerator 3";
     walkerParameters.numberOfWalksInSeries          = 10;
