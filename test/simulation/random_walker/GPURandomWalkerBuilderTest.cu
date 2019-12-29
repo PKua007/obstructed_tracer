@@ -15,6 +15,7 @@
 //#include "../../image/ImageReaderMock.h"
 #include "move_generator/MoveGeneratorsMocks.h"
 #include "move_filter/MoveFiltersMocks.h"
+#include "../../test_utils/CPUDataAccessor.h"
 
 
 namespace {
@@ -86,41 +87,6 @@ TEST_CASE("GPURandomWalkerBuilder: basic parameters") {
     REQUIRE(walkerMock->walkParameters.integrationStep == Approx(0.1));
 }
 
-__global__
-void gpu_move_object_to_global_memory(const void *object, void *globalDest, size_t size) {
-    if (!CUDA_IS_IT_FIRST_THREAD)
-        return;
-
-    memcpy(globalDest, object, size);
-}
-
-template<typename T>
-struct CharMemoryDeleter {
-    void operator()(T *ptr) const {
-        char *charPtr = reinterpret_cast<char*>(ptr);
-        delete [] charPtr;
-    }
-};
-
-template<typename Derived, typename Base = Derived>
-std::unique_ptr<Derived, CharMemoryDeleter<Derived>> get_cpu_data_accessor(const Base *gpuObject) {
-    Derived *gpuGlobalMemoryObject;
-    cudaCheck( cudaMalloc(&gpuGlobalMemoryObject, sizeof(Derived)) );
-    gpu_move_object_to_global_memory<<<1, 32>>>(gpuObject, gpuGlobalMemoryObject, sizeof(Derived));
-
-    char *memory = new char[sizeof(Derived)];
-    auto cpuObject = reinterpret_cast<Derived*>(memory);
-    cudaCheck( cudaMemcpy(cpuObject, gpuGlobalMemoryObject, sizeof(Derived), cudaMemcpyDeviceToHost) );
-    cudaCheck( cudaFree(gpuGlobalMemoryObject) );
-
-    return std::unique_ptr<Derived, CharMemoryDeleter<Derived>>(cpuObject);
-}
-
-template<typename T>
-std::unique_ptr<T, CharMemoryDeleter<T>> get_cpu_data_accessor(const T *gpuObject) {
-    return get_cpu_data_accessor<T, T>(gpuObject);
-}
-
 TEST_CASE("GPURandomWalkerBuilder: move gererator") {
     RandomWalkerFactory::WalkerParameters walkerParameters;
     walkerParameters.moveFilterParameters           = "DefaultMoveFilter";
@@ -138,7 +104,7 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
             auto walkerMock = dynamic_cast<GPURandomWalkerMock*>(walker.get());
 
             REQUIRE(CUDA_IS_INSTANCE_OF(walkerMock->moveGenerator, GaussianMoveGeneratorMock));
-            auto generator = get_cpu_data_accessor<GaussianMoveGeneratorMock>(walkerMock->moveGenerator);
+            auto generator = get_gpu_data_accessor<GaussianMoveGeneratorMock>(walkerMock->moveGenerator);
             REQUIRE(generator->sigma == 3);
         }
 
