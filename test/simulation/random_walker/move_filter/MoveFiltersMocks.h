@@ -10,14 +10,18 @@
 
 #include "simulation/MoveFilter.h"
 #include "utils/CudaDefines.h"
+#include "../../../utils/GPUMock.h"
 
-struct DefaultMoveFilterMock : public MoveFilter {
+struct DefaultMoveFilterMock : public MoveFilter, GPUMock {
     CUDA_HOSTDEV bool isMoveValid(Tracer tracer, Move move) const override { return false; }
     CUDA_HOSTDEV void setupForTracerRadius(float radius) override { }
     CUDA_HOSTDEV Tracer randomValidTracer() override { return Tracer{Point{0, 0}, 0}; }
+    CUDA_DEV char *getClassName(char *nameOut, size_t maxSize) const override {
+        return this->getClassName0("DefaultMoveFilterMock", nameOut, maxSize);
+    }
 };
 
-struct ImageMoveFilterMock : public MoveFilter {
+struct ImageMoveFilterMock : public MoveFilter, GPUMock {
     size_t width;
     size_t height;
     unsigned int *intImageData;
@@ -50,6 +54,10 @@ struct ImageMoveFilterWallBCMock : public ImageMoveFilterMock {
                                            size_t numberOfTrajectories)
             : ImageMoveFilterMock(intImageData, width, height, seed, numberOfTrajectories)
     { }
+
+    CUDA_DEV char *getClassName(char *nameOut, size_t maxSize) const override {
+        return this->getClassName0("ImageMoveFilterWallBCMock", nameOut, maxSize);
+    }
 };
 
 struct ImageMoveFilterPeriodicBCMock : public ImageMoveFilterMock {
@@ -57,6 +65,10 @@ struct ImageMoveFilterPeriodicBCMock : public ImageMoveFilterMock {
                                                unsigned long seed, size_t numberOfTrajectories)
             : ImageMoveFilterMock(intImageData, width, height, seed, numberOfTrajectories)
     { }
+
+    CUDA_DEV char *getClassName(char *nameOut, size_t maxSize) const override {
+        return this->getClassName0("ImageMoveFilterPeriodicBCMock", nameOut, maxSize);
+    }
 };
 
 #endif /* MOVEFILTERSMOCKS_H_ */
