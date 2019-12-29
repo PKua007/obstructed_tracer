@@ -10,9 +10,9 @@
 
 #include "simulation/MoveGenerator.h"
 #include "utils/CudaDefines.h"
-#include "../../../utils/GPUMock.h"
+#include "../../../test_utils/GPURTTI.h"
 
-struct GaussianMoveGeneratorMock : public MoveGenerator, GPUMock {
+struct GaussianMoveGeneratorMock : public MoveGenerator, GPUNamedClass {
     float sigma;
     float integrationStep;
     unsigned int seed;
@@ -28,12 +28,10 @@ struct GaussianMoveGeneratorMock : public MoveGenerator, GPUMock {
     { }
 
     CUDA_HOSTDEV Move generateMove() override { return Move{}; }
-    CUDA_DEV char *getClassName(char *nameOut, size_t maxSize) const override {
-        return this->getClassName0("GaussianMoveGeneratorMock", nameOut, maxSize);
-    }
+    CUDA_IMPLEMENT_GET_CLASS_NAME("GaussianMoveGeneratorMock");
 };
 
-struct CauchyMoveGeneratorMock : public MoveGenerator, GPUMock {
+struct CauchyMoveGeneratorMock : public MoveGenerator, GPUNamedClass {
     float width;
     float integrationStep;
     unsigned int seed;
@@ -49,9 +47,7 @@ struct CauchyMoveGeneratorMock : public MoveGenerator, GPUMock {
     { }
 
     CUDA_HOSTDEV Move generateMove() override { return Move{}; }
-    CUDA_DEV char *getClassName(char *nameOut, size_t maxSize) const override {
-        return this->getClassName0("CauchyMoveGeneratorMock", nameOut, maxSize);
-    }
+    CUDA_IMPLEMENT_GET_CLASS_NAME("CauchyMoveGeneratoMock");
 };
 
 #endif /* MOVEGENERATORSMOCKS_H_ */

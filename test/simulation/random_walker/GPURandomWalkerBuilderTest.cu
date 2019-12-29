@@ -44,36 +44,7 @@ namespace {
         std::size_t getNumberOfSteps() const override { return 0; }
         const Trajectory &getTrajectory(std::size_t index) const override { throw std::runtime_error(""); }
     };
-
-    __global__
-    void gpu_get_name_of_gpu_mock(GPUMock *mock, char *name, size_t maxSize) {
-        if (!CUDA_IS_IT_FIRST_THREAD)
-            return;
-
-        mock->getClassName(name, maxSize);
-    }
-
-    template<typename ConcreteGPUMock>
-    std::string get_name_of_gpu_mock(void *mock) {
-        constexpr std::size_t maxSize = 64;
-        char *gpuName;
-        cudaCheck( cudaMalloc(&gpuName, sizeof(char) * maxSize) );
-        auto *mockCasted = static_cast<ConcreteGPUMock*>(mock);
-        gpu_get_name_of_gpu_mock<<<1, 32>>>(mockCasted, gpuName, maxSize);
-        cudaCheck( cudaDeviceSynchronize() );
-        char cpuName[maxSize];
-        cudaCheck( cudaMemcpy(cpuName, gpuName, sizeof(char) * maxSize, cudaMemcpyDeviceToHost) );
-        cudaCheck( cudaFree(gpuName) );
-        return cpuName;
-    }
 }
-
-#ifndef str
-    #define xstr(a) str(a)
-    #define str(a) #a
-#endif
-
-#define CUDA_IS_INSTANCE_OF(obj, clazz) (get_name_of_gpu_mock<clazz>(obj) == str(clazz))
 
 using GPURandomWalkerBuilderUnderTest = GPURandomWalkerBuilder<GPURandomWalkerMock>;
 
