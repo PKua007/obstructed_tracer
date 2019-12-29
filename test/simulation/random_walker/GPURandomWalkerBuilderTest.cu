@@ -15,7 +15,7 @@
 //#include "../../image/ImageReaderMock.h"
 #include "move_generator/MoveGeneratorsMocks.h"
 #include "move_filter/MoveFiltersMocks.h"
-#include "../../test_utils/CPUDataAccessor.h"
+#include "../../test_utils/GPUDataAccessor.h"
 
 
 namespace {
@@ -108,47 +108,47 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
             REQUIRE(generator->sigma == 3);
         }
 
-        /*SECTION("incorrect sigma") {
+        SECTION("incorrect sigma") {
             SECTION("zero") {
                 walkerParameters.moveGeneratorParameters = "GaussianMoveGenerator 0";
 
-                REQUIRE_THROWS_WITH(CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
+                REQUIRE_THROWS_WITH(GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
                                     Contains("> 0"));
             }
 
             SECTION("negative") {
                 walkerParameters.moveGeneratorParameters = "GaussianMoveGenerator -0.3";
 
-                REQUIRE_THROWS_WITH(CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
+                REQUIRE_THROWS_WITH(GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
                                     Contains("> 0"));
             }
         }
 
-        SECTION("malformed") {
+         SECTION("malformed") {
             SECTION("no parameter") {
                 walkerParameters.moveGeneratorParameters = "GaussianMoveGenerator";
 
-                REQUIRE_THROWS_WITH(CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
+                REQUIRE_THROWS_WITH(GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
                                     Contains("Malformed"));
             }
 
             SECTION("skrewed parameter") {
                 walkerParameters.moveGeneratorParameters = "GaussianMoveGenerator killme";
 
-                REQUIRE_THROWS_WITH(CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
+                REQUIRE_THROWS_WITH(GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
                                     Contains("Malformed"));
             }
-        }*/
+        }
     }
 
-    /*SECTION("cauchy") {
+    SECTION("cauchy") {
         SECTION("correct width") {
             walkerParameters.moveGeneratorParameters = "CauchyMoveGenerator 3";
-            auto walker = CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build();
-            auto walkerMock = dynamic_cast<CPURandomWalkerMock*>(walker.get());
+            auto walker = GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build();
+            auto walkerMock = dynamic_cast<GPURandomWalkerMock*>(walker.get());
 
-            REQUIRE(is_instance_of<CPUCauchyMoveGeneratorMock>(walkerMock->moveGenerator.get()));
-            auto generator = dynamic_cast<CPUCauchyMoveGeneratorMock*>(walkerMock->moveGenerator.get());
+            REQUIRE(CUDA_IS_INSTANCE_OF(walkerMock->moveGenerator, CauchyMoveGeneratorMock));
+            auto generator = get_gpu_data_accessor<CauchyMoveGeneratorMock>(walkerMock->moveGenerator);
             REQUIRE(generator->width == 3);
         }
 
@@ -156,14 +156,14 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
             SECTION("zero") {
                 walkerParameters.moveGeneratorParameters = "CauchyMoveGenerator 0";
 
-                REQUIRE_THROWS_WITH(CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
+                REQUIRE_THROWS_WITH(GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
                                     Contains("> 0"));
             }
 
             SECTION("negative") {
                 walkerParameters.moveGeneratorParameters = "CauchyMoveGenerator -0.3";
 
-                REQUIRE_THROWS_WITH(CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
+                REQUIRE_THROWS_WITH(GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
                                     Contains("> 0"));
             }
         }
@@ -172,14 +172,14 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
             SECTION("no parameter") {
                 walkerParameters.moveGeneratorParameters = "CauchyMoveGenerator";
 
-                REQUIRE_THROWS_WITH(CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
+                REQUIRE_THROWS_WITH(GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
                                     Contains("Malformed"));
             }
 
             SECTION("skrewed parameter") {
                 walkerParameters.moveGeneratorParameters = "CauchyMoveGenerator killme";
 
-                REQUIRE_THROWS_WITH(CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
+                REQUIRE_THROWS_WITH(GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
                                     Contains("Malformed"));
             }
         }
@@ -188,9 +188,9 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
     SECTION("unknown") {
         walkerParameters.moveGeneratorParameters = "KillMe 7";
 
-        REQUIRE_THROWS_WITH(CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
+        REQUIRE_THROWS_WITH(GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
                             Contains("Unknown"));
-    }*/
+    }
 }
 
 /*TEST_CASE("CPURandomWalkerBuilder: move filter") {

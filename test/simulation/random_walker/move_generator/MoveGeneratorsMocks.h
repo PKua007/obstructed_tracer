@@ -47,7 +47,7 @@ struct CauchyMoveGeneratorMock : public MoveGenerator, GPUNamedClass {
     { }
 
     CUDA_HOSTDEV Move generateMove() override { return Move{}; }
-    CUDA_IMPLEMENT_GET_CLASS_NAME("CauchyMoveGeneratoMock");
+    CUDA_IMPLEMENT_GET_CLASS_NAME("CauchyMoveGeneratorMock");
 };
 
 #endif /* MOVEGENERATORSMOCKS_H_ */
