@@ -11,7 +11,10 @@
 #include "CauchyMoveGenerator.h"
 
 #if CUDA_HOST_COMPILATION
-    CauchyMoveGenerator::CauchyMoveGenerator(float width, float integrationStep, unsigned int seed) {
+    CauchyMoveGenerator::CauchyMoveGenerator(float width, float integrationStep, unsigned int seed,
+                                             size_t numberOfTrajectories)
+            : numberOfTrajectories{numberOfTrajectories}
+    {
         this->randomGenerator.seed(seed);
         this->cauchyDistribution = std::cauchy_distribution<float>(0.f, width * integrationStep);
         this->uniformAngleDistribution = std::uniform_real_distribution<float>(0.f, 2*M_PI);
@@ -29,8 +32,8 @@
     }
 
 #else // CUDA_DEVICE_COMPILATION
-    CUDA_DEV CauchyMoveGenerator::CauchyMoveGenerator(float width, float integrationStep, unsigned int seed,
-                                                      size_t numberOfTrajectories)
+    CUDA_HOSTDEV CauchyMoveGenerator::CauchyMoveGenerator(float width, float integrationStep, unsigned int seed,
+                                                          size_t numberOfTrajectories)
             : width{width * integrationStep}, numberOfTrajectories{numberOfTrajectories}
     {
         this->states = new curandState[this->numberOfTrajectories];

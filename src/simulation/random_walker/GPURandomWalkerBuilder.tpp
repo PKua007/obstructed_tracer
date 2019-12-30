@@ -216,7 +216,10 @@ GPURandomWalkerBuilder<GPURandomWalker_t>
 { }
 
 template<typename GPURandomWalker_t>
-std::unique_ptr<RandomWalker> GPURandomWalkerBuilder<GPURandomWalker_t>::build() {
+std::unique_ptr<RandomWalker>
+GPURandomWalkerBuilder<GPURandomWalker_t>
+    ::build()
+{
     MoveGenerator *moveGenerator = this->gpuMoveGeneratorFactory.create(this->seedGenerator(),
                                                                         this->numberOfWalksInSeries);
     MoveFilter *moveFilter = this->gpuMoveFilterFactory.create(this->seedGenerator(), this->numberOfWalksInSeries);

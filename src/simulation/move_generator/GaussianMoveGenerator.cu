@@ -8,7 +8,10 @@
 #include "GaussianMoveGenerator.h"
 
 #if CUDA_HOST_COMPILATION
-    GaussianMoveGenerator::GaussianMoveGenerator(float sigma, float integrationStep, unsigned int seed) {
+    GaussianMoveGenerator::GaussianMoveGenerator(float sigma, float integrationStep, unsigned int seed,
+                                                 size_t numberOfTrajectories)
+            : numberOfTrajectories{numberOfTrajectories}
+    {
         this->randomGenerator.seed(seed);
         // We need to divide sigma by sqrt(2), because if we sample x and y with sigma^2, then r is sampled from 2sigma^2
         // And after this integraton step
@@ -24,8 +27,8 @@
     }
 
 #else // CUDA_DEVICE_COMPILATION
-    CUDA_DEV GaussianMoveGenerator::GaussianMoveGenerator(float sigma, float integrationStep, unsigned int seed,
-                                                          size_t numberOfTrajectories)
+    CUDA_HOSTDEV GaussianMoveGenerator::GaussianMoveGenerator(float sigma, float integrationStep, unsigned int seed,
+                                                              size_t numberOfTrajectories)
             : numberOfTrajectories{numberOfTrajectories}
     {
         // Divide sigma by sqrt(2), because if we sample x and y with sigma^2, then r is sampled from 2sigma^2

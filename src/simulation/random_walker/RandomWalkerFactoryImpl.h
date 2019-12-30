@@ -17,9 +17,6 @@
 #include "GPURandomWalker.h"
 #include "SplitRandomWalker.h"
 
-extern template class CPURandomWalkerBuilder<CPURandomWalker>;
-extern template class GPURandomWalkerBuilder<CPURandomWalker>;
-
 class RandomWalkerFactoryImpl : public RandomWalkerFactory {
 private:
     std::ostream &logger;

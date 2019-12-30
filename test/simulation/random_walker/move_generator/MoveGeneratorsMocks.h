@@ -18,12 +18,9 @@ struct GaussianMoveGeneratorMock : public MoveGenerator, GPUNamedClass {
     unsigned int seed;
     size_t numberOfTrajectories;
 
-    CUDA_HOST GaussianMoveGeneratorMock(float sigma, float integrationStep, unsigned int seed)
-            : sigma{sigma}, integrationStep{integrationStep}, seed{seed}
-    { }
 
-    CUDA_DEV GaussianMoveGeneratorMock(float sigma, float integrationStep, unsigned int seed,
-                                       size_t numberOfTrajectories)
+    CUDA_HOSTDEV GaussianMoveGeneratorMock(float sigma, float integrationStep, unsigned int seed,
+                                           size_t numberOfTrajectories)
             : sigma{sigma}, integrationStep{integrationStep}, seed{seed}, numberOfTrajectories{numberOfTrajectories}
     { }
 
@@ -37,12 +34,8 @@ struct CauchyMoveGeneratorMock : public MoveGenerator, GPUNamedClass {
     unsigned int seed;
     size_t numberOfTrajectories;
 
-    CUDA_HOST CauchyMoveGeneratorMock(float width, float integrationStep, unsigned int seed)
-            : width{width}, integrationStep{integrationStep}, seed{seed}
-    { }
-
-    CUDA_DEV CauchyMoveGeneratorMock(float width, float integrationStep, unsigned int seed,
-                                     size_t numberOfTrajectories)
+    CUDA_HOSTDEV CauchyMoveGeneratorMock(float width, float integrationStep, unsigned int seed,
+                                         size_t numberOfTrajectories)
             : width{width}, integrationStep{integrationStep}, seed{seed}, numberOfTrajectories{numberOfTrajectories}
     { }
 

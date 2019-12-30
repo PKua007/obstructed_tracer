@@ -16,16 +16,16 @@
 #include "../RandomWalkerFactory.h"
 #include "../MoveGenerator.h"
 #include "../MoveFilter.h"
+#include "CPURandomWalker.h"
+#include "simulation/move_generator/GaussianMoveGenerator.h"
+#include "simulation/move_generator/CauchyMoveGenerator.h"
+#include "simulation/move_filter/DefaultMoveFilter.h"
+#include "simulation/move_filter/image_move_filter/ImageMoveFilter.h"
+#include "simulation/move_filter/image_move_filter/WallBoundaryConditions.h"
+#include "simulation/move_filter/image_move_filter/PeriodicBoundaryConditions.h"
 #include "image/PPMImageReader.h"
 #include "utils/FileUtils.h"
 
-/* Forward declarations for CPURandomWalkerBuilderTraits */
-class GaussianMoveGenerator;
-class CauchyMoveGenerator;
-class DefaultMoveFilter;
-template <typename ImageBoundaryConditions> class ImageMoveFilter;
-class PeriodicBoundaryConditions;
-class WallBoundaryConditions;
 
 /**
  * @brief Traits for concrete realization of CPURandomWalkerBuilder.
@@ -117,5 +117,7 @@ public:
      */
     std::unique_ptr<RandomWalker> build();
 };
+
+#include "CPURandomWalkerBuilder.tpp"
 
 #endif /* CPURANDOMWALKERBUILDER_H_ */

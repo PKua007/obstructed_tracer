@@ -25,11 +25,11 @@ CPURandomWalkerBuilder<CPURandomWalker_t>::createMoveGenerator(const std::string
 
     if (moveGeneratorType == "GaussianMoveGenerator") {
         return std::unique_ptr<MoveGenerator>(
-            new GaussianMoveGenerator_t(sigma, integrationStep, this->seedGenerator())
+            new GaussianMoveGenerator_t(sigma, integrationStep, this->seedGenerator(), this->numberOfWalksInSeries)
         );
     } else if (moveGeneratorType == "CauchyMoveGenerator") {
         return std::unique_ptr<MoveGenerator>(
-            new CauchyMoveGenerator_t(sigma, integrationStep, this->seedGenerator())
+            new CauchyMoveGenerator_t(sigma, integrationStep, this->seedGenerator(), this->numberOfWalksInSeries)
         );
     } else {
         throw std::runtime_error("Unknown MoveGenerator: " + moveGeneratorType);

@@ -9,7 +9,6 @@
 #include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
 
 #include "simulation/random_walker/CPURandomWalkerBuilder.h"
-#include "simulation/random_walker/CPURandomWalkerBuilder.tpp"
 #include "utils/Utils.h"
 #include "../../utils/FileUtilsMocks.h"
 #include "../../image/ImageReaderMock.h"

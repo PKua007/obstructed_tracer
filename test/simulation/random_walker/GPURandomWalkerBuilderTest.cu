@@ -10,7 +10,6 @@
 
 
 #include "simulation/random_walker/GPURandomWalkerBuilder.h"
-#include "simulation/random_walker/GPURandomWalkerBuilder.tpp"
 #include "utils/Utils.h"
 #include "../../utils/FileUtilsMocks.h"
 #include "../../image/ImageReaderMock.h"

@@ -14,18 +14,16 @@
 #include "../MoveGenerator.h"
 #include "../MoveFilter.h"
 #include "../RandomWalkerFactory.h"
+#include "simulation/move_generator/GaussianMoveGenerator.h"
+#include "simulation/move_generator/CauchyMoveGenerator.h"
+#include "simulation/move_filter/DefaultMoveFilter.h"
+#include "simulation/move_filter/image_move_filter/ImageMoveFilter.h"
+#include "simulation/move_filter/image_move_filter/WallBoundaryConditions.h"
+#include "simulation/move_filter/image_move_filter/PeriodicBoundaryConditions.h"
 #include "image/Image.h"
 #include "image/PPMImageReader.h"
 #include "utils/FileUtils.h"
 
-
-/* Forward declarations for GPURandomWalkerBuilderTraits */
-class GaussianMoveGenerator;
-class CauchyMoveGenerator;
-class DefaultMoveFilter;
-template <typename ImageBoundaryConditions> class ImageMoveFilter;
-class PeriodicBoundaryConditions;
-class WallBoundaryConditions;
 
 /**
  * @brief Traits for concrete realization of GPURandomWalkerBuilder.
@@ -170,5 +168,6 @@ public:
     std::unique_ptr<RandomWalker> build();
 };
 
+#include "GPURandomWalkerBuilder.tpp"
 
 #endif /* GPURANDOMWALKERBUILDER_H_ */
