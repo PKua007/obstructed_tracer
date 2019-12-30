@@ -6,7 +6,7 @@
  */
 
 #include <catch2/catch.hpp>
-#include <catch2/trompeloeil.hpp>
+#include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
 
 #include "simulation/random_walker/CPURandomWalkerBuilder.h"
 #include "simulation/random_walker/CPURandomWalkerBuilder.tpp"

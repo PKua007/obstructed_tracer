@@ -9,6 +9,7 @@
 #define GPUDATAACCESSOR_H_
 
 #include <memory>
+#include <vector>
 
 #include "utils/CudaCheck.h"
 
@@ -40,6 +41,19 @@ std::unique_ptr<Derived, CharMemoryDeleter<Derived>> get_gpu_data_accessor(const
 template<typename T>
 std::unique_ptr<T, CharMemoryDeleter<T>> get_gpu_data_accessor(const T *gpuObject) {
     return get_gpu_data_accessor<T, T>(gpuObject);
+}
+
+template<typename T>
+std::vector<T> get_gpu_array_as_vector(const T *gpuArray, std::size_t size) {
+    T *gpuGlobalMemoryArray;
+    cudaCheck( cudaMalloc(&gpuGlobalMemoryArray, sizeof(T)*size) );
+    gpu_copy_object_to_global_memory<<<1, 32>>>(gpuArray, gpuGlobalMemoryArray, sizeof(T)*size);
+
+    std::vector<T> cpuVector(size);
+    cudaCheck( cudaMemcpy(cpuVector.data(), gpuGlobalMemoryArray, sizeof(T)*size, cudaMemcpyDeviceToHost) );
+    cudaCheck( cudaFree(gpuGlobalMemoryArray) );
+
+    return cpuVector;
 }
 
 #endif /* GPUDATAACCESSOR_H_ */

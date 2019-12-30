@@ -8,7 +8,7 @@
 #ifndef FILEUTILSMOCKS_H_
 #define FILEUTILSMOCKS_H_
 
-#include <catch2/trompeloeil.hpp>
+#include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
 
 #include "utils/FileUtils.h"
 

@@ -8,7 +8,7 @@
 #ifndef MOVEFILTERMOCK_H_
 #define MOVEFILTERMOCK_H_
 
-#include <catch2/trompeloeil.hpp>
+#include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
 
 #include "simulation/MoveFilter.h"
 

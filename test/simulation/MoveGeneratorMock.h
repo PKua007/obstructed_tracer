@@ -8,7 +8,7 @@
 #ifndef MOVEGENERATORMOCK_H_
 #define MOVEGENERATORMOCK_H_
 
-#include <catch2/trompeloeil.hpp>
+#include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
 
 #include "simulation/MoveGenerator.h"
 

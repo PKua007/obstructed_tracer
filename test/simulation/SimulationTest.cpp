@@ -7,7 +7,7 @@
 
 
 #include <catch2/catch.hpp>
-#include <catch2/trompeloeil.hpp>
+#include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
 
 #include "../frontend/MSDDataApproxEqualMatcher.h"
 #include "simulation/SimulationImpl.h"
