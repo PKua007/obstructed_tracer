@@ -27,9 +27,11 @@ namespace {
 }
 
 template <typename BoundaryConditions>
-ImageMoveFilter<BoundaryConditions>::ImageMoveFilter(unsigned int *intImageData, size_t width, size_t height,
-                                                     unsigned long seed, size_t numberOfTrajectories) :
-        width{width}, height{height}, imageBC(width, height) {
+ImageMoveFilter<BoundaryConditions>
+    ::ImageMoveFilter(unsigned int *intImageData, size_t width, size_t height, unsigned long seed,
+                     size_t numberOfTrajectories)
+        : width{width}, height{height}, imageBC(width, height)
+{
     this->initializeGenerators(seed, numberOfTrajectories);
 
     this->validPointsMapSize = this->width * this->height;
@@ -67,7 +69,9 @@ ImageMoveFilter<BoundaryConditions>::ImageMoveFilter(unsigned int *intImageData,
 }
 
 template <typename BoundaryConditions>
-ImageMoveFilter<BoundaryConditions>::~ImageMoveFilter() {
+ImageMoveFilter<BoundaryConditions>
+    ::~ImageMoveFilter()
+{
     delete [] this->validPointsMap;
     delete [] this->validTracersMap;
     #if CUDA_DEVICE_COMPILATION
@@ -79,7 +83,10 @@ ImageMoveFilter<BoundaryConditions>::~ImageMoveFilter() {
 #if CUDA_DEVICE_COMPILATION
 
     template <typename BoundaryConditions>
-    void ImageMoveFilter<BoundaryConditions>::initializeGenerators(unsigned long seed, size_t numberOfTrajectories) {
+    void
+    ImageMoveFilter<BoundaryConditions>
+        ::initializeGenerators(unsigned long seed, size_t numberOfTrajectories)
+    {
         this->states = new curandState[numberOfTrajectories];
         for (size_t i = 0; i < numberOfTrajectories; i++)
             curand_init(seed, i, 0, &(this->states[i]));
@@ -88,20 +95,29 @@ ImageMoveFilter<BoundaryConditions>::~ImageMoveFilter() {
 #else // CUDA_HOST_COMPILATION
 
     template <typename BoundaryConditions>
-    void ImageMoveFilter<BoundaryConditions>::initializeGenerators(unsigned long seed, size_t numberOfTrajectories) {
+    void
+    ImageMoveFilter<BoundaryConditions>
+        ::initializeGenerators(unsigned long seed, size_t numberOfTrajectories)
+    {
         this->randomGenerator.seed(seed);
     }
 
 #endif
 
 template <typename BoundaryConditions>
-bool ImageMoveFilter<BoundaryConditions>::isPointValid(ImagePoint point) const {
+bool
+ImageMoveFilter<BoundaryConditions>
+    ::isPointValid(ImagePoint point) const
+{
     point = this->imageBC.applyOnImagePoint(point);
     return this->validPointsMap[this->imagePointToIndex(point)];
 }
 
 template <typename BoundaryConditions>
-bool ImageMoveFilter<BoundaryConditions>::isPrecomputedTracerValid(ImagePoint position) const {
+bool
+ImageMoveFilter<BoundaryConditions>
+    ::isPrecomputedTracerValid(ImagePoint position) const
+{
     if (!this->imageBC.isImagePointInBounds(position, this->tracerRadius))
         return false;
 
@@ -110,7 +126,10 @@ bool ImageMoveFilter<BoundaryConditions>::isPrecomputedTracerValid(ImagePoint po
 }
 
 template <typename BoundaryConditions>
-bool ImageMoveFilter<BoundaryConditions>::isNotPrecomputedTracerValid(ImagePoint position, float radius) const {
+bool
+ImageMoveFilter<BoundaryConditions>
+    ::isNotPrecomputedTracerValid(ImagePoint position, float radius) const
+{
     Expects(radius >= 0.f);
 
     int intPointRadius = static_cast<int>(radius);
@@ -133,7 +152,10 @@ bool ImageMoveFilter<BoundaryConditions>::isNotPrecomputedTracerValid(ImagePoint
 }
 
 template <typename BoundaryConditions>
-bool ImageMoveFilter<BoundaryConditions>::isPrecomputedTracerLineValid(ImagePoint from, ImagePoint to) const {
+bool
+ImageMoveFilter<BoundaryConditions>
+    ::isPrecomputedTracerLineValid(ImagePoint from, ImagePoint to) const
+{
     ImageMove imageMove = to - from;
     if (abs(imageMove.x) > abs(imageMove.y)) {
         float a = float(imageMove.y) / float(imageMove.x);
@@ -154,20 +176,29 @@ bool ImageMoveFilter<BoundaryConditions>::isPrecomputedTracerLineValid(ImagePoin
 }
 
 template <typename BoundaryConditions>
-ImagePoint ImageMoveFilter<BoundaryConditions>::indexToImagePoint(size_t index) const {
+ImagePoint
+ImageMoveFilter<BoundaryConditions>
+    ::indexToImagePoint(size_t index) const
+{
     Expects(index < this->validPointsMapSize);
     return {static_cast<int>(index % this->width), static_cast<int>(index / this->width)};
 }
 
 template <typename BoundaryConditions>
-size_t ImageMoveFilter<BoundaryConditions>::imagePointToIndex(ImagePoint point) const {
+size_t
+ImageMoveFilter<BoundaryConditions>
+    ::imagePointToIndex(ImagePoint point) const
+{
     return point.x + this->width * point.y;
 }
 
 #if CUDA_DEVICE_COMPILATION
 
     template <typename BoundaryConditions>
-    float ImageMoveFilter<BoundaryConditions>::randomUniformNumber() {
+    float
+    ImageMoveFilter<BoundaryConditions>
+        ::randomUniformNumber()
+    {
         // 1 minus curand_normal, because it samples from (0, 1], and we want [0, 1)
         return 1.f - curand_uniform(&(this->states[CUDA_THREAD_IDX]));
     }
@@ -175,7 +206,10 @@ size_t ImageMoveFilter<BoundaryConditions>::imagePointToIndex(ImagePoint point) 
 #else // CUDA_HOST_COMPILATION
 
     template <typename BoundaryConditions>
-    float ImageMoveFilter<BoundaryConditions>::randomUniformNumber() {
+    float
+    ImageMoveFilter<BoundaryConditions>
+        ::randomUniformNumber()
+    {
         return this->uniformDistribution(this->randomGenerator);
     }
 
@@ -184,7 +218,10 @@ size_t ImageMoveFilter<BoundaryConditions>::imagePointToIndex(ImagePoint point) 
 #if CUDA_DEVICE_COMPILATION
 
     template <typename BoundaryConditions>
-    ImagePoint ImageMoveFilter<BoundaryConditions>::randomTracerImagePosition() {
+    ImagePoint
+    ImageMoveFilter<BoundaryConditions>
+        ::randomTracerImagePosition()
+    {
         ImagePoint imagePosition;
         do {
             float floatMapIndex = this->randomUniformNumber() * this->validPointsMapSize;
@@ -197,7 +234,10 @@ size_t ImageMoveFilter<BoundaryConditions>::imagePointToIndex(ImagePoint point) 
 #else // CUDA_HOST_COMPILATION
 
     template <typename BoundaryConditions>
-    ImagePoint ImageMoveFilter<BoundaryConditions>::randomTracerImagePosition() {
+    ImagePoint
+    ImageMoveFilter<BoundaryConditions>
+        ::randomTracerImagePosition()
+    {
         float floatCacheIndex = this->randomUniformNumber() * this->validTracerIndicesCache.size();
         size_t cacheIndex = static_cast<size_t>(floatCacheIndex);
         Assert(cacheIndex < this->validTracerIndicesCache.size());
@@ -208,7 +248,10 @@ size_t ImageMoveFilter<BoundaryConditions>::imagePointToIndex(ImagePoint point) 
 #endif
 
 template <typename BoundaryConditions>
-bool ImageMoveFilter<BoundaryConditions>::isMoveValid(Tracer tracer, Move move) const {
+bool
+ImageMoveFilter<BoundaryConditions>
+    ::isMoveValid(Tracer tracer, Move move) const
+{
     Point from = tracer.getPosition();
     Point to = from + move;
     ImagePoint imageFrom(from);
@@ -224,7 +267,10 @@ bool ImageMoveFilter<BoundaryConditions>::isMoveValid(Tracer tracer, Move move) 
 }
 
 template <typename BoundaryConditions>
-Tracer ImageMoveFilter<BoundaryConditions>::randomValidTracer() {
+Tracer
+ImageMoveFilter<BoundaryConditions>
+    ::randomValidTracer()
+{
     ImagePoint imagePosition = this->randomTracerImagePosition();
     float pixelOffsetX = this->randomUniformNumber();
     float pixelOffsetY = this->randomUniformNumber();
@@ -236,7 +282,10 @@ Tracer ImageMoveFilter<BoundaryConditions>::randomValidTracer() {
 #if CUDA_DEVICE_COMPILATION
 
     template <typename BoundaryConditions>
-    void ImageMoveFilter<BoundaryConditions>::setupForTracerRadius(float radius) {
+    void
+    ImageMoveFilter<BoundaryConditions>
+        ::setupForTracerRadius(float radius)
+    {
         int i = CUDA_THREAD_IDX;
         if (i >= this->validPointsMapSize)
             return;
@@ -248,7 +297,10 @@ Tracer ImageMoveFilter<BoundaryConditions>::randomValidTracer() {
 #else // CUDA_HOST_COMPILATION
 
     template <typename BoundaryConditions>
-    void ImageMoveFilter<BoundaryConditions>::setupForTracerRadius(float radius) {
+    void
+    ImageMoveFilter<BoundaryConditions>
+        ::setupForTracerRadius(float radius)
+    {
         Expects(radius >= 0.f);
         this->tracerRadius = radius;
 
@@ -269,14 +321,20 @@ Tracer ImageMoveFilter<BoundaryConditions>::randomValidTracer() {
 #endif
 
 template <typename BoundaryConditions>
-size_t ImageMoveFilter<BoundaryConditions>::getNumberOfAllPoints() const {
+size_t
+ImageMoveFilter<BoundaryConditions>
+    ::getNumberOfAllPoints() const
+{
     return this->validPointsMapSize;
 }
 
 #if CUDA_HOST_COMPILATION
 
     template <typename BoundaryConditions>
-    size_t ImageMoveFilter<BoundaryConditions>::getNumberOfValidTracers() {
+    size_t
+    ImageMoveFilter<BoundaryConditions>
+        ::getNumberOfValidTracers()
+    {
         return this->validTracerIndicesCache.size();
     }
 

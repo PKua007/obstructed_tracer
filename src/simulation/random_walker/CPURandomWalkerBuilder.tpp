@@ -12,8 +12,8 @@
 
 template<typename CPURandomWalker_t>
 std::unique_ptr<MoveGenerator>
-CPURandomWalkerBuilder<CPURandomWalker_t>::createMoveGenerator(const std::string &moveGeneratorParameters,
-                                                               float integrationStep)
+CPURandomWalkerBuilder<CPURandomWalker_t>
+    ::createMoveGenerator(const std::string &moveGeneratorParameters, float integrationStep)
 {
     std::istringstream moveGeneratorStream(moveGeneratorParameters);
     std::string moveGeneratorType;
@@ -38,8 +38,8 @@ CPURandomWalkerBuilder<CPURandomWalker_t>::createMoveGenerator(const std::string
 
 template<typename CPURandomWalker_t>
 std::unique_ptr<MoveFilter>
-CPURandomWalkerBuilder<CPURandomWalker_t>::createImageMoveFilter(std::istringstream &moveFilterStream,
-                                                                 std::ostream &logger)
+CPURandomWalkerBuilder<CPURandomWalker_t>
+    ::createImageMoveFilter(std::istringstream &moveFilterStream, std::ostream &logger)
 {
     std::string imageFilename;
     moveFilterStream >> imageFilename;
@@ -75,8 +75,8 @@ CPURandomWalkerBuilder<CPURandomWalker_t>::createImageMoveFilter(std::istringstr
 
 template<typename CPURandomWalker_t>
 std::unique_ptr<MoveFilter>
-CPURandomWalkerBuilder<CPURandomWalker_t>::createMoveFilter(const std::string &moveFilterParameters,
-                                                            std::ostream &logger)
+CPURandomWalkerBuilder<CPURandomWalker_t>
+    ::createMoveFilter(const std::string &moveFilterParameters, std::ostream &logger)
 {
     std::istringstream moveFilterStream(moveFilterParameters);
     std::string moveFilterType;
@@ -100,7 +100,10 @@ CPURandomWalkerBuilder<CPURandomWalker_t>
 { }
 
 template<typename CPURandomWalker_t>
-std::unique_ptr<RandomWalker> CPURandomWalkerBuilder<CPURandomWalker_t>::build() {
+std::unique_ptr<RandomWalker>
+CPURandomWalkerBuilder<CPURandomWalker_t>
+    ::build()
+{
     float integrationStep = this->walkerParameters.walkParameters.integrationStep;
     auto moveGenerator = this->createMoveGenerator(walkerParameters.moveGeneratorParameters, integrationStep);
     auto moveFilter = this->createMoveFilter(walkerParameters.moveFilterParameters, logger);
