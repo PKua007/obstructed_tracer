@@ -121,7 +121,7 @@ GPURandomWalkerBuilder<GPURandomWalker_t>::MoveFilterOnGPUFactory
 
     this->fileIstreamProvider->setFileDescription("PPM image for MoveFilter");
     auto imageIstream = this->fileIstreamProvider->openFile(imageFilename);
-    Image image = this->imageReader->read(*imageIstream);
+    this->image = this->imageReader->read(*imageIstream);
     logger << "[GPURandomWalkerFactory] Loaded image " << imageFilename << " (" << this->image.getWidth();
     logger << "px x " << this->image.getHeight() << "px)" << std::endl;
 }
