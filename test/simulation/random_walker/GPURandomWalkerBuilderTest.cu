@@ -6,13 +6,14 @@
  */
 
 #include <catch2/catch.hpp>
-//#include <catch2/trompeloeil.hpp>
+#include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
+
 
 #include "simulation/random_walker/GPURandomWalkerBuilder.h"
 #include "simulation/random_walker/GPURandomWalkerBuilder.tpp"
 #include "utils/Utils.h"
-//#include "../../utils/FileUtilsMocks.h"
-//#include "../../image/ImageReaderMock.h"
+#include "../../utils/FileUtilsMocks.h"
+#include "../../image/ImageReaderMock.h"
 #include "move_generator/MoveGeneratorsMocks.h"
 #include "move_filter/MoveFiltersMocks.h"
 #include "../../test_utils/GPUDataAccessor.h"
@@ -62,7 +63,7 @@ struct GPURandomWalkerBuilderTraits<GPURandomWalkerBuilderUnderTest> {
 };
 
 using Catch::Contains;
-//using trompeloeil::_;
+using trompeloeil::_;
 
 TEST_CASE("GPURandomWalkerBuilder: basic parameters") {
     RandomWalkerFactory::WalkerParameters walkerParameters;
@@ -193,7 +194,7 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
     }
 }
 
-/*TEST_CASE("CPURandomWalkerBuilder: move filter") {
+TEST_CASE("GPURandomWalkerBuilder: move filter") {
     RandomWalkerFactory::WalkerParameters walkerParameters;
     walkerParameters.moveGeneratorParameters        = "GaussianMoveGenerator 3";
     walkerParameters.numberOfWalksInSeries          = 10;
@@ -205,10 +206,10 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
 
     SECTION("default") {
         walkerParameters.moveFilterParameters = "DefaultMoveFilter";
-        auto walker = CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build();
-        auto walkerMock = dynamic_cast<CPURandomWalkerMock*>(walker.get());
+        auto walker = GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build();
+        auto walkerMock = dynamic_cast<GPURandomWalkerMock*>(walker.get());
 
-        REQUIRE(is_instance_of<CPUGaussianMoveGeneratorMock>(walkerMock->moveGenerator.get()));
+        REQUIRE(CUDA_IS_INSTANCE_OF(walkerMock->moveFilter, DefaultMoveFilterMock));
     }
 
     SECTION("image") {
@@ -228,17 +229,17 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
             REQUIRE_CALL_V(*imageReader, read(_),
                 .WITH(&_1 == imageStreamPtr)
                 .RETURN(image));
-            auto walker = CPURandomWalkerBuilderUnderTest(1234, walkerParameters, std::move(fileIstreamProvider),
+            auto walker = GPURandomWalkerBuilderUnderTest(1234, walkerParameters, std::move(fileIstreamProvider),
                                                           std::move(imageReader), logger).build();
-            auto walkerMock = dynamic_cast<CPURandomWalkerMock*>(walker.get());
+            auto walkerMock = dynamic_cast<GPURandomWalkerMock*>(walker.get());
 
-            REQUIRE(is_instance_of<ImageMoveFilterWallBCMock>(walkerMock->moveFilter.get()));
-            auto filter = dynamic_cast<ImageMoveFilterWallBCMock*>(walkerMock->moveFilter.get());
+            REQUIRE(CUDA_IS_INSTANCE_OF(walkerMock->moveFilter, ImageMoveFilterWallBCMock));
+            auto filter = get_gpu_data_accessor<ImageMoveFilterWallBCMock>(walkerMock->moveFilter);
             REQUIRE(filter->width == 2);
             REQUIRE(filter->height == 3);
             REQUIRE(filter->numberOfTrajectories == 10);
             auto expectedImageData = image.getIntData();
-            std::vector<uint32_t> actualImageData(filter->intImageData, filter->intImageData + 6);
+            auto actualImageData = get_gpu_array_as_vector(filter->intImageData, 6);
             REQUIRE(actualImageData == expectedImageData);
         }
 
@@ -248,11 +249,11 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
                 .RETURN(nullptr));
             ALLOW_CALL_V(*imageReader, read(_),
                 .RETURN(Image(1, 1)));
-            auto walker = CPURandomWalkerBuilderUnderTest(1234, walkerParameters, std::move(fileIstreamProvider),
+            auto walker = GPURandomWalkerBuilderUnderTest(1234, walkerParameters, std::move(fileIstreamProvider),
                                                           std::move(imageReader), logger).build();
-            auto walkerMock = dynamic_cast<CPURandomWalkerMock*>(walker.get());
+            auto walkerMock = dynamic_cast<GPURandomWalkerMock*>(walker.get());
 
-            REQUIRE(is_instance_of<ImageMoveFilterPeriodicBCMock>(walkerMock->moveFilter.get()));
+            REQUIRE(CUDA_IS_INSTANCE_OF(walkerMock->moveFilter, ImageMoveFilterPeriodicBCMock));
         }
 
         SECTION("malformed") {
@@ -263,7 +264,7 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
                 ALLOW_CALL_V(*imageReader, read(_),
                     .RETURN(Image(1, 1)));
 
-                REQUIRE_THROWS_WITH(CPURandomWalkerBuilderUnderTest(1234, walkerParameters,
+                REQUIRE_THROWS_WITH(GPURandomWalkerBuilderUnderTest(1234, walkerParameters,
                                                                     std::move(fileIstreamProvider),
                                                                     std::move(imageReader), logger).build(),
                                     Contains("Malformed"));
@@ -276,7 +277,7 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
                 ALLOW_CALL_V(*imageReader, read(_),
                     .RETURN(Image(1, 1)));
 
-                REQUIRE_THROWS_WITH(CPURandomWalkerBuilderUnderTest(1234, walkerParameters,
+                REQUIRE_THROWS_WITH(GPURandomWalkerBuilderUnderTest(1234, walkerParameters,
                                                                     std::move(fileIstreamProvider),
                                                                     std::move(imageReader), logger).build(),
                                     Contains("Unknown"));
@@ -288,8 +289,8 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
         SECTION("no parameter") {
             walkerParameters.moveFilterParameters = "KillMe";
 
-            REQUIRE_THROWS_WITH(CPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
+            REQUIRE_THROWS_WITH(GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build(),
                                 Contains("Unknown"));
         }
     }
-}*/
+}
