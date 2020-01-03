@@ -13,8 +13,8 @@
 #include "utils/Utils.h"
 #include "../../utils/FileUtilsMocks.h"
 #include "../../image/ImageReaderMock.h"
-#include "move_generator/MoveGeneratorsMocks.h"
-#include "move_filter/MoveFiltersMocks.h"
+#include "../move_generator/MoveGeneratorsMocks.h"
+#include "../move_filter/MoveFiltersMocks.h"
 #include "../../test_utils/GPUDataAccessor.h"
 
 

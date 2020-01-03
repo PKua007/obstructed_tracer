@@ -10,7 +10,7 @@
 
 #include "simulation/MoveFilter.h"
 #include "utils/CudaDefines.h"
-#include "../../../test_utils/GPURTTI.h"
+#include "../../test_utils/GPURTTI.h"
 
 struct DefaultMoveFilterMock : public MoveFilter, GPUNamedClass {
     CUDA_HOSTDEV bool isMoveValid(Tracer tracer, Move move) const override { return false; }
