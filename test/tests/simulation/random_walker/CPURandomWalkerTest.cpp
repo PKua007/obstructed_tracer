@@ -24,7 +24,6 @@ TEST_CASE("CPURandomWalker: basic") {
 
     auto moveFilter = std::unique_ptr<MoveFilterMock>(new MoveFilterMock);
     auto moveGenerator = std::unique_ptr<MoveGeneratorMock>(new MoveGeneratorMock);
-
     std::ostringstream logger;
 
     SECTION("correct number of trajectories") {
@@ -106,7 +105,6 @@ TEST_CASE("CPURandomWalker: sampling valid tracers") {
     walkParameters.tracerRadius = 3;
     walkParameters.integrationStep = 0.1;
     walkParameters.drift = Move{1, 2};
-
     auto moveFilter = std::unique_ptr<MoveFilterMock>(new MoveFilterMock);
     REQUIRE_CALL_V(*moveFilter, setupForTracerRadius(3));
     trompeloeil::sequence seq;
@@ -119,16 +117,11 @@ TEST_CASE("CPURandomWalker: sampling valid tracers") {
     REQUIRE_CALL_V(*moveFilter, randomValidTracer(),
         .IN_SEQUENCE(seq)
         .RETURN(Tracer{Point{5, 6}, 3}));
-
     auto moveGenerator = std::unique_ptr<MoveGeneratorMock>(new MoveGeneratorMock);
-
     std::ostringstream logger;
-
     CPURandomWalker cpuRandomWalker(3, walkParameters, std::move(moveGenerator), std::move(moveFilter), logger);
 
-
     auto initialTracers = cpuRandomWalker.getRandomInitialTracersVector();
-
 
     REQUIRE(initialTracers.size() == 3);
     REQUIRE(initialTracers[0] == Tracer{Point{1, 2}, 3});

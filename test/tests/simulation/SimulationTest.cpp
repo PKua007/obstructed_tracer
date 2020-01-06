@@ -47,20 +47,16 @@ TEST_CASE("Simulation: parsing basic parameters") {
     SECTION("basic") {
         auto trajectoryPrinter = std::unique_ptr<TrajectoryPrinterMock>(new TrajectoryPrinterMock);
         auto randomWalkerFactory = std::unique_ptr<RandomWalkerFactoryMock>(new RandomWalkerFactoryMock);
-
         Parameters parameters = get_default_parameters();
         parameters.numberOfSteps = 2000;
         parameters.tracerRadius = 1;
         parameters.integrationStep = 2;
         parameters.numberOfWalksInSeries = 5;
         parameters.moveGenerator = "i am the MoveGenerator";
-
         std::ostringstream logger;
         SimulationImpl simulation(parameters, std::move(randomWalkerFactory), std::move(trajectoryPrinter), "", logger);
 
-
         auto actual = simulation.getWalkerParametersForSimulation(0);
-
 
         REQUIRE(actual.numberOfWalksInSeries == 5);
         REQUIRE(actual.walkParameters.numberOfSteps == 2000);
@@ -268,24 +264,22 @@ TEST_CASE("Simulation: parsing device") {
 TEST_CASE("Simulation: handling split") {
     using trompeloeil::_;
     auto trajectoryPrinter = std::unique_ptr<TrajectoryPrinterMock>(new TrajectoryPrinterMock);
-    auto randomWalkerFactory = std::unique_ptr<RandomWalkerFactoryMock>(new RandomWalkerFactoryMock);
     auto cpuRandomWalkerPtr = new RandomWalkerMock;
     auto cpuRandomWalker = std::unique_ptr<RandomWalkerMock>(cpuRandomWalkerPtr);
-    std::ostringstream logger;
-    Parameters parameters = get_default_parameters();
-    parameters.device = "cpu";
-    parameters.numberOfSteps = 2000;
-    parameters.numberOfSplits = 2;
-
+    auto randomWalkerFactory = std::unique_ptr<RandomWalkerFactoryMock>(new RandomWalkerFactoryMock);
     REQUIRE_CALL_V(*randomWalkerFactory, createCPURandomWalker(_, _),
         .WITH(_2.walkParameters.numberOfSteps == 1000)
         .LR_RETURN(std::move(cpuRandomWalker)));
     REQUIRE_CALL_V(*randomWalkerFactory, createSplitRandomWalker(2, _),
         .WITH(_2.get() == cpuRandomWalkerPtr)
         .THROW("SplitRandomWalker has been summoned"));
+    Parameters parameters = get_default_parameters();
+    parameters.device = "cpu";
+    parameters.numberOfSteps = 2000;
+    parameters.numberOfSplits = 2;
+    std::ostringstream logger;
 
     SimulationImpl simulation(parameters, std::move(randomWalkerFactory), std::move(trajectoryPrinter), "", logger);
-
 
     REQUIRE_THROWS_WITH(simulation.run(logger), Contains("SplitRandomWalker has been summoned"));
 }
@@ -296,7 +290,7 @@ TEST_CASE("Simulation: run") {
     std::ostringstream logger;
 
     // All but numberOfSeries, numberOfWalksInSeries and numberOfSteps, which are set in indivual sections
-    Parameters parameters = get_default_parameters();
+    Parameters parameters;
     parameters.device                = "cpu";
     parameters.moveGenerator         = "GaussianMoveGenerator";
     parameters.moveFilter            = "DefaultMoveFilter";
@@ -309,7 +303,6 @@ TEST_CASE("Simulation: run") {
         parameters.numberOfSeries        = 7;
         parameters.numberOfWalksInSeries = 8;
         parameters.numberOfSteps         = 9;
-
         RandomWalkerFactory::WalkerParameters expectedWalkerParameters;
         expectedWalkerParameters.moveGeneratorParameters        = parameters.moveGenerator;
         expectedWalkerParameters.moveFilterParameters           = parameters.moveFilter;
@@ -318,13 +311,10 @@ TEST_CASE("Simulation: run") {
         expectedWalkerParameters.walkParameters.tracerRadius    = parameters.tracerRadius;
         expectedWalkerParameters.walkParameters.drift           = Move{1, 2};
         expectedWalkerParameters.walkParameters.integrationStep = parameters.integrationStep;
-
         auto randomWalkerFactory = std::unique_ptr<RandomWalkerFactoryMock>(new RandomWalkerFactoryMock);
         REQUIRE_CALL_V(*randomWalkerFactory, createCPURandomWalker(_, expectedWalkerParameters),
             .THROW(std::runtime_error("Got right parameters!")));
-
         SimulationImpl simulation(parameters, std::move(randomWalkerFactory), std::move(trajectoryPrinter), "", logger);
-
 
         REQUIRE_THROWS_WITH(simulation.run(logger), Contains("Got right parameters!"));
     }
@@ -354,7 +344,6 @@ TEST_CASE("Simulation: run") {
         parameters.storeTrajectories     = false;
         parameters.numberOfSeries        = 1;
         parameters.numberOfWalksInSeries = 2;
-
         std::vector<Tracer> initialTracers{initialTracer1, initialTracer2};
 
         auto randomWalker = std::unique_ptr<RandomWalkerMock>(new RandomWalkerMock);

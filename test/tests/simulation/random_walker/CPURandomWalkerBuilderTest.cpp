@@ -18,10 +18,6 @@
 
 
 namespace {
-    /*
-     * Simple mocks which save parameters from the constructor and return default values.
-     */
-
     struct CPURandomWalkerMock : public RandomWalker {
         std::size_t numberOfWalks;
         RandomWalker::WalkParameters walkParameters;
@@ -42,6 +38,18 @@ namespace {
         std::size_t getNumberOfSteps() const override { return 0; }
         const Trajectory &getTrajectory(std::size_t index) const override { throw std::runtime_error(""); }
     };
+
+    RandomWalkerFactory::WalkerParameters get_default_parameters() {
+        RandomWalkerFactory::WalkerParameters defaultParameters;
+        defaultParameters.moveFilterParameters           = "DefaultMoveFilter";
+        defaultParameters.moveGeneratorParameters        = "GaussianMoveGenerator 3";
+        defaultParameters.numberOfWalksInSeries          = 10;
+        defaultParameters.walkParameters.numberOfSteps   = 100;
+        defaultParameters.walkParameters.tracerRadius    = 3;
+        defaultParameters.walkParameters.drift           = Move{1, 2};
+        defaultParameters.walkParameters.integrationStep = 0.1;
+        return defaultParameters;
+    }
 }
 
 using CPURandomWalkerBuilderUnderTest = CPURandomWalkerBuilder<CPURandomWalkerMock>;
@@ -85,13 +93,7 @@ TEST_CASE("CPURandomWalkerBuilder: basic parameters") {
 }
 
 TEST_CASE("CPURandomWalkerBuilder: move gererator") {
-    RandomWalkerFactory::WalkerParameters walkerParameters;
-    walkerParameters.moveFilterParameters           = "DefaultMoveFilter";
-    walkerParameters.numberOfWalksInSeries          = 10;
-    walkerParameters.walkParameters.numberOfSteps   = 100;
-    walkerParameters.walkParameters.tracerRadius    = 3;
-    walkerParameters.walkParameters.drift           = Move{1, 2};
-    walkerParameters.walkParameters.integrationStep = 0.1;
+    RandomWalkerFactory::WalkerParameters walkerParameters = get_default_parameters();
     std::ostringstream logger;
 
     SECTION("gaussian") {
@@ -191,13 +193,7 @@ TEST_CASE("CPURandomWalkerBuilder: move gererator") {
 }
 
 TEST_CASE("CPURandomWalkerBuilder: move filter") {
-    RandomWalkerFactory::WalkerParameters walkerParameters;
-    walkerParameters.moveGeneratorParameters        = "GaussianMoveGenerator 3";
-    walkerParameters.numberOfWalksInSeries          = 10;
-    walkerParameters.walkParameters.numberOfSteps   = 100;
-    walkerParameters.walkParameters.tracerRadius    = 3;
-    walkerParameters.walkParameters.drift           = Move{1, 2};
-    walkerParameters.walkParameters.integrationStep = 0.1;
+    RandomWalkerFactory::WalkerParameters walkerParameters = get_default_parameters();
     std::ostringstream logger;
 
     SECTION("default") {

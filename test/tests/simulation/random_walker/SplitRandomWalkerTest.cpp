@@ -20,6 +20,7 @@ TEST_CASE("SplitRandomWalker : basics") {
             .RETURN(2));
         ALLOW_CALL_V(*randomWalker, getNumberOfSteps(),
             .RETURN(3));
+
         SplitRandomWalker splitRandomWalker(4, std::move(randomWalker));
 
         REQUIRE(splitRandomWalker.getNumberOfTrajectories() == 2);
@@ -31,6 +32,7 @@ TEST_CASE("SplitRandomWalker : basics") {
             .RETURN(2));
         ALLOW_CALL_V(*randomWalker, getNumberOfSteps(),
             .RETURN(3));
+
         SplitRandomWalker splitRandomWalker(4, std::move(randomWalker));
 
         REQUIRE(splitRandomWalker.getNumberOfSteps() == 12);
@@ -44,7 +46,6 @@ TEST_CASE("SplitRandomWalker : 2 splits, 1 trajectory") {
     Trajectory t2;
     t2.addPoint(Point{3, 4});
     t2.addPoint(Point{5, 6});
-
     std::vector<Tracer> initialTracers1 = {Tracer{Point{1, 2}, 0}};
     std::vector<Tracer> initialTracers2 = {Tracer{Point{3, 4}, 0}};
 

@@ -19,10 +19,6 @@
 
 
 namespace {
-    /*
-     * Simple mocks which save parameters from the constructor and return default values.
-     */
-
     struct GPURandomWalkerMock : public RandomWalker {
         std::size_t numberOfWalks;
         RandomWalker::WalkParameters walkParameters;
@@ -45,6 +41,18 @@ namespace {
         std::size_t getNumberOfSteps() const override { return 0; }
         const Trajectory &getTrajectory(std::size_t index) const override { throw std::runtime_error(""); }
     };
+
+    RandomWalkerFactory::WalkerParameters get_default_parameters() {
+        RandomWalkerFactory::WalkerParameters defaultParameters;
+        defaultParameters.moveFilterParameters           = "DefaultMoveFilter";
+        defaultParameters.moveGeneratorParameters        = "GaussianMoveGenerator 3";
+        defaultParameters.numberOfWalksInSeries          = 10;
+        defaultParameters.walkParameters.numberOfSteps   = 100;
+        defaultParameters.walkParameters.tracerRadius    = 3;
+        defaultParameters.walkParameters.drift           = Move{1, 2};
+        defaultParameters.walkParameters.integrationStep = 0.1;
+        return defaultParameters;
+    }
 }
 
 using GPURandomWalkerBuilderUnderTest = GPURandomWalkerBuilder<GPURandomWalkerMock>;
@@ -88,18 +96,13 @@ TEST_CASE("GPURandomWalkerBuilder: basic parameters") {
 }
 
 TEST_CASE("GPURandomWalkerBuilder: move gererator") {
-    RandomWalkerFactory::WalkerParameters walkerParameters;
-    walkerParameters.moveFilterParameters           = "DefaultMoveFilter";
-    walkerParameters.numberOfWalksInSeries          = 10;
-    walkerParameters.walkParameters.numberOfSteps   = 100;
-    walkerParameters.walkParameters.tracerRadius    = 3;
-    walkerParameters.walkParameters.drift           = Move{1, 2};
-    walkerParameters.walkParameters.integrationStep = 0.1;
+    RandomWalkerFactory::WalkerParameters walkerParameters = get_default_parameters();
     std::ostringstream logger;
 
     SECTION("gaussian") {
         SECTION("correct sigma") {
             walkerParameters.moveGeneratorParameters = "GaussianMoveGenerator 3";
+
             auto walker = GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build();
             auto walkerMock = dynamic_cast<GPURandomWalkerMock*>(walker.get());
 
@@ -144,6 +147,7 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
     SECTION("cauchy") {
         SECTION("correct width") {
             walkerParameters.moveGeneratorParameters = "CauchyMoveGenerator 3";
+
             auto walker = GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build();
             auto walkerMock = dynamic_cast<GPURandomWalkerMock*>(walker.get());
 
@@ -194,17 +198,12 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
 }
 
 TEST_CASE("GPURandomWalkerBuilder: move filter") {
-    RandomWalkerFactory::WalkerParameters walkerParameters;
-    walkerParameters.moveGeneratorParameters        = "GaussianMoveGenerator 3";
-    walkerParameters.numberOfWalksInSeries          = 10;
-    walkerParameters.walkParameters.numberOfSteps   = 100;
-    walkerParameters.walkParameters.tracerRadius    = 3;
-    walkerParameters.walkParameters.drift           = Move{1, 2};
-    walkerParameters.walkParameters.integrationStep = 0.1;
+    RandomWalkerFactory::WalkerParameters walkerParameters = get_default_parameters();
     std::ostringstream logger;
 
     SECTION("default") {
         walkerParameters.moveFilterParameters = "DefaultMoveFilter";
+
         auto walker = GPURandomWalkerBuilderUnderTest(1234, walkerParameters, logger).build();
         auto walkerMock = dynamic_cast<GPURandomWalkerMock*>(walker.get());
 
@@ -228,6 +227,7 @@ TEST_CASE("GPURandomWalkerBuilder: move filter") {
             REQUIRE_CALL_V(*imageReader, read(_),
                 .WITH(&_1 == imageStreamPtr)
                 .RETURN(image));
+
             auto walker = GPURandomWalkerBuilderUnderTest(1234, walkerParameters, std::move(fileIstreamProvider),
                                                           std::move(imageReader), logger).build();
             auto walkerMock = dynamic_cast<GPURandomWalkerMock*>(walker.get());
@@ -248,6 +248,7 @@ TEST_CASE("GPURandomWalkerBuilder: move filter") {
                 .RETURN(nullptr));
             ALLOW_CALL_V(*imageReader, read(_),
                 .RETURN(Image(1, 1)));
+
             auto walker = GPURandomWalkerBuilderUnderTest(1234, walkerParameters, std::move(fileIstreamProvider),
                                                           std::move(imageReader), logger).build();
             auto walkerMock = dynamic_cast<GPURandomWalkerMock*>(walker.get());
