@@ -11,9 +11,9 @@
 
 #define CUDA_DEVICE_COMPILATION     defined(__CUDA_ARCH__)
 #define CUDA_HOST_COMPILATION       !defined(__CUDA_ARCH__)
-#define USING_NVCC                  defined(__CUDACC__)
+#define CUDA_USING_NVCC             defined(__CUDACC__)
 
-#if USING_NVCC
+#if CUDA_USING_NVCC
     #define CUDA_HOSTDEV    __host__ __device__
     #define CUDA_HOST       __host__
     #define CUDA_DEV        __device__

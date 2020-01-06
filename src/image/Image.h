@@ -21,9 +21,29 @@
  * @see operator!=(Color, Color)
  */
 struct Color {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
+    uint8_t r{};
+    uint8_t g{};
+    uint8_t b{};
+
+    /**
+     * @brief Default constructor - makes black.
+     */
+    Color() { }
+
+    /**
+     * @brief Constructs a color from individual channel values.
+     */
+    Color(uint8_t r, uint8_t g, uint8_t b) : r{r}, g{g}, b{b} { }
+
+    /**
+     * @brief Constructs a color from int data.
+     * @param intColor a colot in 0xFFFFFFFF-like form, where alpha channel is ignored
+     */
+    Color(uint32_t intColor)
+            : r{static_cast<uint8_t>(intColor >> 24)},
+              g{static_cast<uint8_t>(intColor >> 16)},
+              b{static_cast<uint8_t>(intColor >> 8)}
+    { }
 
     /**
      * @brief Converts a color to 0xFFFFFFFF-like form with alpha channel always being 0xFF.
@@ -32,8 +52,8 @@ struct Color {
     operator uint32_t() const { return (this->r << 24) | (this->g << 16) | (this->b << 8) | 0xff; }
 };
 
-#define WHITE Color{uint8_t{255}, uint8_t{255}, uint8_t{255}}
-#define BLACK Color{uint8_t{0}, uint8_t{0}, uint8_t{0}}
+#define WHITE Color{255, 255, 255}
+#define BLACK Color{0, 0, 0}
 
 /**
  * @brief Stream insertion operator for Color printing in 0xFFFFFF style.

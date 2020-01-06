@@ -77,14 +77,14 @@ inline std::ostream &operator<<(std::ostream &out, Point point) {
 /**
  * @brief Checks if @a p1 and @a p2 are equal.
  */
-inline bool operator==(Point p1, Point p2) {
+CUDA_HOSTDEV inline bool operator==(Point p1, Point p2) {
     return p1.x == p2.x && p1.y == p2.y;
 }
 
 /**
  * @brief Checks if @a p1 and @a p2 are not equal.
  */
-inline bool operator!=(Point p1, Point p2) {
+CUDA_HOSTDEV inline bool operator!=(Point p1, Point p2) {
     return !(p1 == p2);
 }
 

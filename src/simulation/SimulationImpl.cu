@@ -21,6 +21,15 @@
 #include "Timer.h"
 
 
+void SimulationImpl::TrajectoryPrinter::print(const Trajectory &trajectory, const std::string &filename) {
+    std::ofstream trajectoryFile(filename);
+    if (!trajectoryFile)
+        die("[SimulationImpl::run] Cannot open " + filename + " to store trajectory");
+
+    trajectoryFile << std::fixed << std::setprecision(6);
+    trajectory.store(trajectoryFile);
+}
+
 Move SimulationImpl::parseDrift(const std::string &driftString) const {
     std::istringstream driftStream(driftString);
     std::string coordinatesType;
@@ -93,12 +102,12 @@ void SimulationImpl::initializeDevice(const std::string &deviceParameters) {
     } else if (deviceName == "gpu") {
         this->device = GPU;
 
-        std::size_t heapSizeInBytes;
+        int heapSizeInBytes;
         deviceStream >> heapSizeInBytes;
 
         if (deviceStream) {
             Validate(heapSizeInBytes > 0);
-            cudaCheck( cudaDeviceSetLimit(cudaLimitMallocHeapSize, heapSizeInBytes) );
+            cudaCheck( cudaDeviceSetLimit(cudaLimitMallocHeapSize, static_cast<size_t>(heapSizeInBytes)) );
         } else if (!deviceStream.eof()) {
             throw ValidationException("Wrong device format: \"cpu\" OR \"gpu\" (heap size in bytes = default)");
         }
@@ -117,12 +126,8 @@ void SimulationImpl::store_trajectories(const RandomWalker &randomWalker, const 
        std::ostringstream trajectoryFilenameStream;
        trajectoryFilenameStream << outputFilePrefix << "_" << simulationIndex << "_" << trajectoryIndex << ".txt";
        std::string trajectoryFilename = trajectoryFilenameStream.str();
-       std::ofstream trajectoryFile(trajectoryFilename);
-       if (!trajectoryFile)
-           die("[SimulationImpl::run] Cannot open " + trajectoryFilename + " to store trajectory");
 
-       trajectoryFile << std::fixed << std::setprecision(6);
-       trajectory.store(trajectoryFile);
+       this->trajectoryPrinter->print(trajectory, trajectoryFilename);
 
        logger << "[SimulationImpl::run] Trajectory " << trajectoryIndex << " stored to " << trajectoryFilename;
        logger << ". Initial position: " << trajectory.getFirst();
@@ -134,13 +139,15 @@ void SimulationImpl::store_trajectories(const RandomWalker &randomWalker, const 
 SimulationImpl::SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix,
                                std::ostream &logger)
         : SimulationImpl(parameters, std::unique_ptr<RandomWalkerFactory>(new RandomWalkerFactoryImpl(logger)),
-                         outputFilePrefix, logger)
+                         std::unique_ptr<TrajectoryPrinter>(new TrajectoryPrinter), outputFilePrefix, logger)
 { }
 
 SimulationImpl::SimulationImpl(const Parameters &parameters, std::unique_ptr<RandomWalkerFactory> randomWalkerFactory,
+                               std::unique_ptr<TrajectoryPrinter> trajectoryPrinter,
                                const std::string &outputFilePrefix, std::ostream &logger)
         : outputFilePrefix{outputFilePrefix}, randomWalkerFactory{std::move(randomWalkerFactory)},
-          parameters{parameters}, msdDataCalculator(parameters.numberOfSteps), msdData(parameters.numberOfSteps)
+          trajectoryPrinter{std::move(trajectoryPrinter)}, parameters{parameters},
+          msdDataCalculator(parameters.numberOfSteps), msdData(parameters.numberOfSteps)
 {
     ValidateMsg(parameters.numberOfSteps % parameters.numberOfSplits == 0,
                 "Cannot split " + std::to_string(parameters.numberOfSteps) + " in "
@@ -184,12 +191,24 @@ void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalk
     logger << std::endl;
 }
 
+RandomWalkerFactory::WalkerParameters
+SimulationImpl::getWalkerParametersForSimulation(std::size_t simulationIndex) const {
+    Expects(simulationIndex < this->moveFilters.size());
+
+    auto walkerParameters = this->walkerParametersTemplate;
+    walkerParameters.moveFilterParameters = this->moveFilters[simulationIndex];
+    return walkerParameters;
+}
+
+std::size_t SimulationImpl::getNumberOfSimulations() const {
+    return this->moveFilters.size();
+}
+
 void SimulationImpl::run(std::ostream &logger) {
-    for (std::size_t simulationIndex = 0; simulationIndex < this->moveFilters.size(); simulationIndex++) {
+    for (std::size_t simulationIndex = 0; simulationIndex < this->getNumberOfSimulations(); simulationIndex++) {
         logger << "[SimulationImpl::run] Preparing simulation " << simulationIndex << "..." << std::endl;
 
-        auto walkerParameters = this->walkerParametersTemplate;
-        walkerParameters.moveFilterParameters = this->moveFilters[simulationIndex];
+        auto walkerParameters = this->getWalkerParametersForSimulation(simulationIndex);
 
         std::unique_ptr<RandomWalker> randomWalker;
         if (this->device == CPU)

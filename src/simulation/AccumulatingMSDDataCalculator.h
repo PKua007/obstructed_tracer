@@ -26,6 +26,9 @@ private:
     MSDData data;
 
 public:
+    /**
+     * @brief Creates the calculator for trajectories with number of steps determined by the first trajectory
+     */
     AccumulatingMSDDataCalculator() { }
 
     /**

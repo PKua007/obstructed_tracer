@@ -19,6 +19,8 @@ class RandomWalkerFactory {
 public:
     /**
      * @brief A helper struct with parameters of random walkers.
+     * @see bool operator==(const RandomWalkerFactory::WalkerParameters &, const RandomWalkerFactory::WalkerParameters &)
+     * @see std::ostream &operator<<(std::ostream &, const RandomWalkerFactory::WalkerParameters &)
      */
     struct WalkerParameters {
         /**
@@ -76,5 +78,31 @@ public:
     virtual std::unique_ptr<RandomWalker> createSplitRandomWalker(std::size_t numberOfSplits,
                                                                   std::unique_ptr<RandomWalker> randomWalker) = 0;
 };
+
+/**
+ * @brief Compares two RandomWalkerFactory::WalkerParameters.
+ */
+inline bool operator==(const RandomWalkerFactory::WalkerParameters &wp1,
+                       const RandomWalkerFactory::WalkerParameters &wp2)
+{
+    return wp1.moveGeneratorParameters == wp2.moveGeneratorParameters
+           && wp1.moveFilterParameters == wp2.moveFilterParameters
+           && wp1.numberOfWalksInSeries == wp2.numberOfWalksInSeries
+           && wp1.walkParameters == wp2.walkParameters;
+}
+
+/**
+ * @brief Stream insertion operator printing walker parameters.
+ * @param out stream to print to
+ * @param walkerParameters walker parameters to be printed
+ * @return the reference to @a out
+ */
+inline std::ostream &operator<<(std::ostream &out, const RandomWalkerFactory::WalkerParameters &walkerParameters) {
+    out << "{moveGeneratorParameters: " << walkerParameters.moveGeneratorParameters
+        << ", moveFilterParameters: " << walkerParameters.moveFilterParameters
+        << ", numberOfWalksInSeries: " << walkerParameters.numberOfWalksInSeries
+        << ", walkParameters: " << walkerParameters.walkParameters << "}";
+    return out;
+}
 
 #endif /* RANDOMWALKERFACTORY_H_ */

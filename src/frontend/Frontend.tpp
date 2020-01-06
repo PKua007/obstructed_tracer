@@ -57,7 +57,7 @@ void Frontend<ConcreteSimulation, ConcreteAnalyzer>::perform_walk() {
                            "data");
     }
 
-    msdData.store(msdFile);
+    msdFile << msdData;
     this->logger << "[Frontend::perform_walk] Mean square displacement data stored to " + msdFilename << std::endl;
     this->logger << "[Frontend::perform_walk] Run finished." << std::endl;
 }
@@ -87,7 +87,7 @@ void Frontend<ConcreteSimulation, ConcreteAnalyzer>::analyze() {
     }
 
     MSDData msdData;
-    msdData.restore(msdFile);
+    msdFile >> msdData;
 
     ConcreteAnalyzer analyzer;
     analyzer.analyze(msdData, this->parameters, relativeFitStart, relativeFitEnd);

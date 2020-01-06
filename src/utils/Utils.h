@@ -32,4 +32,9 @@ int lastIndexOf(const std::string &s, char target);
 
 void die(const std::string & reason);
 
+template<typename Derived, typename Base>
+bool is_instance_of(Base* d) {
+    return dynamic_cast<Derived*>(d) != nullptr;
+}
+
 #endif /* UTILS_C_ */

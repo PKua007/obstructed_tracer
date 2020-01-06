@@ -29,6 +29,8 @@ class RandomWalker {
 public:
     /**
      * @brief A struct containing walk parameters.
+     * @see operator==(const RandomWalker::WalkParameters &, const RandomWalker::WalkParameters &)
+     * @see std::ostream &operator<<(std::ostream &, const RandomWalker::WalkParameters &)
      */
     struct WalkParameters {
         /**
@@ -89,5 +91,29 @@ public:
      */
     virtual const Trajectory &getTrajectory(std::size_t index) const = 0;
 };
+
+/**
+ * @brief Compares two RandomWalker::WalkParameters.
+ */
+inline bool operator==(const RandomWalker::WalkParameters &wp1, const RandomWalker::WalkParameters &wp2) {
+    return wp1.numberOfSteps == wp2.numberOfSteps
+           && wp1.tracerRadius == wp2.tracerRadius
+           && wp1.integrationStep == wp2.integrationStep
+           && wp1.drift == wp2.drift;
+}
+
+/**
+ * @brief Stream insertion operator printing walk parameters.
+ * @param out stream to print to
+ * @param walkParameters walker parameters to be printed
+ * @return the reference to @a out
+ */
+inline std::ostream &operator<<(std::ostream &out, const RandomWalker::WalkParameters &walkerParameters) {
+    out << "{numberOfSteps: " << walkerParameters.numberOfSteps
+        << ", tracerRadius: " << walkerParameters.tracerRadius
+        << ", integrationStep: " << walkerParameters.integrationStep
+        << ", drift: " << walkerParameters.drift << "}";
+    return out;
+}
 
 #endif /* RANDOMWALKER_H_ */
