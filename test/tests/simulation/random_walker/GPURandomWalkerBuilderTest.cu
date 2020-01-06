@@ -104,7 +104,7 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
             auto walkerMock = dynamic_cast<GPURandomWalkerMock*>(walker.get());
 
             REQUIRE(CUDA_IS_INSTANCE_OF(walkerMock->moveGenerator, GaussianMoveGeneratorMock));
-            auto generator = get_gpu_data_accessor<GaussianMoveGeneratorMock>(walkerMock->moveGenerator);
+            auto generator = get_gpu_object_accessor<GaussianMoveGeneratorMock>(walkerMock->moveGenerator);
             REQUIRE(generator->sigma == 3);
         }
 
@@ -148,7 +148,7 @@ TEST_CASE("GPURandomWalkerBuilder: move gererator") {
             auto walkerMock = dynamic_cast<GPURandomWalkerMock*>(walker.get());
 
             REQUIRE(CUDA_IS_INSTANCE_OF(walkerMock->moveGenerator, CauchyMoveGeneratorMock));
-            auto generator = get_gpu_data_accessor<CauchyMoveGeneratorMock>(walkerMock->moveGenerator);
+            auto generator = get_gpu_object_accessor<CauchyMoveGeneratorMock>(walkerMock->moveGenerator);
             REQUIRE(generator->width == 3);
         }
 
@@ -233,7 +233,7 @@ TEST_CASE("GPURandomWalkerBuilder: move filter") {
             auto walkerMock = dynamic_cast<GPURandomWalkerMock*>(walker.get());
 
             REQUIRE(CUDA_IS_INSTANCE_OF(walkerMock->moveFilter, ImageMoveFilterWallBCMock));
-            auto filter = get_gpu_data_accessor<ImageMoveFilterWallBCMock>(walkerMock->moveFilter);
+            auto filter = get_gpu_object_accessor<ImageMoveFilterWallBCMock>(walkerMock->moveFilter);
             REQUIRE(filter->width == 2);
             REQUIRE(filter->height == 3);
             REQUIRE(filter->numberOfTrajectories == 10);
