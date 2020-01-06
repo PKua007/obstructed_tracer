@@ -135,6 +135,7 @@ public:
      * @param walkerParameters the parameters of the random walk, RandomWalker, MoveGenerator and MoveFilter
      * @param walkerParameters the parameters of the walker, MoveFilter and MoveGenerator
      * @param fileIstreamProvider the class opening file to read (for image loading)
+     * @param imageReader the reader use to load the image
      * @param logger the output stream for some info on initializing strategies and GPURandomWalker
      */
     GPURandomWalkerBuilder(unsigned long seed, const RandomWalkerFactory::WalkerParameters &walkerParameters,

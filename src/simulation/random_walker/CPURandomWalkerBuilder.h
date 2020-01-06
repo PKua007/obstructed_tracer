@@ -88,6 +88,7 @@ public:
      * @param seed the seed which will be used in MoveFilter and MoveGenerator
      * @param walkerParameters the parameters of the walker, MoveFilter and MoveGenerator
      * @param fileIstreamProvider the class opening file to read (for image loading)
+     * @param imageReader the reader use to load the image
      * @param logger the output stream which will be passed to RandomWalker to show info
      */
     CPURandomWalkerBuilder(unsigned long seed, const RandomWalkerFactory::WalkerParameters &walkerParameters,

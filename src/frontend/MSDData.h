@@ -113,9 +113,6 @@ public:
  *
  * Each line contains one entry, and things in the entry are separated by spaces in the order the same as in
  * MSDData::Entry.
- *
- * @param out stream to write to
- * @param msdData MSDData to store
  */
 std::ostream &operator<<(std::ostream &out, const MSDData &msdData);
 
@@ -124,9 +121,6 @@ std::ostream &operator<<(std::ostream &out, const MSDData &msdData);
  *
  * Required format: each line contains one entry, and things in the entry are separated by spaces in the order the
  * same as in MSDData::Entry.
- *
- * @param in stream to read from
- * @param msdData MSDData to restore
  */
 std::istream &operator>>(std::istream &in, MSDData &msdData);
 
