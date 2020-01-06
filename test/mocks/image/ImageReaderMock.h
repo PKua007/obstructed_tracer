@@ -8,7 +8,7 @@
 #ifndef IMAGEREADERMOCK_H_
 #define IMAGEREADERMOCK_H_
 
-#include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
+#include <catch2/trompeloeil.hpp>
 
 class ImageReaderMock : public ImageReader {
 public:

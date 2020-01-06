@@ -6,10 +6,11 @@
  */
 
 #include <catch2/catch.hpp>
-#include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
+#include <catch2/trompeloeil.hpp>
 #include <sstream>
 
 #include "simulation/random_walker/SplitRandomWalker.h"
+
 #include "mocks/simulation/RandomWalkerMock.h"
 
 TEST_CASE("SplitRandomWalker : basics") {

@@ -7,12 +7,13 @@
 
 
 #include <catch2/catch.hpp>
-#include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
+#include <catch2/trompeloeil.hpp>
 
-#include "matchers/frontend/MSDDataApproxEqualMatcher.h"
 #include "simulation/SimulationImpl.h"
+
 #include "mocks/simulation/RandomWalkerMock.h"
 #include "mocks/simulation/RandomWalkerFactoryMock.h"
+#include "matchers/frontend/MSDDataApproxEqualMatcher.h"
 
 using Catch::Contains;
 

@@ -8,7 +8,7 @@
 #ifndef RANDOMWALKERFACTORYMOCK_H_
 #define RANDOMWALKERFACTORYMOCK_H_
 
-#include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
+#include <catch2/trompeloeil.hpp>
 
 #include "simulation/RandomWalkerFactory.h"
 

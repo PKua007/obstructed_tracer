@@ -5,7 +5,7 @@
  *      Author: pkua
  */
 
-#include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
+#include <catch2/trompeloeil.hpp>
 
 #include "simulation/RandomWalker.h"
 

@@ -6,11 +6,11 @@
  */
 
 #include <catch2/catch.hpp>
-#include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
-
+#include <catch2/trompeloeil.hpp>
 
 #include "simulation/random_walker/GPURandomWalkerBuilder.h"
 #include "utils/Utils.h"
+
 #include "mocks/utils/FileUtilsMocks.h"
 #include "mocks/image/ImageReaderMock.h"
 #include "mocks/simulation/move_generator/MoveGeneratorsMocks.h"
