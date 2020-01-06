@@ -13,7 +13,7 @@
 
 #include "mocks/simulation/RandomWalkerMock.h"
 
-TEST_CASE("SplitRandomWalker : basics") {
+TEST_CASE("SplitRandomWalker: basics") {
     SECTION("correct number of trajectories") {
         auto randomWalker = std::unique_ptr<RandomWalkerMock>(new RandomWalkerMock);
         ALLOW_CALL_V(*randomWalker, getNumberOfTrajectories(),
@@ -39,7 +39,7 @@ TEST_CASE("SplitRandomWalker : basics") {
     }
 }
 
-TEST_CASE("SplitRandomWalker : 2 splits, 1 trajectory") {
+TEST_CASE("SplitRandomWalker: 2 splits, 1 trajectory") {
     Trajectory t1;
     t1.addPoint(Point{1, 2});
     t1.addPoint(Point{3, 4});

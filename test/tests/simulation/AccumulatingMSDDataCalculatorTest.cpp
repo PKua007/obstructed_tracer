@@ -121,7 +121,7 @@ TEST_CASE("AccumulatingMSDDataCalculator: adding") {
     }
 }
 
-TEST_CASE("AccumulatinMSDDataCalculator: error check") {
+TEST_CASE("AccumulatingMSDDataCalculator: error check") {
     SECTION("not matching trajectory sizes") {
         Trajectory trajectory1;
         trajectory1.addPoint(Point{1, 2}, false);
