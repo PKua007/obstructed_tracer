@@ -8,12 +8,24 @@
 #ifndef GPUNAMEDCLASS_H_
 #define GPUNAMEDCLASS_H_
 
+/** @file */
+
 #include <string>
 
 #include "utils/CudaDefines.h"
 #include "utils/CudaCheck.h"
 
-
+/**
+ * @brief An interface for names gpu classes.
+ *
+ * One should just inherit from it and use macro:
+ * \code
+ * class MyClass : public GPUNamedClass {
+ * public:
+ *     CUDA_IMPLEMENT_GET_CLASS_NAME("MyClass");
+ * }
+ * \endcode
+ */
 class GPUNamedClass {
 protected:
     CUDA_DEV char *getClassName0(const char *name, char *nameOut, size_t maxSize) const;
@@ -24,7 +36,9 @@ public:
     CUDA_DEV virtual char *getClassName(char *nameOut, size_t maxSize) const = 0;
 };
 
-
+/**
+ * @brief see GPUNamedClass
+ */
 #define CUDA_IMPLEMENT_GET_CLASS_NAME(name) \
     CUDA_DEV char *getClassName(char *nameOut, size_t maxSize) const override { \
         return this->getClassName0(name, nameOut, maxSize); \
