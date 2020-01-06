@@ -9,10 +9,10 @@
 #include <catch2/catch.hpp>
 #include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
 
-#include "../frontend/MSDDataApproxEqualMatcher.h"
+#include "matchers/frontend/MSDDataApproxEqualMatcher.h"
 #include "simulation/SimulationImpl.h"
-#include "RandomWalkerMock.h"
-#include "RandomWalkerFactoryMock.h"
+#include "mocks/simulation/RandomWalkerMock.h"
+#include "mocks/simulation/RandomWalkerFactoryMock.h"
 
 using Catch::Contains;
 

@@ -9,8 +9,8 @@
 #include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
 
 #include "simulation/random_walker/CPURandomWalker.h"
-#include "../MoveFilterMock.h"
-#include "../MoveGeneratorMock.h"
+#include "mocks/simulation/MoveFilterMock.h"
+#include "mocks/simulation/MoveGeneratorMock.h"
 
 using Catch::Contains;
 

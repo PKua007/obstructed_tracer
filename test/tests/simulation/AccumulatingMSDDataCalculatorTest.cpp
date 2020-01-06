@@ -8,8 +8,8 @@
 #include <catch2/catch.hpp>
 #include "trompeloeil_for_cuda/catch2/trompeloeil.hpp"
 #include "simulation/AccumulatingMSDDataCalculator.h"
-#include "RandomWalkerMock.h"
-#include "../frontend/MSDDataApproxEqualMatcher.h"
+#include "mocks/simulation/RandomWalkerMock.h"
+#include "matchers/frontend/MSDDataApproxEqualMatcher.h"
 
 TEST_CASE("AccumulatingMSDDataCalculator: adding") {
     SECTION("one walker, one trajectory") {

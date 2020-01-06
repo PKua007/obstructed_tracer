@@ -10,7 +10,7 @@
 
 #include "simulation/MoveGenerator.h"
 #include "utils/CudaDefines.h"
-#include "../../test_utils/GPURTTI.h"
+#include "test_utils/GPURTTI.h"
 
 struct GaussianMoveGeneratorMock : public MoveGenerator, GPUNamedClass {
     float sigma;

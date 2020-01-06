@@ -10,7 +10,7 @@
 #include <sstream>
 
 #include "simulation/random_walker/SplitRandomWalker.h"
-#include "../RandomWalkerMock.h"
+#include "mocks/simulation/RandomWalkerMock.h"
 
 TEST_CASE("SplitRandomWalker : basics") {
     SECTION("correct number of trajectories") {
