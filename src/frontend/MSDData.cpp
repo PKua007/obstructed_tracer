@@ -61,3 +61,27 @@ std::istream &operator>>(std::istream &in, MSDData &msdData) {
     return in;
 }
 
+void MSDData::printWithTimes(std::ostream &out, float integrationStep) const {
+    std::size_t i{};
+    for (const auto &entry : this->data) {
+        out << (i * integrationStep) << " " << entry << "\n";
+        i++;
+    }
+}
+
+std::istream &operator>>(std::istream &in, MSDData::TimedEntry &entry) {
+    std::istream::sentry sEntry(in);
+    if (!sEntry)
+        return in;
+
+    in >> entry.t;
+    operator>>(in, static_cast<MSDData::Entry &>(entry));
+    return in;
+}
+
+void MSDData::loadFromFileWithTimes(std::istream &in) {
+    this->data.clear();
+    std::copy(std::istream_iterator<MSDData::TimedEntry>(in), std::istream_iterator<MSDData::TimedEntry>(),
+              std::back_inserter(this->data));
+}
+

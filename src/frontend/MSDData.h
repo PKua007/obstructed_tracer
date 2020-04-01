@@ -42,6 +42,12 @@ public:
     };
 
 private:
+    struct TimedEntry : public Entry {
+        float t{};
+
+        friend std::istream &operator>>(std::istream &in, TimedEntry &entry);
+    };
+
     std::vector<Entry> data;
 
 public:
@@ -104,8 +110,13 @@ public:
      */
     const_iterator end() const { return this->data.end(); }
 
+    void printWithTimes(std::ostream &out, float integrationStep) const;
+    void loadFromFileWithTimes(std::istream &in);
+
     friend std::ostream &operator<<(std::ostream &, const MSDData &);
     friend std::istream &operator>>(std::istream &, MSDData &);
+
+    friend std::istream &operator>>(std::istream &in, TimedEntry &entry);
 };
 
 /**

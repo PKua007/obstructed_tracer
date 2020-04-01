@@ -53,7 +53,7 @@ public:
     virtual std::unique_ptr<std::ostream> openFile(const std::string &filename) const {
         auto file = std::unique_ptr<std::ofstream>(new std::ofstream(filename));
         if (!(*file))
-            throw FileException("Cannot open file " + filename + " to read: " + this->fileDescription);
+            throw FileException("Cannot open file " + filename + " to write: " + this->fileDescription);
         return std::move(file);
     }
 };
@@ -92,7 +92,7 @@ public:
     virtual std::unique_ptr<std::istream> openFile(const std::string &filename) const {
         auto file = std::unique_ptr<std::ifstream>(new std::ifstream(filename));
         if (!(*file))
-            throw FileException("Cannot open file " + filename + " to write: " + this->fileDescription);
+            throw FileException("Cannot open file " + filename + " to read: " + this->fileDescription);
         return std::move(file);
     }
 };
