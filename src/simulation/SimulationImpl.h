@@ -15,6 +15,7 @@
 #include "frontend/Parameters.h"
 #include "RandomWalkerFactory.h"
 #include "AccumulatingMSDDataCalculator.h"
+#include "PositionHistogram.h"
 
 /**
  * @brief The concrete implementation of Simulation.
@@ -53,8 +54,10 @@ private:
     std::mt19937 seedGenerator;
     std::vector<std::string> moveFilters;
     std::string outputFilePrefix;
+    std::vector<std::size_t> positionHistogramSteps;
 
     AccumulatingMSDDataCalculator msdDataCalculator;
+    PositionHistogram positionHistogram;
     std::unique_ptr<RandomWalkerFactory> randomWalkerFactory;
     std::unique_ptr<TrajectoryPrinter> trajectoryPrinter;
     MSDData msdData;
@@ -62,11 +65,13 @@ private:
     Move parseDrift(const std::string &driftString) const;
     RandomWalkerFactory::WalkerParameters prepareWalkerParametersTemplate(const Parameters &parameters) const;
     std::vector<std::string> prepareMoveFilterParameters(const std::string &moveFilterChain) const;
+    std::vector<std::size_t> preparePositionHistogramSteps(const std::string &stepsString) const;
     void initializeSeedGenerator(const std::string &seed, std::ostream &logger);
     void initializeDevice(const std::string &device);
     void runSingleSimulation(std::size_t simulationIndex, RandomWalker &randomWalker, std::ostream &logger);
-    void store_trajectories(const RandomWalker &randomWalker, const std::string &outputFilePrefix,
-                            std::size_t simulationIndex, std::size_t firstTrajectoryIndex, std::ostream &logger);
+    void storeTrajectories(const RandomWalker &randomWalker, std::size_t simulationIndex,
+                           std::size_t firstTrajectoryIndex, std::ostream &logger);
+    void storeHistograms(std::ostream &logger);
 
 public:
     /**

@@ -25,7 +25,7 @@ moveGenerator = GaussianMoveGenerator 3
 # parameters performed, allowing for example to average reuslting mean swuare displacement data over different
 # images.
 
-moveFilter = ImageMoveFilter fibrinogen.ppm PeriodicBoundaryConditions
+moveFilter = ImageMoveFilter sample_images/fibrinogen.ppm PeriodicBoundaryConditions
 
 
 # The increment of time in each iteration. The move generator lenght scale and drift will be altered accordingly, and
@@ -76,3 +76,8 @@ seed = random
 # It can be used if images are large and cannot fit in GPU heap of default size.
 
 device = gpu
+
+
+# When specified, for each given step the x, y will be dumped to file (output prefix)_histogram_(step).txt
+
+positionHistogramSteps = 10 100

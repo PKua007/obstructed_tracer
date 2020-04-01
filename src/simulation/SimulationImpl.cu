@@ -18,6 +18,7 @@
 #include "utils/OMPDefines.h"
 #include "utils/Assertions.h"
 #include "utils/CudaCheck.h"
+#include "utils/FileUtils.h"
 #include "Timer.h"
 
 
@@ -81,6 +82,19 @@ std::vector<std::string> SimulationImpl::prepareMoveFilterParameters(const std::
     return moveFilterStrings;
 }
 
+std::vector<std::size_t> SimulationImpl::preparePositionHistogramSteps(const std::string &stepsString) const {
+    auto steps = explode(stepsString, ' ');
+    std::vector<std::size_t> result;
+    for (const auto &stepStr : steps) {
+        std::size_t step = std::stoul(stepStr);
+        Assert(step < this->parameters.numberOfSteps + 1);    // + 1 because the starting point is always present
+        result.push_back(step);
+    }
+
+    return result;
+}
+
+
 void SimulationImpl::initializeSeedGenerator(const std::string &seed, std::ostream& logger) {
     if (seed == "random") {
         unsigned long randomSeed = std::random_device()();
@@ -114,9 +128,8 @@ void SimulationImpl::initializeDevice(const std::string &deviceParameters) {
     }
 }
 
-void SimulationImpl::store_trajectories(const RandomWalker &randomWalker, const std::string &outputFilePrefix,
-                                        std::size_t simulationIndex, std::size_t firstTrajectoryIndex,
-                                        std::ostream &logger)
+void SimulationImpl::storeTrajectories(const RandomWalker &randomWalker, std::size_t simulationIndex,
+                                       std::size_t firstTrajectoryIndex, std::ostream &logger)
 {
    std::size_t numberOfTrajectories = randomWalker.getNumberOfTrajectories();
    for (std::size_t i = 0; i < numberOfTrajectories; i++) {
@@ -124,7 +137,7 @@ void SimulationImpl::store_trajectories(const RandomWalker &randomWalker, const 
 
        std::size_t trajectoryIndex = i + firstTrajectoryIndex;
        std::ostringstream trajectoryFilenameStream;
-       trajectoryFilenameStream << outputFilePrefix << "_" << simulationIndex << "_" << trajectoryIndex << ".txt";
+       trajectoryFilenameStream << this->outputFilePrefix << "_" << simulationIndex << "_" << trajectoryIndex << ".txt";
        std::string trajectoryFilename = trajectoryFilenameStream.str();
 
        this->trajectoryPrinter->print(trajectory, trajectoryFilename);
@@ -134,6 +147,21 @@ void SimulationImpl::store_trajectories(const RandomWalker &randomWalker, const 
        logger << ", accepted steps: " << trajectory.getNumberOfAcceptedSteps();
        logger << ", final position: " << trajectory.getLast() << std::endl;
    }
+}
+
+void SimulationImpl::storeHistograms(std::ostream &logger) {
+    auto fileOstreamProvider = std::unique_ptr<FileOstreamProvider>(new FileOstreamProvider());
+
+    for (std::size_t step : this->positionHistogramSteps) {
+        std::string histogramFilename = this->outputFilePrefix + "_histogram_" + std::to_string(step) + ".txt";
+
+        fileOstreamProvider->setFileDescription("histogram for step " + std::to_string(step));
+        auto histogramFile = fileOstreamProvider->openFile(histogramFilename);
+
+        this->positionHistogram.printForStep(step, *histogramFile);
+        logger << "[SimulationImpl::run] Position histogram for step " << step << " stored to " << histogramFilename;
+        logger << std::endl;
+    }
 }
 
 SimulationImpl::SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix,
@@ -155,6 +183,8 @@ SimulationImpl::SimulationImpl(const Parameters &parameters, std::unique_ptr<Ran
 
     this->walkerParametersTemplate = this->prepareWalkerParametersTemplate(parameters);
     this->moveFilters = this->prepareMoveFilterParameters(parameters.moveFilter);
+    this->positionHistogramSteps = this->preparePositionHistogramSteps(parameters.positionHistogramSteps);
+    this->positionHistogram = PositionHistogram(this->positionHistogramSteps);
     Validate(!this->moveFilters.empty());
     this->initializeSeedGenerator(this->parameters.seed, logger);
     this->initializeDevice(this->parameters.device);
@@ -163,6 +193,12 @@ SimulationImpl::SimulationImpl(const Parameters &parameters, std::unique_ptr<Ran
     logger << "[SimulationImpl] " << moveFilters.size() << " simulations will be performed using MoveFilters:";
     logger << std::endl;
     std::copy(this->moveFilters.begin(), this->moveFilters.end(), std::ostream_iterator<std::string>(logger, "\n"));
+    if (!this->positionHistogramSteps.empty()) {
+        logger << "[SimulationImpl] Position histograms will be generated for steps: ";
+        std::copy(this->positionHistogramSteps.begin(), this->positionHistogramSteps.end(),
+                  std::ostream_iterator<std::size_t>(logger, ", "));
+        logger << std::endl;
+    }
     logger << std::endl;
 }
 
@@ -179,12 +215,13 @@ void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalk
         randomWalker.run(logger, initialTracers);
 
         if (this->parameters.storeTrajectories)
-            store_trajectories(randomWalker, this->outputFilePrefix, simulationIndex, startTrajectory, logger);
+            this->storeTrajectories(randomWalker, simulationIndex, startTrajectory, logger);
 
         logger << "[SimulationImpl::run] Calculating mean square displacement data... " << std::flush;
         Timer timer;
         timer.start();
         this->msdDataCalculator.addTrajectories(randomWalker);
+        this->positionHistogram.addTrajectories(randomWalker);
         timer.stop();
         logger << "completed in " << timer.countMicroseconds() << " μs." << std::endl;
     }
@@ -226,5 +263,6 @@ void SimulationImpl::run(std::ostream &logger) {
         this->runSingleSimulation(simulationIndex, *randomWalker, logger);
     }
 
+    this->storeHistograms(logger);
     this->msdData = this->msdDataCalculator.fetchMSDData();
 }

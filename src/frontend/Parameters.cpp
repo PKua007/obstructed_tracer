@@ -39,6 +39,8 @@ Parameters::Parameters(std::istream& input) {
             this->seed = config.getString(key);
         else if (key == "device")
             this->device = config.getString(key);
+        else if (key == "positionHistogramSteps")
+            this->positionHistogramSteps = config.getString(key);
         else
             std::cerr << "[Parameters::Parameters] Warning: unknown parameter " << key << std::endl;
     }
@@ -47,18 +49,19 @@ Parameters::Parameters(std::istream& input) {
 }
 
 void Parameters::print(std::ostream& out) {
-    out << "numberOfSteps         : " << this->numberOfSteps << std::endl;
-    out << "tracerRadius          : " << this->tracerRadius << std::endl;
-    out << "moveGenerator         : " << this->moveGenerator << std::endl;
-    out << "moveFilter            : " << this->moveFilter << std::endl;
-    out << "integrationStep       : " << this->integrationStep << std::endl;
-    out << "drift                 : " << this->drift << std::endl;
-    out << "numberOfWalksInSeries : " << this->numberOfWalksInSeries << std::endl;
-    out << "numberOfSplits        : " << this->numberOfSplits << std::endl;
-    out << "numberOfSeries        : " << this->numberOfSeries << std::endl;
-    out << "storeTrajectories     : " << (this->storeTrajectories ? "true" : "false") << std::endl;
-    out << "seed                  : " << this->seed << std::endl;
-    out << "device                : " << this->device << std::endl;
+    out << "numberOfSteps          : " << this->numberOfSteps << std::endl;
+    out << "tracerRadius           : " << this->tracerRadius << std::endl;
+    out << "moveGenerator          : " << this->moveGenerator << std::endl;
+    out << "moveFilter             : " << this->moveFilter << std::endl;
+    out << "integrationStep        : " << this->integrationStep << std::endl;
+    out << "drift                  : " << this->drift << std::endl;
+    out << "numberOfWalksInSeries  : " << this->numberOfWalksInSeries << std::endl;
+    out << "numberOfSplits         : " << this->numberOfSplits << std::endl;
+    out << "numberOfSeries         : " << this->numberOfSeries << std::endl;
+    out << "storeTrajectories      : " << (this->storeTrajectories ? "true" : "false") << std::endl;
+    out << "seed                   : " << this->seed << std::endl;
+    out << "device                 : " << this->device << std::endl;
+    out << "positionHistogramSteps : " << this->positionHistogramSteps << std::endl;
 }
 
 void Parameters::validateParameters() const {

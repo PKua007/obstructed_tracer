@@ -22,18 +22,19 @@ private:
     void validateParameters() const;
 
 public:
-    std::size_t numberOfSteps         = 1000;
-    float       tracerRadius          = 0.f;
-    std::string moveGenerator         = "GaussianMoveGenerator";
-    std::string moveFilter            = "DefaultMoveFilter";
-    float       integrationStep       = 1;
-    std::string drift                 = "xy 0 0";
-    std::size_t numberOfWalksInSeries = 10;
-    std::size_t numberOfSplits        = 1;
-    std::size_t numberOfSeries        = 1;
-    bool        storeTrajectories     = false;
-    std::string seed                  = "random";
-    std::string device                = "gpu";
+    std::size_t numberOfSteps          = 1000;
+    float       tracerRadius           = 0.f;
+    std::string moveGenerator          = "GaussianMoveGenerator";
+    std::string moveFilter             = "DefaultMoveFilter";
+    float       integrationStep        = 1;
+    std::string drift                  = "xy 0 0";
+    std::size_t numberOfWalksInSeries  = 10;
+    std::size_t numberOfSplits         = 1;
+    std::size_t numberOfSeries         = 1;
+    bool        storeTrajectories      = false;
+    std::string seed                   = "random";
+    std::string device                 = "gpu";
+    std::string positionHistogramSteps = "";
 
     /**
      * @brief Creates default parameters.
