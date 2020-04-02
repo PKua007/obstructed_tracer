@@ -18,7 +18,7 @@ TEST_CASE("PositionHistogram: valid") {
     trajectory1.addPoint(Point{10, 7}, false);
 
     Trajectory trajectory2;
-    trajectory2.addPoint(Point{1, 2}, false);
+    trajectory2.addPoint(Point{1, 2}, false);   // Initial positions should be subtracted
     trajectory2.addPoint(Point{5, 8}, false);
     trajectory2.addPoint(Point{6, 9}, false);
 
@@ -40,8 +40,8 @@ TEST_CASE("PositionHistogram: valid") {
         std::ostringstream out0, out2;
         histogram.printForStep(0, out0);
         histogram.printForStep(2, out2);
-        REQUIRE(out0.str() == "0 1\n1 2\n");
-        REQUIRE(out2.str() == "10 7\n6 9\n");
+        REQUIRE(out0.str() == "0 0\n0 0\n");
+        REQUIRE(out2.str() == "10 6\n5 7\n");
     }
 
     SECTION("two walker, one trajectory each") {
@@ -67,8 +67,8 @@ TEST_CASE("PositionHistogram: valid") {
         std::ostringstream out0, out2;
         histogram.printForStep(0, out0);
         histogram.printForStep(2, out2);
-        REQUIRE(out0.str() == "0 1\n1 2\n");
-        REQUIRE(out2.str() == "10 7\n6 9\n");
+        REQUIRE(out0.str() == "0 0\n0 0\n");
+        REQUIRE(out2.str() == "10 6\n5 7\n");
     }
 }
 

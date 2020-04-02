@@ -96,4 +96,11 @@ TEST_CASE("Point") {
 
         REQUIRE(out.str() == "1 2");
     }
+
+    SECTION("2 points subtraction") {
+        Point p1{1, 2};
+        Point p2{7, 10};
+
+        REQUIRE(p2 - p1 == Move{6, 8});
+    }
 }

@@ -19,10 +19,11 @@ void PositionHistogram::addTrajectories(const RandomWalker &walker) {
     std::size_t numberOfTrajectories = walker.getNumberOfTrajectories();
     for (std::size_t trajIdx{}; trajIdx < numberOfTrajectories; trajIdx++) {
         const Trajectory &trajectory = walker.getTrajectory(trajIdx);
+        Point initialPosition = trajectory[0];
         for (std::size_t stepIdx{}; stepIdx < this->timeSteps.size(); stepIdx++) {
             std::size_t step = this->timeSteps[stepIdx];
             Assert(step < trajectory.getSize());
-            this->histograms[stepIdx].push_back(trajectory[step]);
+            this->histograms[stepIdx].push_back(trajectory[step] - initialPosition);
         }
     }
 }
@@ -33,5 +34,5 @@ void PositionHistogram::printForStep(std::size_t step, std::ostream &out) {
     std::size_t stepIdx = stepIt - this->timeSteps.begin();
 
     const auto &histogram = this->histograms[stepIdx];
-    std::copy(histogram.begin(), histogram.end(), std::ostream_iterator<Point>(out, "\n"));
+    std::copy(histogram.begin(), histogram.end(), std::ostream_iterator<Move>(out, "\n"));
 }

@@ -17,7 +17,8 @@
 
 /**
  * @brief A `__host__ __device__` struct representing a floating precision point.
- * @see operator<<(std::ostream &, Point point)
+ * @see operator<<(std::ostream &, Point)
+ * @see operator-(Point, Point)
  */
 struct Point  {
     float x{};
@@ -72,6 +73,13 @@ struct Point  {
 inline std::ostream &operator<<(std::ostream &out, Point point) {
     out << point.x << " " << point.y;
     return out;
+}
+
+/**
+ * @brief Returns Move as the difference of 2 points.
+ */
+CUDA_HOSTDEV inline Move operator-(Point p1, Point p2) {
+    return Move(p1.x - p2.x, p1.y - p2.y);
 }
 
 /**
