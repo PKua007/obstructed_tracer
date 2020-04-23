@@ -12,7 +12,7 @@
 #include <curand_kernel.h>
 
 #include "simulation/MoveFilter.h"
-#include "ImagePoint.h"
+#include "simulation/IntegerPoint.h"
 
 /**
  * @brief A `__host__` `__device__` MoveFilter accepting moves if they do not collide with stuff on the image.
@@ -47,14 +47,14 @@ private:
     size_t validPointsMapSize{};
 
     CUDA_HOSTDEV void initializeGenerators(unsigned long seed, size_t numberOfTrajectories);
-    CUDA_HOSTDEV bool isNotPrecomputedTracerValid(ImagePoint position, float radius) const;
-    CUDA_HOSTDEV bool isPointValid(ImagePoint point) const;
-    CUDA_HOSTDEV bool isPrecomputedTracerValid(ImagePoint position) const;
-    CUDA_HOSTDEV bool isPrecomputedTracerLineValid(ImagePoint from, ImagePoint to) const;
-    CUDA_HOSTDEV ImagePoint indexToImagePoint(std::size_t index) const;
-    CUDA_HOSTDEV size_t imagePointToIndex(ImagePoint point) const;
+    CUDA_HOSTDEV bool isNotPrecomputedTracerValid(IntegerPoint position, float radius) const;
+    CUDA_HOSTDEV bool isPointValid(IntegerPoint point) const;
+    CUDA_HOSTDEV bool isPrecomputedTracerValid(IntegerPoint position) const;
+    CUDA_HOSTDEV bool isPrecomputedTracerLineValid(IntegerPoint from, IntegerPoint to) const;
+    CUDA_HOSTDEV IntegerPoint indexToIntegerPoint(std::size_t index) const;
+    CUDA_HOSTDEV size_t integerPointToIndex(IntegerPoint point) const;
     CUDA_HOSTDEV float randomUniformNumber();
-    CUDA_HOSTDEV ImagePoint randomTracerImagePosition();
+    CUDA_HOSTDEV IntegerPoint randomTracerImagePosition();
 
 public:
     /**

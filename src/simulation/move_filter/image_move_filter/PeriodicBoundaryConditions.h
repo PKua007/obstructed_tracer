@@ -27,18 +27,18 @@ public:
     /**
      * @brief All points are accepted due to infinite repeating of periodic boundary conditions - return always true.
      */
-    CUDA_HOSTDEV bool isImagePointInBounds(ImagePoint imagePoint, int radius) const {
+    CUDA_HOSTDEV bool isIntegerPointInBounds(IntegerPoint integerPoint, int radius) const {
         return true;
     }
 
     /**
-     * @brief @a image point is translated according to periodic boundary conditions, so it ends up being in the range
+     * @brief @a integerPoint is translated according to periodic boundary conditions, so it ends up being in the range
      * of the image. After translating the result is returned.
-     * @param imagePoint point to be translated
+     * @param integerPoint point to be translated
      * @return the point after translation
      */
-    CUDA_HOSTDEV ImagePoint applyOnImagePoint(ImagePoint imagePoint) const {
-        return {mod(imagePoint.x, this->width), mod(imagePoint.y, this->height)};
+    CUDA_HOSTDEV IntegerPoint applyOnIntegerPoint(IntegerPoint integerPoint) const {
+        return {mod(integerPoint.x, this->width), mod(integerPoint.y, this->height)};
     }
 };
 
