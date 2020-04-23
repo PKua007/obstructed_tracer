@@ -22,11 +22,19 @@ CoverageMap::CoverageMap(std::size_t width, std::size_t height)
 }
 
 void CoverageMap::visit(IntegerPoint integerPoint) {
-    this->coverageMap[this->integetPointToIndex(integerPoint)]++;
+    this->coverageMap[this->integerPointToIndex(integerPoint)]++;
 }
 
-bool CoverageMap::isVisited(IntegerPoint integerPoint) {
-    return this->coverageMap[this->integetPointToIndex(integerPoint)] > 0;
+bool CoverageMap::isVisited(IntegerPoint integerPoint) const {
+    return this->coverageMap[this->integerPointToIndex(integerPoint)] > 0;
+}
+
+std::size_t CoverageMap::numOfVisits(IntegerPoint integerPoint) const {
+    return this->coverageMap[this->integerPointToIndex(integerPoint)];
+}
+
+std::size_t CoverageMap::integerPointToIndex(IntegerPoint integerPoint) const {
+    return mod(integerPoint.x, this->width) + mod(integerPoint.y, this->height) * this->width;
 }
 
 CoverageMap operator+(const CoverageMap &map1, const CoverageMap &map2) {
@@ -37,12 +45,4 @@ CoverageMap operator+(const CoverageMap &map1, const CoverageMap &map2) {
     std::transform(map1.coverageMap.begin(), map1.coverageMap.end(), map2.coverageMap.begin(), map.coverageMap.begin(),
                    std::plus<std::size_t>());
     return map;
-}
-
-std::size_t CoverageMap::integetPointToIndex(IntegerPoint integerPoint) {
-    return mod(integerPoint.x, this->width) + mod(integerPoint.y, this->height) * this->width;
-}
-
-std::size_t CoverageMap::numOfVisits(IntegerPoint integerPoint) {
-    return this->coverageMap[this->integetPointToIndex(integerPoint)];
 }
