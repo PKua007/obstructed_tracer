@@ -42,6 +42,12 @@ CoverageMap &CoverageMap::operator+=(const CoverageMap &other) {
     return (*this);
 }
 
+void CoverageMap::store(std::ostream &out) const {
+    for (int i{}; i < this->width; i++)
+        for (int j{}; j < this->height; j++)
+            out << i << " " << j << " " << this->coverageMap[this->integerPointToIndex({i, j})] << std::endl;
+}
+
 CoverageMap operator+(const CoverageMap &map1, const CoverageMap &map2) {
     Expects(map1.width == map2.width);
     Expects(map1.height == map2.height);

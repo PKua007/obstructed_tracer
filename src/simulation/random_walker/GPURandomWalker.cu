@@ -194,3 +194,7 @@ std::vector<Tracer> GPURandomWalker::getRandomInitialTracersVector() {
 const Trajectory &GPURandomWalker::getTrajectory(std::size_t index) const {
     return this->trajectories[index];
 }
+
+const std::vector<Trajectory> &GPURandomWalker::getTrajectories() const {
+    return this->trajectories;
+}

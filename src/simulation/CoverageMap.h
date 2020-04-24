@@ -30,6 +30,7 @@ public:
     void visit(IntegerPoint integerPoint);
     bool isVisited(IntegerPoint integerPoint) const;
     std::size_t numOfVisits(IntegerPoint integerPoint) const;
+    void store(std::ostream &out) const;
 
     /**
      * @brief see operator+(const CoverageMap &, const CoverageMap &)

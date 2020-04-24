@@ -92,3 +92,7 @@ std::vector<Tracer> CPURandomWalker::getRandomInitialTracersVector() {
 const Trajectory &CPURandomWalker::getTrajectory(std::size_t index) const {
     return this->trajectories[index];
 }
+
+const std::vector<Trajectory> &CPURandomWalker::getTrajectories() const {
+    return this->trajectories;
+}

@@ -75,3 +75,7 @@ const Trajectory &SplitRandomWalker::getTrajectory(std::size_t index) const {
 std::size_t SplitRandomWalker::getNumberOfSteps() const {
     return this->numberOfStepsPerSplit * this->numberOfSplits;
 }
+
+const std::vector<Trajectory> &SplitRandomWalker::getTrajectories() const {
+    return this->trajectories;
+}

@@ -41,6 +41,8 @@ Parameters::Parameters(std::istream& input) {
             this->device = config.getString(key);
         else if (key == "positionHistogramSteps")
             this->positionHistogramSteps = config.getString(key);
+        else if (key == "coverageMapsSize")
+            this->coverageMapsSize = config.getString(key);
         else
             std::cerr << "[Parameters::Parameters] Warning: unknown parameter " << key << std::endl;
     }
@@ -62,6 +64,7 @@ void Parameters::print(std::ostream& out) {
     out << "seed                   : " << this->seed << std::endl;
     out << "device                 : " << this->device << std::endl;
     out << "positionHistogramSteps : " << this->positionHistogramSteps << std::endl;
+    out << "coverageMapsSize       : " << this->coverageMapsSize << std::endl;
 }
 
 void Parameters::validateParameters() const {

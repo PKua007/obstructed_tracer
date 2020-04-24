@@ -164,6 +164,26 @@ void SimulationImpl::storeHistograms(std::ostream &logger) {
     }
 }
 
+void SimulationImpl::storeCoverageMaps(std::ostream &logger) {
+    if (this->coverageMapAccumulator == nullptr)
+        return;
+
+    auto fileOstreamProvider = std::unique_ptr<FileOstreamProvider>(new FileOstreamProvider());
+
+    std::string mapFilename = this->outputFilePrefix + "_map.txt";
+    fileOstreamProvider->setFileDescription("coverage map");
+    auto mapFile = fileOstreamProvider->openFile(mapFilename);
+    this->coverageMapAccumulator->getCoverageMap().store(*mapFile);
+
+    std::string singleMapFilename = this->outputFilePrefix + "_single_map.txt";
+    fileOstreamProvider->setFileDescription("coverage map counted once");
+    auto singleMapFile = fileOstreamProvider->openFile(singleMapFilename);
+    this->coverageMapAccumulator->getCoverageMapCountedOnce().store(*singleMapFile);
+
+    logger << "[SimulationImpl::run] Coverage maps stored to " << mapFilename << " and " << singleMapFilename;
+    logger << std::endl;
+}
+
 SimulationImpl::SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix,
                                std::ostream &logger)
         : SimulationImpl(parameters, std::unique_ptr<RandomWalkerFactory>(new RandomWalkerFactoryImpl(logger)),
@@ -185,6 +205,7 @@ SimulationImpl::SimulationImpl(const Parameters &parameters, std::unique_ptr<Ran
     this->moveFilters = this->prepareMoveFilterParameters(parameters.moveFilter);
     this->positionHistogramSteps = this->preparePositionHistogramSteps(parameters.positionHistogramSteps);
     this->positionHistogram = PositionHistogram(this->positionHistogramSteps);
+    this->coverageMapAccumulator = this->prepareCoverageMapAccumulator(parameters.coverageMapsSize);
     Validate(!this->moveFilters.empty());
     this->initializeSeedGenerator(this->parameters.seed, logger);
     this->initializeDevice(this->parameters.device);
@@ -222,6 +243,8 @@ void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalk
         timer.start();
         this->msdDataCalculator.addTrajectories(randomWalker);
         this->positionHistogram.addTrajectories(randomWalker);
+        if (this->coverageMapAccumulator != nullptr)
+            this->coverageMapAccumulator->addTrajectories(randomWalker.getTrajectories());
         timer.stop();
         logger << "completed in " << timer.countMicroseconds() << " μs." << std::endl;
     }
@@ -239,6 +262,21 @@ SimulationImpl::getWalkerParametersForSimulation(std::size_t simulationIndex) co
 
 std::size_t SimulationImpl::getNumberOfSimulations() const {
     return this->moveFilters.size();
+}
+
+std::unique_ptr<CoverageMapAccumulator>
+SimulationImpl::prepareCoverageMapAccumulator(const std::string &coverageMapsSize) const {
+    if (coverageMapsSize.empty())
+        return nullptr;
+
+    std::istringstream sizeStream(coverageMapsSize);
+    std::size_t width, height;
+    sizeStream >> width >> height;
+    ValidateMsg(sizeStream, "coverageMapsSize should be empty (not to do the maps) or: [width > 0] [height > 0]");
+    Validate(width > 0);
+    Validate(height > 0);
+
+    return std::unique_ptr<CoverageMapAccumulator>(new CoverageMapAccumulator(width, height));
 }
 
 void SimulationImpl::run(std::ostream &logger) {
@@ -264,5 +302,6 @@ void SimulationImpl::run(std::ostream &logger) {
     }
 
     this->storeHistograms(logger);
+    this->storeCoverageMaps(logger);
     this->msdData = this->msdDataCalculator.fetchMSDData();
 }

@@ -40,6 +40,7 @@ namespace {
         std::size_t getNumberOfTrajectories() const override { return 0; }
         std::size_t getNumberOfSteps() const override { return 0; }
         const Trajectory &getTrajectory(std::size_t index) const override { throw std::runtime_error(""); }
+        const std::vector<Trajectory> &getTrajectories() const override { throw std::runtime_error(""); }
     };
 
     RandomWalkerFactory::WalkerParameters get_default_parameters() {
