@@ -238,15 +238,29 @@ void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalk
         if (this->parameters.storeTrajectories)
             this->storeTrajectories(randomWalker, simulationIndex, startTrajectory, logger);
 
-        logger << "[SimulationImpl::run] Calculating mean square displacement data... " << std::flush;
         Timer timer;
+
+        logger << "[SimulationImpl::run] Calculating mean square displacement data... " << std::flush;
         timer.start();
         this->msdDataCalculator.addTrajectories(randomWalker);
-        this->positionHistogram.addTrajectories(randomWalker);
-        if (this->coverageMapAccumulator != nullptr)
-            this->coverageMapAccumulator->addTrajectories(randomWalker.getTrajectories());
         timer.stop();
         logger << "completed in " << timer.countMicroseconds() << " μs." << std::endl;
+
+        if (!this->positionHistogramSteps.empty()) {
+            logger << "[SimulationImpl::run] Calculating histograms... " << std::flush;
+            timer.start();
+            this->positionHistogram.addTrajectories(randomWalker);
+            timer.stop();
+            logger << "completed in " << timer.countMicroseconds() << " μs." << std::endl;
+        }
+
+        if (this->coverageMapAccumulator != nullptr) {
+            logger << "[SimulationImpl::run] Generating coverage maps... " << std::flush;
+            timer.start();
+            this->coverageMapAccumulator->addTrajectories(randomWalker.getTrajectories());
+            timer.stop();
+            logger << "completed in " << timer.countMicroseconds() << " μs." << std::endl;
+        }
     }
     logger << std::endl;
 }
