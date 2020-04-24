@@ -5,7 +5,7 @@ numberOfSteps = 10000
 
 # The radius of a tracer 
 
-tracerRadius = 2
+tracerRadius = 0
 
 
 # Distribution to sample steps from; available: GaussianMoveGenerator (sigma); CauchyMoveGenerator (gamma)
@@ -31,12 +31,12 @@ moveFilter = ImageMoveFilter sample_images/fibrinogen.ppm PeriodicBoundaryCondit
 # The increment of time in each iteration. The move generator lenght scale and drift will be altered accordingly, and
 # integration step equal 1 means no rescaling
 
-integrationStep = 1
+integrationStep = 0.1
 
 
 # Constant drift to be added to each sampled move. Available formats: xy (x) (y); rt (radius) (angle in degrees)
 
-drift = rt 1 180
+drift = rt 0 50
 
 
 # Number of walks to be performed in a single series. They have to fit into video memory/RAM and will be performed
@@ -49,7 +49,7 @@ numberOfWalksInSeries = 500
 # walks is then
 #    (number of simulations based on movefilter) * (number of series) * (number of walks in series)
 
-numberOfSeries = 2
+numberOfSeries = 20
 
 
 # If greater than 1, each trajectory will be split into that many parts. That parts will be run in separate random
@@ -80,4 +80,12 @@ device = gpu
 
 # When specified, for each given step the x, y will be dumped to file (output prefix)_histogram_(step).txt
 
-positionHistogramSteps = 10 100
+positionHistogramSteps = 
+
+
+# When specified, coverage maps, one with each point counted normally, and the second one, with points in a single
+# trajectory counted only once, will be stored to (output prefix)_map.txt and (output prefix)_single_map.txt
+# Format: [width] [height]
+# This will be the size of the map generated and if point pass it, pbc will be used
+
+coverageMapsSize = 1000 1000
