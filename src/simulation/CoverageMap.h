@@ -8,6 +8,8 @@
 #ifndef COVERAGEMAP_H_
 #define COVERAGEMAP_H_
 
+#include <vector>
+
 #include "IntegerPoint.h"
 
 /**
