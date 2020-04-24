@@ -37,6 +37,11 @@ std::size_t CoverageMap::integerPointToIndex(IntegerPoint integerPoint) const {
     return mod(integerPoint.x, this->width) + mod(integerPoint.y, this->height) * this->width;
 }
 
+CoverageMap &CoverageMap::operator+=(const CoverageMap &other) {
+    (*this) = (*this) + other;
+    return (*this);
+}
+
 CoverageMap operator+(const CoverageMap &map1, const CoverageMap &map2) {
     Expects(map1.width == map2.width);
     Expects(map1.height == map2.height);

@@ -32,6 +32,11 @@ public:
     std::size_t numOfVisits(IntegerPoint integerPoint) const;
 
     /**
+     * @brief see operator+(const CoverageMap &, const CoverageMap &)
+     */
+    CoverageMap &operator+=(const CoverageMap &other);
+
+    /**
      * @brief Creates a new map from corresponding entries in 2 given maps.
      */
     friend CoverageMap operator+(const CoverageMap &map1, const CoverageMap &map2);
