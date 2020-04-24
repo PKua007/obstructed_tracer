@@ -90,6 +90,8 @@ public:
      * @return the tractory of the index @a index
      */
     virtual const Trajectory &getTrajectory(std::size_t index) const = 0;
+
+    virtual const std::vector<Trajectory> &getTrajectories() const = 0;
 };
 
 /**

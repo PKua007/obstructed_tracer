@@ -23,14 +23,14 @@ public:
     { }
 
     /**
-     * @brief Returns true, if all pixels of a disk placed in @a imagePoint are in the bounds of the image.
-     * @param imagePoint center of a tracer to check
-     * @param radius of the tracer placed in @a imagePoint
+     * @brief Returns true, if all pixels of a disk placed in @a integerPoint are in the bounds of the image.
+     * @param integerPoint center of a tracer to check
+     * @param radius of the tracer placed in @a integerPoint
      */
-    CUDA_HOSTDEV bool isImagePointInBounds(ImagePoint imagePoint, int radius) const {
-        if (imagePoint.x - radius < 0 || imagePoint.x + radius >= this->width)
+    CUDA_HOSTDEV bool isIntegerPointInBounds(IntegerPoint integerPoint, int radius) const {
+        if (integerPoint.x - radius < 0 || integerPoint.x + radius >= this->width)
             return false;
-        else if (imagePoint.y - radius < 0 || imagePoint.y + radius >= this->height)
+        else if (integerPoint.y - radius < 0 || integerPoint.y + radius >= this->height)
             return false;
         else
             return true;
@@ -38,10 +38,10 @@ public:
 
     /**
      * @brief Performs no translation. The same point is returned
-     * @return the same point as @a imagePoint
+     * @return the same point as @a integerPoint
      */
-    CUDA_HOSTDEV ImagePoint applyOnImagePoint(ImagePoint imagePoint) const {
-        return imagePoint;
+    CUDA_HOSTDEV IntegerPoint applyOnIntegerPoint(IntegerPoint integerPoint) const {
+        return integerPoint;
     }
 };
 

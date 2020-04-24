@@ -18,4 +18,5 @@ public:
     MAKE_CONST_MOCK0(getNumberOfTrajectories, std::size_t(), override);
     MAKE_CONST_MOCK0(getNumberOfSteps, std::size_t(), override);
     MAKE_CONST_MOCK1(getTrajectory, const Trajectory &(std::size_t), override);
+    MAKE_CONST_MOCK0(getTrajectories, const std::vector<Trajectory> &(), override);
 };

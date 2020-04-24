@@ -10,14 +10,14 @@
 #include "utils/Utils.h"
 
 namespace {
-    struct ImageMove {
+    struct IntegerMove {
         int x{};
         int y{};
 
-        CUDA_HOSTDEV ImageMove(int x, int y) : x{x}, y{y} { };
+        CUDA_HOSTDEV IntegerMove(int x, int y) : x{x}, y{y} { };
     };
 
-    CUDA_HOSTDEV ImageMove operator-(ImagePoint p1, ImagePoint p2) {
+    CUDA_HOSTDEV IntegerMove operator-(IntegerPoint p1, IntegerPoint p2) {
         return {p1.x - p2.x, p1.y - p2.y};
     }
 
@@ -51,8 +51,8 @@ ImageMoveFilter<BoundaryConditions>
     size_t i = 0;
     for (size_t y = 0; y < this->height; y++) {
         for (size_t x = 0; x < this->width; x++) {
-            ImagePoint imagePoint = {static_cast<int>(x), static_cast<int>(this->height - y - 1)};
-            if (intImageData[this->imagePointToIndex(imagePoint)] == 0xffffffff)
+            IntegerPoint integerPoint = {static_cast<int>(x), static_cast<int>(this->height - y - 1)};
+            if (intImageData[this->integerPointToIndex(integerPoint)] == 0xffffffff)
                 this->validPointsMap[i] = true;
             else
                 this->validPointsMap[i] = false;
@@ -107,33 +107,33 @@ ImageMoveFilter<BoundaryConditions>
 template <typename BoundaryConditions>
 bool
 ImageMoveFilter<BoundaryConditions>
-    ::isPointValid(ImagePoint point) const
+    ::isPointValid(IntegerPoint point) const
 {
-    point = this->imageBC.applyOnImagePoint(point);
-    return this->validPointsMap[this->imagePointToIndex(point)];
+    point = this->imageBC.applyOnIntegerPoint(point);
+    return this->validPointsMap[this->integerPointToIndex(point)];
 }
 
 template <typename BoundaryConditions>
 bool
 ImageMoveFilter<BoundaryConditions>
-    ::isPrecomputedTracerValid(ImagePoint position) const
+    ::isPrecomputedTracerValid(IntegerPoint position) const
 {
-    if (!this->imageBC.isImagePointInBounds(position, this->tracerRadius))
+    if (!this->imageBC.isIntegerPointInBounds(position, this->tracerRadius))
         return false;
 
-    position = this->imageBC.applyOnImagePoint(position);
-    return this->validTracersMap[this->imagePointToIndex(position)];
+    position = this->imageBC.applyOnIntegerPoint(position);
+    return this->validTracersMap[this->integerPointToIndex(position)];
 }
 
 template <typename BoundaryConditions>
 bool
 ImageMoveFilter<BoundaryConditions>
-    ::isNotPrecomputedTracerValid(ImagePoint position, float radius) const
+    ::isNotPrecomputedTracerValid(IntegerPoint position, float radius) const
 {
     Expects(radius >= 0.f);
 
     int intPointRadius = static_cast<int>(radius);
-    if (!this->imageBC.isImagePointInBounds(position, intPointRadius))
+    if (!this->imageBC.isIntegerPointInBounds(position, intPointRadius))
         return false;
 
     if (radius == 0.f)
@@ -154,19 +154,19 @@ ImageMoveFilter<BoundaryConditions>
 template <typename BoundaryConditions>
 bool
 ImageMoveFilter<BoundaryConditions>
-    ::isPrecomputedTracerLineValid(ImagePoint from, ImagePoint to) const
+    ::isPrecomputedTracerLineValid(IntegerPoint from, IntegerPoint to) const
 {
-    ImageMove imageMove = to - from;
-    if (abs(imageMove.x) > abs(imageMove.y)) {
-        float a = float(imageMove.y) / float(imageMove.x);
-        for (int x = from.x; x != to.x; x += sgn(imageMove.x)) {
+    IntegerMove integerMove = to - from;
+    if (abs(integerMove.x) > abs(integerMove.y)) {
+        float a = float(integerMove.y) / float(integerMove.x);
+        for (int x = from.x; x != to.x; x += sgn(integerMove.x)) {
             int y = static_cast<int>(round(from.y + a * (x - from.x)));
             if (!this->isPrecomputedTracerValid({ x, y }))
                 return false;
         }
     } else {
-        float a = float(imageMove.x) / float(imageMove.y);
-        for (int y = from.y; y != to.y; y += sgn(imageMove.y)) {
+        float a = float(integerMove.x) / float(integerMove.y);
+        for (int y = from.y; y != to.y; y += sgn(integerMove.y)) {
             int x = static_cast<int>(round(from.x + a * (y - from.y)));
             if (!this->isPrecomputedTracerValid({ x, y }))
                 return false;
@@ -176,9 +176,9 @@ ImageMoveFilter<BoundaryConditions>
 }
 
 template <typename BoundaryConditions>
-ImagePoint
+IntegerPoint
 ImageMoveFilter<BoundaryConditions>
-    ::indexToImagePoint(size_t index) const
+    ::indexToIntegerPoint(size_t index) const
 {
     Expects(index < this->validPointsMapSize);
     return {static_cast<int>(index % this->width), static_cast<int>(index / this->width)};
@@ -187,7 +187,7 @@ ImageMoveFilter<BoundaryConditions>
 template <typename BoundaryConditions>
 size_t
 ImageMoveFilter<BoundaryConditions>
-    ::imagePointToIndex(ImagePoint point) const
+    ::integerPointToIndex(IntegerPoint point) const
 {
     return point.x + this->width * point.y;
 }
@@ -218,15 +218,15 @@ ImageMoveFilter<BoundaryConditions>
 #if CUDA_DEVICE_COMPILATION
 
     template <typename BoundaryConditions>
-    ImagePoint
+    IntegerPoint
     ImageMoveFilter<BoundaryConditions>
         ::randomTracerImagePosition()
     {
-        ImagePoint imagePosition;
+        IntegerPoint imagePosition;
         do {
             float floatMapIndex = this->randomUniformNumber() * this->validPointsMapSize;
             size_t mapIndex = static_cast<size_t>(floatMapIndex);
-            imagePosition = this->indexToImagePoint(mapIndex);
+            imagePosition = this->indexToIntegerPoint(mapIndex);
         } while(!this->isPrecomputedTracerValid(imagePosition));
         return imagePosition;
     }
@@ -234,7 +234,7 @@ ImageMoveFilter<BoundaryConditions>
 #else // CUDA_HOST_COMPILATION
 
     template <typename BoundaryConditions>
-    ImagePoint
+    IntegerPoint
     ImageMoveFilter<BoundaryConditions>
         ::randomTracerImagePosition()
     {
@@ -242,7 +242,7 @@ ImageMoveFilter<BoundaryConditions>
         size_t cacheIndex = static_cast<size_t>(floatCacheIndex);
         Assert(cacheIndex < this->validTracerIndicesCache.size());
         size_t tracerIndex = this->validTracerIndicesCache[cacheIndex];
-        return this->indexToImagePoint(tracerIndex);
+        return this->indexToIntegerPoint(tracerIndex);
     }
 
 #endif
@@ -254,16 +254,16 @@ ImageMoveFilter<BoundaryConditions>
 {
     Point from = tracer.getPosition();
     Point to = from + move;
-    ImagePoint imageFrom(from);
-    ImagePoint imageTo(to);
+    IntegerPoint integerFrom(from);
+    IntegerPoint integerTo(to);
 
-    if (imageFrom == imageTo)
+    if (integerFrom == integerTo)
         return true;
 
-    if (!this->isPrecomputedTracerValid(imageTo))
+    if (!this->isPrecomputedTracerValid(integerTo))
         return false;
 
-    return this->isPrecomputedTracerLineValid(imageFrom, imageTo);
+    return this->isPrecomputedTracerLineValid(integerFrom, integerTo);
 }
 
 template <typename BoundaryConditions>
@@ -271,7 +271,7 @@ Tracer
 ImageMoveFilter<BoundaryConditions>
     ::randomValidTracer()
 {
-    ImagePoint imagePosition = this->randomTracerImagePosition();
+    IntegerPoint imagePosition = this->randomTracerImagePosition();
     float pixelOffsetX = this->randomUniformNumber();
     float pixelOffsetY = this->randomUniformNumber();
 
@@ -291,7 +291,7 @@ ImageMoveFilter<BoundaryConditions>
             return;
 
         this->tracerRadius = radius;
-        this->validTracersMap[i] = this->isNotPrecomputedTracerValid(this->indexToImagePoint(i), radius);
+        this->validTracersMap[i] = this->isNotPrecomputedTracerValid(this->indexToIntegerPoint(i), radius);
     }
 
 #else // CUDA_HOST_COMPILATION
@@ -306,7 +306,7 @@ ImageMoveFilter<BoundaryConditions>
 
         this->validTracerIndicesCache.clear();
         for (size_t i = 0; i < this->validPointsMapSize; i++) {
-            if (this->isNotPrecomputedTracerValid(this->indexToImagePoint(i), radius)) {
+            if (this->isNotPrecomputedTracerValid(this->indexToIntegerPoint(i), radius)) {
                 this->validTracersMap[i] = true;
                 this->validTracerIndicesCache.push_back(i);
             } else {

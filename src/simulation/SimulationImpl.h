@@ -16,6 +16,7 @@
 #include "RandomWalkerFactory.h"
 #include "AccumulatingMSDDataCalculator.h"
 #include "PositionHistogram.h"
+#include "CoverageMapAccumulator.h"
 
 /**
  * @brief The concrete implementation of Simulation.
@@ -58,6 +59,7 @@ private:
 
     AccumulatingMSDDataCalculator msdDataCalculator;
     PositionHistogram positionHistogram;
+    std::unique_ptr<CoverageMapAccumulator> coverageMapAccumulator;
     std::unique_ptr<RandomWalkerFactory> randomWalkerFactory;
     std::unique_ptr<TrajectoryPrinter> trajectoryPrinter;
     MSDData msdData;
@@ -66,12 +68,14 @@ private:
     RandomWalkerFactory::WalkerParameters prepareWalkerParametersTemplate(const Parameters &parameters) const;
     std::vector<std::string> prepareMoveFilterParameters(const std::string &moveFilterChain) const;
     std::vector<std::size_t> preparePositionHistogramSteps(const std::string &stepsString) const;
+    std::unique_ptr<CoverageMapAccumulator> prepareCoverageMapAccumulator(const std::string &coverageMapsSize) const;
     void initializeSeedGenerator(const std::string &seed, std::ostream &logger);
     void initializeDevice(const std::string &device);
     void runSingleSimulation(std::size_t simulationIndex, RandomWalker &randomWalker, std::ostream &logger);
     void storeTrajectories(const RandomWalker &randomWalker, std::size_t simulationIndex,
                            std::size_t firstTrajectoryIndex, std::ostream &logger);
     void storeHistograms(std::ostream &logger);
+    void storeCoverageMaps(std::ostream &logger);
 
 public:
     /**

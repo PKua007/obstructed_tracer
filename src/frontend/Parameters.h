@@ -35,6 +35,7 @@ public:
     std::string seed                   = "random";
     std::string device                 = "gpu";
     std::string positionHistogramSteps = "";
+    std::string coverageMapsSize       = "";
 
     /**
      * @brief Creates default parameters.

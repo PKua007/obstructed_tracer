@@ -51,6 +51,7 @@ public:
     std::size_t getNumberOfTrajectories() const override;
     std::size_t getNumberOfSteps() const override;
     const Trajectory &getTrajectory(std::size_t index) const override;
+    const std::vector<Trajectory> &getTrajectories() const override;
 };
 
 #endif /* SPLITRANDOMWALKER_H_ */

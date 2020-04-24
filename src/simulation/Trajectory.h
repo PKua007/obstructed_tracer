@@ -32,6 +32,8 @@ protected:
     std::size_t acceptedSteps{};
 
 public:
+    using const_iterator = std::vector<Point>::const_iterator;
+
     /**
      * @brief Creates an empty trajectory.
      */
@@ -72,6 +74,9 @@ public:
      * @return the final position of a tracer
      */
     Point getLast() const;
+
+    const_iterator begin() const { return this->trajectory.begin(); }
+    const_iterator end() const { return this->trajectory.end(); }
 
     /**
      * @brief Clears the whole trajectory and resets the number of accepted steps.
