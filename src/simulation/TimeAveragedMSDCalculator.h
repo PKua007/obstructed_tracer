@@ -13,6 +13,10 @@
 
 class TimeAveragedMSDCalculator {
 public:
+    std::size_t maxDelta;
+    std::size_t deltaStep;
+
+public:
     TimeAveragedMSDCalculator(std::size_t maxDelta, std::size_t deltaStep);
 
     TimeAveragedMSD calculate(const Trajectory &trajectory);
