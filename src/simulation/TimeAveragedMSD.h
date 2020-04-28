@@ -22,7 +22,7 @@ public:
     using const_iterator = std::vector<float>::const_iterator;
 
     TimeAveragedMSD() { }
-    TimeAveragedMSD(std::size_t deltaSteps, std::size_t stepSize) : stepSize{stepSize}, data(deltaSteps) { }
+    TimeAveragedMSD(std::size_t numSteps, std::size_t stepSize) : stepSize{stepSize}, data(numSteps) { }
 
     float &operator[](std::size_t stepIdx) {
         Expects(stepIdx < this->size());

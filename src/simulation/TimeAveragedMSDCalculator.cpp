@@ -20,8 +20,8 @@ TimeAveragedMSD TimeAveragedMSDCalculator::calculate(const Trajectory &trajector
 
     TimeAveragedMSD result(this->maxDelta/this->deltaStep + 1, this->deltaStep);
 
-    for (std::size_t step{}; step <= this->maxDelta/this->deltaStep; step++) {
-        std::size_t delta = step*this->deltaStep;
+    for (std::size_t deltaStepIdx{}; deltaStepIdx <= this->maxDelta/this->deltaStep; deltaStepIdx++) {
+        std::size_t delta = deltaStepIdx*this->deltaStep;
         float r2{};
         for (std::size_t i = delta; i < trajectory.getSize(); i++) {
             Move deltaR = trajectory[i - delta] - trajectory[i];
@@ -29,7 +29,7 @@ TimeAveragedMSD TimeAveragedMSDCalculator::calculate(const Trajectory &trajector
             r2 += deltaR.x*deltaR.x + deltaR.y*deltaR.y;
         }
         r2 /= (trajectory.getSize() - delta);
-        result[step] = r2;
+        result[deltaStepIdx] = r2;
     }
 
     return result;
