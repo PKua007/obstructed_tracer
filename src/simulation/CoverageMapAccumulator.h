@@ -15,7 +15,7 @@
 
 /**
  * @brief A class accumulating coverage maps in 2 ways for each given trajectory, w.r.t. pbc.
- * @detail One way is calculating each point (getCoverageMap()) normally, and the second one is taking point repeating
+ * @details One way is calculating each point (getCoverageMap()) normally, and the second one is taking point repeating
  * in a single trajectory as only one and then add to the map (getCoverageMapCountedOnce())
  */
 class CoverageMapAccumulator {

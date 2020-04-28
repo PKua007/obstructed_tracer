@@ -12,6 +12,12 @@
 
 #include "utils/Assertions.h"
 
+/**
+ * @brief Mean square displacement averaged over the trajectory.
+ * @details It is a function of Delta and calculated as
+ * \f$ 1/(T-\Delta) \int_0^{T-\Delta} (\vec{r}(t+\Delta) - \vec{r}(t))^2 dt\f$,
+ * where T is a whole trajectory time.
+ */
 class TimeAveragedMSD {
 private:
     std::vector<float> data;
@@ -22,6 +28,12 @@ public:
     using const_iterator = std::vector<float>::const_iterator;
 
     TimeAveragedMSD() { }
+
+    /**
+     * @brief Created TA MSD with @a numSteps steps, with stepSize @a stepSize, where these are expressed in number of
+     * iterations.
+     * @details Note, that the first step corresponds to Delta=0, and last to Delta=stepSize*(numSteps - 1)
+     */
     TimeAveragedMSD(std::size_t numSteps, std::size_t stepSize) : stepSize{stepSize}, data(numSteps) { }
 
     float &operator[](std::size_t stepIdx) {

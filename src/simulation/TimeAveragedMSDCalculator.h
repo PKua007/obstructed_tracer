@@ -11,12 +11,19 @@
 #include "TimeAveragedMSD.h"
 #include "Trajectory.h"
 
+/**
+ * @brief Calculates TimeAveragedMSD (see that class's description) from a given trajectories.
+ */
 class TimeAveragedMSDCalculator {
 public:
     std::size_t maxDelta;
     std::size_t deltaStep;
 
 public:
+    /**
+     * @brief Constructs the calculator, which will produce TA MSD, where Delta is from 0 to @a maxDelta with a step
+     * @a deltaStep.
+     */
     TimeAveragedMSDCalculator(std::size_t maxDelta, std::size_t deltaStep);
 
     TimeAveragedMSD calculate(const Trajectory &trajectory);
