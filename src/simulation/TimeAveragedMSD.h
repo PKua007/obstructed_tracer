@@ -9,8 +9,10 @@
 #define TIMEAVERAGEDMSD_H_
 
 #include <vector>
+#include <algorithm>
 
 #include "utils/Assertions.h"
+#include "analyzer/PowerRegression.h"
 
 /**
  * @brief Mean square displacement averaged over the trajectory.
@@ -60,7 +62,41 @@ public:
      * @brief Based on @a stepSize and @a integrationStep passed in the constructor, translates data index to the
      * physical time.
      */
-    float dataIndexToRealTime(std::size_t index) { return index * this->stepSize * this->integrationStep; }
+    float dataIndexToRealTime(std::size_t index) const { return index * this->stepSize * this->integrationStep; }
+
+    double getPowerLawExponent(double relativeFitStart, double relativeFitEnd) const {
+        Expects(relativeFitStart > 0);
+        Expects(relativeFitEnd > relativeFitStart);
+        Expects(relativeFitEnd <= 1);
+
+        std::size_t fitStartIdx = static_cast<std::size_t>(this->size()*relativeFitStart);
+        std::size_t fitEndIdx = static_cast<std::size_t>(this->size()*relativeFitEnd);
+        Assert(fitStartIdx > 0);
+        Assert(fitEndIdx < this->size());
+
+        PowerRegression regression;
+        for (std::size_t i = fitStartIdx; i < fitEndIdx; i++)
+            regression.addXY(this->dataIndexToRealTime(i), this->data[i]);
+        regression.calculate();
+        return regression.getExponent().value;
+    }
+
+    TimeAveragedMSD &operator+=(const TimeAveragedMSD &other) {
+        Expects(this->size() == other.size());
+        Expects(this->stepSize == other.stepSize);
+        Expects(this->integrationStep == other.integrationStep);
+
+        std::transform(this->data.begin(), this->data.end(), other.data.begin(), this->data.begin(),
+                       std::plus<float>());
+        return *this;
+    }
+
+    friend TimeAveragedMSD operator/(const TimeAveragedMSD &tamsd, float a) {
+        TimeAveragedMSD result(tamsd.size(), tamsd.stepSize, tamsd.integrationStep);
+        for (std::size_t i{}; i < tamsd.size(); i++)
+            result[i] = tamsd.data[i] / a;
+        return result;
+    }
 };
 
 #endif /* TIMEAVERAGEDMSD_H_ */

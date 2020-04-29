@@ -7,22 +7,36 @@
 
 #include "TAMSDPowerLawAccumulator.h"
 
-TAMSDPowerLawAccumulator::TAMSDPowerLawAccumulator(double relativeFitStart, double relativeFitEnd) {
+#include "utils/Assertions.h"
 
+TAMSDPowerLawAccumulator::TAMSDPowerLawAccumulator(double relativeFitStart, double relativeFitEnd)
+        : relativeFitStart{relativeFitStart}, relativeFitEnd{relativeFitEnd}
+{
+    Expects(relativeFitStart > 0);
+    Expects(relativeFitEnd > relativeFitStart);
+    Expects(relativeFitEnd <= 1);
 }
 
 void TAMSDPowerLawAccumulator::addTAMSD(const TimeAveragedMSD &tamsd) {
+    if (this->ensembleAveragedTAMSD.empty())
+        this->ensembleAveragedTAMSD = tamsd;
+    else
+        this->ensembleAveragedTAMSD += tamsd;    // This also validates if the TAMDSs have the same parameters
 
+    this->numMSDs++;
+    double alpha = tamsd.getPowerLawExponent(this->relativeFitStart, this->relativeFitEnd);
+    this->exponentHistogram.push_back(alpha);
+    this->averageExponent += alpha;
 }
 
 std::vector<double> TAMSDPowerLawAccumulator::getExponentHistogram() const {
-    return {};
+    return this->exponentHistogram;
 }
 
 TimeAveragedMSD TAMSDPowerLawAccumulator::getEnsembleAveragedTAMSD() const {
-    return TimeAveragedMSD{};
+    return this->ensembleAveragedTAMSD / this->numMSDs;
 }
 
 double TAMSDPowerLawAccumulator::getAverageExponent() const {
-    return 0.0;
+    return this->averageExponent / this->numMSDs;
 }

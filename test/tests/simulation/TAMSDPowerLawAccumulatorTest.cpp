@@ -13,8 +13,8 @@
 
 TEST_CASE("TAMSDPowerLawAccumulator") {
     // We will have steps 0, 1, 2, 3, 4, 5
-    // The fit range (0.3, 0.9) will give 2, 3, 4
-    TAMSDPowerLawAccumulator accumulator(0.3, 0.9);
+    // The fit range (0.4, 0.9) will give 2, 3, 4
+    TAMSDPowerLawAccumulator accumulator(0.4, 0.9);
 
     // Step size 2, integration step 0.25, which gives delta_time = 0.5
     TimeAveragedMSD tamsd1(6, 2, 0.25);
@@ -31,22 +31,28 @@ TEST_CASE("TAMSDPowerLawAccumulator") {
     tamsd2[3] = K2 * std::pow(3 * 0.25, alpha2);
     tamsd2[4] = K2 * std::pow(4 * 0.25, alpha2);
 
-
     accumulator.addTAMSD(tamsd1);
     accumulator.addTAMSD(tamsd2);
 
+    SECTION("alpha histogram") {
+        auto alphas = accumulator.getExponentHistogram();
+        REQUIRE_THAT(alphas, IsApproxEqual(std::vector<double>{alpha1, alpha2}, 1e-8));
+    }
 
-    auto alphas = accumulator.getExponentHistogram();
-    double meanAlpha = accumulator.getAverageExponent();
-    REQUIRE_THAT(alphas, IsApproxEqual(std::vector<double>{2, 3}, 1e-8));
-    REQUIRE(meanAlpha == 2.5);
+    SECTION("mean alpha") {
+        double meanAlpha = accumulator.getAverageExponent();
+        REQUIRE(meanAlpha == Approx(0.5*(alpha1 + alpha2)));
+    }
 
-    TimeAveragedMSD meanTamsd = accumulator.getEnsembleAveragedTAMSD();
-    REQUIRE(meanTamsd.dataIndexToRealTime(1) == Approx(0.5));
-    std::vector<float> meanTamsdVector(meanTamsd.begin(), meanTamsd.end());
-    REQUIRE_THAT(meanTamsdVector, IsApproxEqual(
-        std::vector<float>{1337, 1337, 0.5f*(tamsd1[2]+tamsd2[2]), 0.5f*(tamsd1[3]+tamsd2[3]),
-                            0.5f*(tamsd1[4]+tamsd2[4]), 1337},
-        1e-8
-    ));
+    SECTION("mean TA MSD") {
+        TimeAveragedMSD meanTamsd = accumulator.getEnsembleAveragedTAMSD();
+        REQUIRE(meanTamsd.dataIndexToRealTime(1) == Approx(0.5));
+
+        std::vector<float> meanTamsdVector(meanTamsd.begin(), meanTamsd.end());
+        REQUIRE_THAT(meanTamsdVector, IsApproxEqual(
+            std::vector<float>{1337, 1337, 0.5f*(tamsd1[2]+tamsd2[2]), 0.5f*(tamsd1[3]+tamsd2[3]),
+                                0.5f*(tamsd1[4]+tamsd2[4]), 1337},
+            1e-8
+        ));
+    }
 }

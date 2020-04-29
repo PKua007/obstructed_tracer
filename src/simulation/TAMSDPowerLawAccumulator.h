@@ -11,6 +11,15 @@
 #include "TimeAveragedMSD.h"
 
 class TAMSDPowerLawAccumulator {
+private:
+    double relativeFitStart{};
+    double relativeFitEnd{};
+
+    std::size_t numMSDs{};
+    std::vector<double> exponentHistogram;
+    TimeAveragedMSD ensembleAveragedTAMSD;
+    double averageExponent{};
+
 public:
     TAMSDPowerLawAccumulator(double relativeFitStart, double relativeFitEnd);
 
