@@ -18,13 +18,14 @@ class TimeAveragedMSDCalculator {
 public:
     std::size_t maxDelta;
     std::size_t deltaStep;
+    float integrationStep;
 
 public:
     /**
      * @brief Constructs the calculator, which will produce TA MSD, where Delta is from 0 to @a maxDelta with a step
-     * @a deltaStep.
+     * @a deltaStep and with integrationStep @a integrationStep.
      */
-    TimeAveragedMSDCalculator(std::size_t maxDelta, std::size_t deltaStep);
+    TimeAveragedMSDCalculator(std::size_t maxDelta, std::size_t deltaStep, float integrationStep);
 
     TimeAveragedMSD calculate(const Trajectory &trajectory);
 };

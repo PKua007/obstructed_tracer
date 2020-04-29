@@ -22,6 +22,7 @@ class TimeAveragedMSD {
 private:
     std::vector<float> data;
     std::size_t stepSize;
+    float integrationStep;
 
 public:
     using iterator = std::vector<float>::iterator;
@@ -32,9 +33,11 @@ public:
     /**
      * @brief Created TA MSD with @a numSteps steps, with stepSize @a stepSize, where these are expressed in number of
      * iterations.
-     * @details Note, that the first step corresponds to Delta=0, and last to Delta=stepSize*(numSteps - 1)
+     * @details Note, that the first step corresponds to Delta=0, and last to Delta=@a stepSize*(@a numSteps - 1).
      */
-    TimeAveragedMSD(std::size_t numSteps, std::size_t stepSize) : stepSize{stepSize}, data(numSteps) { }
+    TimeAveragedMSD(std::size_t numSteps, std::size_t stepSize, float integrationStep)
+            : stepSize{stepSize}, data(numSteps), integrationStep(integrationStep)
+    { }
 
     float &operator[](std::size_t stepIdx) {
         Expects(stepIdx < this->size());
@@ -52,7 +55,12 @@ public:
     iterator end() { return data.end(); }
     const_iterator begin() const { data.begin(); }
     const_iterator end() const { data.end(); }
-    std::size_t getStepSize() { return stepSize; }
+
+    /**
+     * @brief Based on @a stepSize and @a integrationStep passed in the constructor, translates data index to the
+     * physical time.
+     */
+    float dataIndexToRealTime(std::size_t index) { return index * this->stepSize * this->integrationStep; }
 };
 
 #endif /* TIMEAVERAGEDMSD_H_ */
