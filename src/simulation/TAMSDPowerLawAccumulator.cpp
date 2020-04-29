@@ -21,7 +21,7 @@ void TAMSDPowerLawAccumulator::addTAMSD(const TimeAveragedMSD &tamsd) {
     if (this->ensembleAveragedTAMSD.empty())
         this->ensembleAveragedTAMSD = tamsd;
     else
-        this->ensembleAveragedTAMSD += tamsd;    // This also validates if the TAMDSs have the same parameters
+        this->ensembleAveragedTAMSD += tamsd;    // This also checks if the new TA MDS has the same params as the rest
 
     this->numMSDs++;
     double alpha = tamsd.getPowerLawExponent(this->relativeFitStart, this->relativeFitEnd);
@@ -37,6 +37,6 @@ TimeAveragedMSD TAMSDPowerLawAccumulator::getEnsembleAveragedTAMSD() const {
     return this->ensembleAveragedTAMSD / this->numMSDs;
 }
 
-double TAMSDPowerLawAccumulator::getAverageExponent() const {
+double TAMSDPowerLawAccumulator::getEnsembleAverageExponent() const {
     return this->averageExponent / this->numMSDs;
 }

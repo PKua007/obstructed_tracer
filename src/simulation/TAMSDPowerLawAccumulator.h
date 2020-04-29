@@ -10,6 +10,10 @@
 
 #include "TimeAveragedMSD.h"
 
+/**
+ * @brief A class which calculates and collects some information about TA MSD from a several TA MSD.
+ * @details There are: histogram of exponents of power law, ensemble averaged TA MSD and and exponent for it.
+ */
 class TAMSDPowerLawAccumulator {
 private:
     double relativeFitStart{};
@@ -21,13 +25,16 @@ private:
     double averageExponent{};
 
 public:
+    /**
+     * @brief @a relativeFitStart and @a relativeFitEnd will tell to what part of data a power law should be fitted.
+     */
     TAMSDPowerLawAccumulator(double relativeFitStart, double relativeFitEnd);
 
     void addTAMSD(const TimeAveragedMSD &tamsd);
 
     std::vector<double> getExponentHistogram() const;
     TimeAveragedMSD getEnsembleAveragedTAMSD() const;
-    double getAverageExponent() const;
+    double getEnsembleAverageExponent() const;
 };
 
 #endif /* TAMSDPOWERLAWACCUMULATOR_H_ */
