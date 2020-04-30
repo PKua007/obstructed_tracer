@@ -36,6 +36,7 @@ public:
     std::string device                 = "gpu";
     std::string positionHistogramSteps = "";
     std::string coverageMapsSize       = "";
+    std::string tamsdMode              = "none";
 
     /**
      * @brief Creates default parameters.

@@ -82,16 +82,19 @@ std::vector<std::string> SimulationImpl::prepareMoveFilterParameters(const std::
     return moveFilterStrings;
 }
 
-std::vector<std::size_t> SimulationImpl::preparePositionHistogramSteps(const std::string &stepsString) const {
+void SimulationImpl::initializePositionHistogram(const std::string &stepsString, std::size_t numberOfSteps) {
     auto steps = explode(stepsString, ' ');
-    std::vector<std::size_t> result;
     for (const auto &stepStr : steps) {
         std::size_t step = std::stoul(stepStr);
-        Assert(step < this->parameters.numberOfSteps + 1);    // + 1 because the starting point is always present
-        result.push_back(step);
+        Assert(step < numberOfSteps + 1);    // + 1 because the starting point is always present
+        this->positionHistogramSteps.push_back(step);
     }
 
-    return result;
+    if (!this->positionHistogramSteps.empty()) {
+        this->positionHistogram = std::unique_ptr<PositionHistogram>(
+            new PositionHistogram(this->positionHistogramSteps)
+        );
+    }
 }
 
 
@@ -128,6 +131,63 @@ void SimulationImpl::initializeDevice(const std::string &deviceParameters) {
     }
 }
 
+void SimulationImpl::initializeCoverageMapAccumulator(const std::string &coverageMapsSize) {
+    if (coverageMapsSize.empty())
+        return;
+
+    std::istringstream sizeStream(coverageMapsSize);
+    std::size_t width, height;
+    sizeStream >> width >> height;
+    ValidateMsg(sizeStream, "coverageMapsSize should be empty (not to do the maps) or: [width > 0] [height > 0]");
+    Validate(width > 0);
+    Validate(height > 0);
+
+    this->coverageMapAccumulator = std::unique_ptr<CoverageMapAccumulator>(new CoverageMapAccumulator(width, height));
+}
+
+void SimulationImpl::initializeTAMSDCalculators(const Parameters &parameters) {
+    std::istringstream tamsdParamStream(parameters.tamsdMode);
+    std::string mode;
+    tamsdParamStream >> mode;
+    ValidateMsg(tamsdParamStream, "Malformed TA MSD mode parameters, usage: [mode] ...");
+
+    if (mode == "none")
+        return;
+    else if (mode != "individual" && mode != "powerLaw" && mode != "both")
+        throw ValidationException("TA MSD mode should be one of: none, individual, powerLaw, both");
+
+    std::size_t deltaStep;
+    tamsdParamStream >> deltaStep;
+    ValidateMsg(tamsdParamStream, "Malformed TA MSD mode parameters, usage: " + mode + " [delta step] ...");
+    Validate(deltaStep > 0);
+
+    // Max delta corresponds to number of steps / 10, because later it is just a mess, even for free diffusion.
+    // Moreover, maxDelta should be divisible by deltaStep
+    std::size_t maxDelta = (parameters.numberOfSteps / 10) / deltaStep * deltaStep;
+    ValidateMsg(maxDelta > 0, "Too large delta step");
+
+    this->tamsdCalculator = std::unique_ptr<TimeAveragedMSDCalculator>(
+        new TimeAveragedMSDCalculator(maxDelta, deltaStep, parameters.integrationStep)
+    );
+
+    if (mode == "individual" || mode == "both")
+        this->shouldStoreTAMSD = true;
+
+    if (mode == "powerLaw" || mode == "both") {
+        double relativeFitStart{}, relativeFitEnd{};
+        tamsdParamStream >> relativeFitStart >> relativeFitEnd;
+        ValidateMsg(tamsdParamStream, "Malformed TA MSD parameters, usage: " + mode + " [relative fit start] "
+                                      "[relative fit end]");
+        Validate(relativeFitStart > 0);
+        Validate(relativeFitStart < relativeFitEnd);
+        Validate(relativeFitEnd <= 1);
+
+        this->tamsdPowerLawAccumulator = std::unique_ptr<TAMSDPowerLawAccumulator>(
+            new TAMSDPowerLawAccumulator(relativeFitStart, relativeFitEnd)
+        );
+    }
+}
+
 void SimulationImpl::storeTrajectories(const RandomWalker &randomWalker, std::size_t simulationIndex,
                                        std::size_t firstTrajectoryIndex, std::ostream &logger)
 {
@@ -137,7 +197,8 @@ void SimulationImpl::storeTrajectories(const RandomWalker &randomWalker, std::si
 
        std::size_t trajectoryIndex = i + firstTrajectoryIndex;
        std::ostringstream trajectoryFilenameStream;
-       trajectoryFilenameStream << this->outputFilePrefix << "_" << simulationIndex << "_" << trajectoryIndex << ".txt";
+       trajectoryFilenameStream << this->outputFilePrefix << "_traj_" << simulationIndex << "_" << trajectoryIndex;
+       trajectoryFilenameStream << ".txt";
        std::string trajectoryFilename = trajectoryFilenameStream.str();
 
        this->trajectoryPrinter->print(trajectory, trajectoryFilename);
@@ -153,12 +214,12 @@ void SimulationImpl::storeHistograms(std::ostream &logger) {
     auto fileOstreamProvider = std::unique_ptr<FileOstreamProvider>(new FileOstreamProvider());
 
     for (std::size_t step : this->positionHistogramSteps) {
-        std::string histogramFilename = this->outputFilePrefix + "_histogram_" + std::to_string(step) + ".txt";
+        std::string histogramFilename = this->outputFilePrefix + "_hist_" + std::to_string(step) + ".txt";
 
         fileOstreamProvider->setFileDescription("histogram for step " + std::to_string(step));
         auto histogramFile = fileOstreamProvider->openFile(histogramFilename);
 
-        this->positionHistogram.printForStep(step, *histogramFile);
+        this->positionHistogram->printForStep(step, *histogramFile);
         logger << "[SimulationImpl::run] Position histogram for step " << step << " stored to " << histogramFilename;
         logger << std::endl;
     }
@@ -170,7 +231,7 @@ void SimulationImpl::storeCoverageMaps(std::ostream &logger) {
 
     auto fileOstreamProvider = std::unique_ptr<FileOstreamProvider>(new FileOstreamProvider());
 
-    std::string mapFilename = this->outputFilePrefix + "_map.txt";
+    std::string mapFilename = this->outputFilePrefix + "_multi_map.txt";
     fileOstreamProvider->setFileDescription("coverage map");
     auto mapFile = fileOstreamProvider->openFile(mapFilename);
     this->coverageMapAccumulator->getCoverageMap().store(*mapFile);
@@ -182,6 +243,45 @@ void SimulationImpl::storeCoverageMaps(std::ostream &logger) {
 
     logger << "[SimulationImpl::run] Coverage maps stored to " << mapFilename << " and " << singleMapFilename;
     logger << std::endl;
+}
+
+void SimulationImpl::storeTAMSD(const TimeAveragedMSD &tamsd, std::size_t simulationIndex, std::size_t trajectoryIndex,
+                                std::ostream& logger)
+{
+    std::ostringstream tamsdFilenameStream;
+    tamsdFilenameStream << this->outputFilePrefix << "_tamsd_" << simulationIndex << "_" << trajectoryIndex << ".txt";
+    std::string tamsdFilename = tamsdFilenameStream.str();
+
+    auto fileOstreamProvider = std::unique_ptr<FileOstreamProvider>(new FileOstreamProvider());
+    fileOstreamProvider->setFileDescription("TA MSD");
+    auto tamsdFile = fileOstreamProvider->openFile(tamsdFilename);
+    tamsd.store(*tamsdFile);
+
+    logger << "[SimulationImpl::run] TA MSD " << trajectoryIndex << " stored to " << tamsdFilename << std::endl;
+}
+
+void SimulationImpl::storeTAMSDData(std::ostream &logger) {
+    if (this->tamsdPowerLawAccumulator == nullptr)
+        return;
+
+    auto fileOstreamProvider = std::unique_ptr<FileOstreamProvider>(new FileOstreamProvider());
+
+    std::string histogramFilename = this->outputFilePrefix + "_alpha_hist.txt";
+    fileOstreamProvider->setFileDescription("TA MSD power law esponent histogram");
+    auto histogramFile = fileOstreamProvider->openFile(histogramFilename);
+    auto histogram = this->tamsdPowerLawAccumulator->getExponentHistogram();
+    std::copy(histogram.begin(), histogram.end(), std::ostream_iterator<double>(*histogramFile, "\n"));
+
+    std::string meanTamsdFilename = this->outputFilePrefix + "_mean_tamsd.txt";
+    fileOstreamProvider->setFileDescription("ensemble averaged TA MSD");
+    auto meanTamsdFile = fileOstreamProvider->openFile(meanTamsdFilename);
+    TimeAveragedMSD meanTamsd = this->tamsdPowerLawAccumulator->getEnsembleAveragedTAMSD();
+    meanTamsd.store(*meanTamsdFile);
+
+    logger << "[SimulationImpl::run] TAMSD alpha histogram stored to " << histogramFilename << std::endl;
+    logger << "[SimulationImpl::run] Ensemble averaged TAMSD stored to " << meanTamsdFilename << std::endl;
+    logger << "[SimulationImpl::run] Ensemble averaged TAMSD alpha: ";
+    logger << this->tamsdPowerLawAccumulator->getEnsembleAveragedExponent() << std::endl;
 }
 
 SimulationImpl::SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix,
@@ -203,10 +303,11 @@ SimulationImpl::SimulationImpl(const Parameters &parameters, std::unique_ptr<Ran
 
     this->walkerParametersTemplate = this->prepareWalkerParametersTemplate(parameters);
     this->moveFilters = this->prepareMoveFilterParameters(parameters.moveFilter);
-    this->positionHistogramSteps = this->preparePositionHistogramSteps(parameters.positionHistogramSteps);
-    this->positionHistogram = PositionHistogram(this->positionHistogramSteps);
-    this->coverageMapAccumulator = this->prepareCoverageMapAccumulator(parameters.coverageMapsSize);
     Validate(!this->moveFilters.empty());
+
+    this->initializePositionHistogram(parameters.positionHistogramSteps, parameters.numberOfSteps);
+    this->initializeCoverageMapAccumulator(parameters.coverageMapsSize);
+    this->initializeTAMSDCalculators(parameters);
     this->initializeSeedGenerator(this->parameters.seed, logger);
     this->initializeDevice(this->parameters.device);
 
@@ -214,12 +315,19 @@ SimulationImpl::SimulationImpl(const Parameters &parameters, std::unique_ptr<Ran
     logger << "[SimulationImpl] " << moveFilters.size() << " simulations will be performed using MoveFilters:";
     logger << std::endl;
     std::copy(this->moveFilters.begin(), this->moveFilters.end(), std::ostream_iterator<std::string>(logger, "\n"));
-    if (!this->positionHistogramSteps.empty()) {
+
+    if (this->positionHistogram != nullptr) {
         logger << "[SimulationImpl] Position histograms will be generated for steps: ";
         std::copy(this->positionHistogramSteps.begin(), this->positionHistogramSteps.end(),
                   std::ostream_iterator<std::size_t>(logger, ", "));
         logger << std::endl;
     }
+
+    if (this->tamsdCalculator != nullptr) {
+        logger << "[SimulationImpl] TA MSD will be calculated up to Delta = " << this->tamsdCalculator->getMaxDelta();
+        logger << " with a step " << this->tamsdCalculator->getDeltaStep() << std::endl;
+    }
+
     logger << std::endl;
 }
 
@@ -232,6 +340,7 @@ void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalk
         logger << std::endl;
         logger << "[SimulationImpl::run] Simulation " << simulationIndex << ", series " << i << ": trajectories ";
         logger << startTrajectory << " - " << endTrajectory << std::endl;
+
         auto initialTracers = randomWalker.getRandomInitialTracersVector();
         randomWalker.run(logger, initialTracers);
 
@@ -246,10 +355,10 @@ void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalk
         timer.stop();
         logger << "completed in " << timer.countMicroseconds() << " μs." << std::endl;
 
-        if (!this->positionHistogramSteps.empty()) {
+        if (this->positionHistogram != nullptr) {
             logger << "[SimulationImpl::run] Calculating histograms... " << std::flush;
             timer.start();
-            this->positionHistogram.addTrajectories(randomWalker);
+            this->positionHistogram->addTrajectories(randomWalker);
             timer.stop();
             logger << "completed in " << timer.countMicroseconds() << " μs." << std::endl;
         }
@@ -258,6 +367,25 @@ void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalk
             logger << "[SimulationImpl::run] Generating coverage maps... " << std::flush;
             timer.start();
             this->coverageMapAccumulator->addTrajectories(randomWalker.getTrajectories());
+            timer.stop();
+            logger << "completed in " << timer.countMicroseconds() << " μs." << std::endl;
+        }
+
+        if (this->tamsdCalculator != nullptr) {
+            logger << "[SimulationImpl::run] Calculating TA MSD... " << std::flush;
+            timer.start();
+            if (this->shouldStoreTAMSD)
+                logger << std::endl;
+
+            auto tamsds = this->tamsdCalculator->calculate(randomWalker.getTrajectories());
+            for (std::size_t i{}; i < tamsds.size(); i++) {
+                const auto &tamsd = tamsds[i];
+                if (this->shouldStoreTAMSD)
+                    this->storeTAMSD(tamsd, simulationIndex, startTrajectory + i, logger);
+
+                if (this->tamsdPowerLawAccumulator != nullptr)
+                    this->tamsdPowerLawAccumulator->addTAMSD(tamsd);
+            }
             timer.stop();
             logger << "completed in " << timer.countMicroseconds() << " μs." << std::endl;
         }
@@ -278,20 +406,6 @@ std::size_t SimulationImpl::getNumberOfSimulations() const {
     return this->moveFilters.size();
 }
 
-std::unique_ptr<CoverageMapAccumulator>
-SimulationImpl::prepareCoverageMapAccumulator(const std::string &coverageMapsSize) const {
-    if (coverageMapsSize.empty())
-        return nullptr;
-
-    std::istringstream sizeStream(coverageMapsSize);
-    std::size_t width, height;
-    sizeStream >> width >> height;
-    ValidateMsg(sizeStream, "coverageMapsSize should be empty (not to do the maps) or: [width > 0] [height > 0]");
-    Validate(width > 0);
-    Validate(height > 0);
-
-    return std::unique_ptr<CoverageMapAccumulator>(new CoverageMapAccumulator(width, height));
-}
 
 void SimulationImpl::run(std::ostream &logger) {
     for (std::size_t simulationIndex = 0; simulationIndex < this->getNumberOfSimulations(); simulationIndex++) {
@@ -317,5 +431,6 @@ void SimulationImpl::run(std::ostream &logger) {
 
     this->storeHistograms(logger);
     this->storeCoverageMaps(logger);
+    this->storeTAMSDData(logger);
     this->msdData = this->msdDataCalculator.fetchMSDData();
 }

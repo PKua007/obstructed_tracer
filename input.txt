@@ -25,7 +25,7 @@ moveGenerator = GaussianMoveGenerator 3
 # parameters performed, allowing for example to average reuslting mean swuare displacement data over different
 # images.
 
-moveFilter = ImageMoveFilter sample_images/fibrinogen.ppm PeriodicBoundaryConditions
+moveFilter = DefaultMoveFilter#ImageMoveFilter sample_images/fibrinogen.ppm PeriodicBoundaryConditions
 
 
 # The increment of time in each iteration. The move generator lenght scale and drift will be altered accordingly, and
@@ -49,7 +49,7 @@ numberOfWalksInSeries = 500
 # walks is then
 #    (number of simulations based on movefilter) * (number of series) * (number of walks in series)
 
-numberOfSeries = 20
+numberOfSeries = 1
 
 
 # If greater than 1, each trajectory will be split into that many parts. That parts will be run in separate random
@@ -88,4 +88,18 @@ positionHistogramSteps =
 # Format: [width] [height]
 # This will be the size of the map generated and if point pass it, pbc will be used
 
-coverageMapsSize = 1000 1000
+coverageMapsSize = #1000 1000
+
+
+# This specifies what time averaged MSD features should be calculated. Modes:
+#     - none - do not do this at all
+#     - individual - only print individual TA MSD
+#     - powerLaw - prepare histogram of power law exponents, print average TA MSD and average power law exponent
+#     - both - do both
+# If not "none" One has to specify additional parameters after a space: 
+#     For individual    : [delta step size]
+#     For powerLaw/both : [delta step size] [relative fit start 0-1] [relative fit end 0-1]
+# [delta step size] means how dense TA MSD should be sampled (disregarding integration step!). For example, if the
+# trajectory steps are 100 and [delta step size] = 5, TA MSD will be sampled for 0, 5, 10, ..., 95
+
+tamsdMode = powerLaw 10 0.01 0.1

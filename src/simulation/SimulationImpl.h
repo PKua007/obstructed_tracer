@@ -17,6 +17,8 @@
 #include "AccumulatingMSDDataCalculator.h"
 #include "PositionHistogram.h"
 #include "CoverageMapAccumulator.h"
+#include "TimeAveragedMSDCalculator.h"
+#include "TAMSDPowerLawAccumulator.h"
 
 /**
  * @brief The concrete implementation of Simulation.
@@ -57,25 +59,33 @@ private:
     std::string outputFilePrefix;
     std::vector<std::size_t> positionHistogramSteps;
 
-    AccumulatingMSDDataCalculator msdDataCalculator;
-    PositionHistogram positionHistogram;
-    std::unique_ptr<CoverageMapAccumulator> coverageMapAccumulator;
     std::unique_ptr<RandomWalkerFactory> randomWalkerFactory;
     std::unique_ptr<TrajectoryPrinter> trajectoryPrinter;
+
+    AccumulatingMSDDataCalculator msdDataCalculator;
+    std::unique_ptr<PositionHistogram> positionHistogram;
+    std::unique_ptr<CoverageMapAccumulator> coverageMapAccumulator;
+    std::unique_ptr<TimeAveragedMSDCalculator> tamsdCalculator;
+    bool shouldStoreTAMSD{};
+    std::unique_ptr<TAMSDPowerLawAccumulator> tamsdPowerLawAccumulator;
     MSDData msdData;
 
     Move parseDrift(const std::string &driftString) const;
     RandomWalkerFactory::WalkerParameters prepareWalkerParametersTemplate(const Parameters &parameters) const;
     std::vector<std::string> prepareMoveFilterParameters(const std::string &moveFilterChain) const;
-    std::vector<std::size_t> preparePositionHistogramSteps(const std::string &stepsString) const;
-    std::unique_ptr<CoverageMapAccumulator> prepareCoverageMapAccumulator(const std::string &coverageMapsSize) const;
+    void initializePositionHistogram(const std::string &stepsString, std::size_t numberOfSteps);
+    void initializeCoverageMapAccumulator(const std::string &coverageMapsSize);
     void initializeSeedGenerator(const std::string &seed, std::ostream &logger);
     void initializeDevice(const std::string &device);
+    void initializeTAMSDCalculators(const Parameters &parameters);
     void runSingleSimulation(std::size_t simulationIndex, RandomWalker &randomWalker, std::ostream &logger);
     void storeTrajectories(const RandomWalker &randomWalker, std::size_t simulationIndex,
                            std::size_t firstTrajectoryIndex, std::ostream &logger);
+    void storeTAMSD(const TimeAveragedMSD &tamsd, std::size_t simulationIndex, std::size_t trajectoryIndex,
+                    std::ostream &logger);
     void storeHistograms(std::ostream &logger);
     void storeCoverageMaps(std::ostream &logger);
+    void storeTAMSDData(std::ostream &logger);
 
 public:
     /**
