@@ -17,6 +17,8 @@
 #include "AccumulatingMSDDataCalculator.h"
 #include "PositionHistogram.h"
 #include "CoverageMapAccumulator.h"
+#include "TimeAveragedMSDCalculator.h"
+#include "TAMSDPowerLawAccumulator.h"
 
 /**
  * @brief The concrete implementation of Simulation.
@@ -62,6 +64,9 @@ private:
     std::unique_ptr<CoverageMapAccumulator> coverageMapAccumulator;
     std::unique_ptr<RandomWalkerFactory> randomWalkerFactory;
     std::unique_ptr<TrajectoryPrinter> trajectoryPrinter;
+    std::unique_ptr<TimeAveragedMSDCalculator> tamsdCalculator;
+    bool storeTAMSD{};
+    std::unique_ptr<TAMSDPowerLawAccumulator> tamsdPowerLawAccumulator;
     MSDData msdData;
 
     Move parseDrift(const std::string &driftString) const;
@@ -71,11 +76,15 @@ private:
     std::unique_ptr<CoverageMapAccumulator> prepareCoverageMapAccumulator(const std::string &coverageMapsSize) const;
     void initializeSeedGenerator(const std::string &seed, std::ostream &logger);
     void initializeDevice(const std::string &device);
+    void initializeTAMSDCalculators(const Parameters &parameters);
     void runSingleSimulation(std::size_t simulationIndex, RandomWalker &randomWalker, std::ostream &logger);
     void storeTrajectories(const RandomWalker &randomWalker, std::size_t simulationIndex,
                            std::size_t firstTrajectoryIndex, std::ostream &logger);
+    void doStoreTAMSD(const TimeAveragedMSD &tamsd, std::size_t simulationIndex, std::size_t trajectoryIndex,
+                      std::ostream &logger);
     void storeHistograms(std::ostream &logger);
     void storeCoverageMaps(std::ostream &logger);
+    void storeTAMSDData(std::ostream &logger);
 
 public:
     /**

@@ -184,6 +184,45 @@ void SimulationImpl::storeCoverageMaps(std::ostream &logger) {
     logger << std::endl;
 }
 
+void SimulationImpl::doStoreTAMSD(const TimeAveragedMSD &tamsd, std::size_t simulationIndex,
+                                  std::size_t trajectoryIndex, std::ostream& logger)
+{
+    std::ostringstream tamsdFilenameStream;
+    tamsdFilenameStream << this->outputFilePrefix << "_tamsd_" << simulationIndex << "_" << trajectoryIndex << ".txt";
+    std::string tamsdFilename = tamsdFilenameStream.str();
+
+    auto fileOstreamProvider = std::unique_ptr<FileOstreamProvider>(new FileOstreamProvider());
+    fileOstreamProvider->setFileDescription("TA MSD");
+    auto tamsdFile = fileOstreamProvider->openFile(tamsdFilename);
+    tamsd.store(*tamsdFile);
+
+    logger << "[SimulationImpl::run] TA MSD " << trajectoryIndex << " stored to " << tamsdFilename << std::endl;
+}
+
+void SimulationImpl::storeTAMSDData(std::ostream &logger) {
+    if (this->tamsdPowerLawAccumulator == nullptr)
+        return;
+
+    auto fileOstreamProvider = std::unique_ptr<FileOstreamProvider>(new FileOstreamProvider());
+
+    std::string histogramFilename = this->outputFilePrefix + "_alpha_histogram.txt";
+    fileOstreamProvider->setFileDescription("TA MSD power law esponent histogram");
+    auto histogramFile = fileOstreamProvider->openFile(histogramFilename);
+    auto histogram = this->tamsdPowerLawAccumulator->getExponentHistogram();
+    std::copy(histogram.begin(), histogram.end(), std::ostream_iterator<double>(*histogramFile, "\n"));
+
+    std::string meanTamsdFilename = this->outputFilePrefix + "_mean_tamsd.txt";
+    fileOstreamProvider->setFileDescription("ensemble averaged TA MSD");
+    auto meanTamsdFile = fileOstreamProvider->openFile(meanTamsdFilename);
+    TimeAveragedMSD meanTamsd = this->tamsdPowerLawAccumulator->getEnsembleAveragedTAMSD();
+    meanTamsd.store(*meanTamsdFile);
+
+    logger << "[SimulationImpl::run] TAMSD alpha histogram stored to " << histogramFilename << std::endl;
+    logger << "[SimulationImpl::run] Ensemble averaged TAMSD stored to " << meanTamsdFilename << std::endl;
+    logger << "[SimulationImpl::run] Ensemble averaged TAMSD alpha: ";
+    logger << this->tamsdPowerLawAccumulator->getEnsembleAveragedExponent() << std::endl;
+}
+
 SimulationImpl::SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix,
                                std::ostream &logger)
         : SimulationImpl(parameters, std::unique_ptr<RandomWalkerFactory>(new RandomWalkerFactoryImpl(logger)),
@@ -206,6 +245,7 @@ SimulationImpl::SimulationImpl(const Parameters &parameters, std::unique_ptr<Ran
     this->positionHistogramSteps = this->preparePositionHistogramSteps(parameters.positionHistogramSteps);
     this->positionHistogram = PositionHistogram(this->positionHistogramSteps);
     this->coverageMapAccumulator = this->prepareCoverageMapAccumulator(parameters.coverageMapsSize);
+    this->initializeTAMSDCalculators(parameters);
     Validate(!this->moveFilters.empty());
     this->initializeSeedGenerator(this->parameters.seed, logger);
     this->initializeDevice(this->parameters.device);
@@ -214,12 +254,19 @@ SimulationImpl::SimulationImpl(const Parameters &parameters, std::unique_ptr<Ran
     logger << "[SimulationImpl] " << moveFilters.size() << " simulations will be performed using MoveFilters:";
     logger << std::endl;
     std::copy(this->moveFilters.begin(), this->moveFilters.end(), std::ostream_iterator<std::string>(logger, "\n"));
+
     if (!this->positionHistogramSteps.empty()) {
         logger << "[SimulationImpl] Position histograms will be generated for steps: ";
         std::copy(this->positionHistogramSteps.begin(), this->positionHistogramSteps.end(),
                   std::ostream_iterator<std::size_t>(logger, ", "));
         logger << std::endl;
     }
+
+    if (this->tamsdCalculator != nullptr) {
+        logger << "[SimulationImpl] TA MSD will be calculated up to Delta = " << this->tamsdCalculator->getMaxDelta();
+        logger << " with a step " << this->tamsdCalculator->getDeltaStep() << std::endl;
+    }
+
     logger << std::endl;
 }
 
@@ -261,6 +308,25 @@ void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalk
             timer.stop();
             logger << "completed in " << timer.countMicroseconds() << " μs." << std::endl;
         }
+
+        if (this->tamsdCalculator != nullptr) {
+            logger << "[SimulationImpl::run] Calculating TA MSD... " << std::flush;
+            timer.start();
+            if (this->storeTAMSD)
+                logger << std::endl;
+
+            for (std::size_t i{}; i < randomWalker.getNumberOfTrajectories(); i++) {
+                const auto &trajectory = randomWalker.getTrajectory(i);
+                TimeAveragedMSD tamsd = this->tamsdCalculator->calculate(trajectory);
+                if (this->storeTAMSD)
+                    this->doStoreTAMSD(tamsd, simulationIndex, startTrajectory + i, logger);
+
+                if (this->tamsdPowerLawAccumulator != nullptr)
+                    this->tamsdPowerLawAccumulator->addTAMSD(tamsd);
+            }
+            timer.stop();
+            logger << "completed in " << timer.countMicroseconds() << " μs." << std::endl;
+        }
     }
     logger << std::endl;
 }
@@ -293,6 +359,50 @@ SimulationImpl::prepareCoverageMapAccumulator(const std::string &coverageMapsSiz
     return std::unique_ptr<CoverageMapAccumulator>(new CoverageMapAccumulator(width, height));
 }
 
+void SimulationImpl::initializeTAMSDCalculators(const Parameters &parameters) {
+    std::istringstream tamsdParamStream(parameters.tamsdMode);
+    std::string mode;
+    tamsdParamStream >> mode;
+    ValidateMsg(tamsdParamStream, "Malformed TA MSD mode parameters, usage: [mode] ...");
+
+    if (mode == "none")
+        return;
+    else if (mode != "individual" && mode != "powerLaw" && mode != "both")
+        throw ValidationException("TA MSD mode should be one of: none, individual, powerLaw, both");
+
+    // We want at least 1000 entries when integrating the TA MSD and we want TA MSD to span over 1000 trajectory steps,
+    // so we need at least 2000 steps in the trajectory
+    //ValidateMsg(parameters.numberOfSteps >= 2000, "For TA MSD, trajectory should have at least 2000 steps");
+
+    std::size_t deltaStep;
+    tamsdParamStream >> deltaStep;
+    ValidateMsg(tamsdParamStream, "Malformed TA MSD mode parameters, usage: " + mode + " [delta step] ...");
+    Validate(deltaStep > 0);
+    std::size_t maxDelta = (parameters.numberOfSteps / 10) / deltaStep * deltaStep;
+    ValidateMsg(maxDelta > 0, "Too large delta step");
+
+    this->tamsdCalculator = std::unique_ptr<TimeAveragedMSDCalculator>(
+        new TimeAveragedMSDCalculator(maxDelta, deltaStep, parameters.integrationStep)
+    );
+
+    if (mode == "individual" || mode == "both")
+        this->storeTAMSD = true;
+
+    if (mode == "powerLaw" || mode == "both") {
+        double relativeFitStart{}, relativeFitEnd{};
+        tamsdParamStream >> relativeFitStart >> relativeFitEnd;
+        ValidateMsg(tamsdParamStream, "Malformed TA MSD parameters, usage: " + mode + " [relative fit start] "
+                                      "[relative fit end]");
+        Validate(relativeFitStart > 0);
+        Validate(relativeFitStart < relativeFitEnd);
+        Validate(relativeFitEnd <= 1);
+
+        this->tamsdPowerLawAccumulator = std::unique_ptr<TAMSDPowerLawAccumulator>(
+            new TAMSDPowerLawAccumulator(relativeFitStart, relativeFitEnd)
+        );
+    }
+}
+
 void SimulationImpl::run(std::ostream &logger) {
     for (std::size_t simulationIndex = 0; simulationIndex < this->getNumberOfSimulations(); simulationIndex++) {
         logger << "[SimulationImpl::run] Preparing simulation " << simulationIndex << "..." << std::endl;
@@ -317,5 +427,6 @@ void SimulationImpl::run(std::ostream &logger) {
 
     this->storeHistograms(logger);
     this->storeCoverageMaps(logger);
+    this->storeTAMSDData(logger);
     this->msdData = this->msdDataCalculator.fetchMSDData();
 }

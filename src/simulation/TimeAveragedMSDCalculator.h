@@ -28,6 +28,9 @@ public:
     TimeAveragedMSDCalculator(std::size_t maxDelta, std::size_t deltaStep, float integrationStep);
 
     TimeAveragedMSD calculate(const Trajectory &trajectory);
+
+    std::size_t getMaxDelta() const { return this->maxDelta; }
+    std::size_t getDeltaStep() const { return this->deltaStep; }
 };
 
 #endif /* TIMEAVERAGEDMSDCALCULATOR_H_ */

@@ -40,7 +40,7 @@ TEST_CASE("TAMSDPowerLawAccumulator") {
     }
 
     SECTION("mean alpha") {
-        double meanAlpha = accumulator.getEnsembleAverageExponent();
+        double meanAlpha = accumulator.getEnsembleAveragedExponent();
         REQUIRE(meanAlpha == Approx(0.5*(alpha1 + alpha2)));
     }
 

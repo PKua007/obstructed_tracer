@@ -34,7 +34,7 @@ public:
 
     std::vector<double> getExponentHistogram() const;
     TimeAveragedMSD getEnsembleAveragedTAMSD() const;
-    double getEnsembleAverageExponent() const;
+    double getEnsembleAveragedExponent() const;
 };
 
 #endif /* TAMSDPOWERLAWACCUMULATOR_H_ */

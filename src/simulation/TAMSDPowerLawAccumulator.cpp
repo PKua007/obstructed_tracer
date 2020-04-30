@@ -37,6 +37,6 @@ TimeAveragedMSD TAMSDPowerLawAccumulator::getEnsembleAveragedTAMSD() const {
     return this->ensembleAveragedTAMSD / this->numMSDs;
 }
 
-double TAMSDPowerLawAccumulator::getEnsembleAverageExponent() const {
+double TAMSDPowerLawAccumulator::getEnsembleAveragedExponent() const {
     return this->averageExponent / this->numMSDs;
 }

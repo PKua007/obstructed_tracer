@@ -9,6 +9,7 @@
 #define TIMEAVERAGEDMSD_H_
 
 #include <vector>
+#include <iosfwd>
 
 /**
  * @brief Mean square displacement averaged over the trajectory.
@@ -43,8 +44,8 @@ public:
     bool empty() const { return data.empty(); }
     iterator begin() { return data.begin(); }
     iterator end() { return data.end(); }
-    const_iterator begin() const { data.begin(); }
-    const_iterator end() const { data.end(); }
+    const_iterator begin() const { return data.begin(); }
+    const_iterator end() const { return data.end(); }
 
     /**
      * @brief Based on @a stepSize and @a integrationStep passed in the constructor, translates data index to the
@@ -57,6 +58,8 @@ public:
      * returns the exponent.
      */
     double getPowerLawExponent(double relativeFitStart, double relativeFitEnd) const;
+
+    void store(std::ostream &out) const;
 
     TimeAveragedMSD &operator+=(const TimeAveragedMSD &other);
     friend TimeAveragedMSD operator/(const TimeAveragedMSD &tamsd, float a);

@@ -38,7 +38,7 @@ double TimeAveragedMSD::getPowerLawExponent(double relativeFitStart, double rela
     std::size_t fitStartIdx = static_cast<std::size_t>(this->size()*relativeFitStart);
     std::size_t fitEndIdx = static_cast<std::size_t>(this->size()*relativeFitEnd);
     Assert(fitStartIdx > 0);    // TA MSD is 0 for Delta=0, so it breaks the logarithm in the power-law fit
-    Assert(fitEndIdx < this->size());
+    Assert(fitEndIdx <= this->size());
 
     PowerRegression regression;
     for (std::size_t i = fitStartIdx; i < fitEndIdx; i++)
@@ -61,4 +61,9 @@ TimeAveragedMSD operator/(const TimeAveragedMSD &tamsd, float a) {
     for (std::size_t i{}; i < tamsd.size(); i++)
         result[i] = tamsd.data[i] / a;
     return result;
+}
+
+void TimeAveragedMSD::store(std::ostream &out) const {
+    for (std::size_t i{}; i < this->size(); i++)
+        out << this->dataIndexToRealTime(i) << " " << this->data[i] << std::endl;
 }
