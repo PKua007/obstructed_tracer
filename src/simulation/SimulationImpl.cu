@@ -315,9 +315,9 @@ void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalk
             if (this->storeTAMSD)
                 logger << std::endl;
 
-            for (std::size_t i{}; i < randomWalker.getNumberOfTrajectories(); i++) {
-                const auto &trajectory = randomWalker.getTrajectory(i);
-                TimeAveragedMSD tamsd = this->tamsdCalculator->calculate(trajectory);
+            auto tamsds = this->tamsdCalculator->calculate(randomWalker.getTrajectories());
+            for (std::size_t i{}; i < tamsds.size(); i++) {
+                const auto &tamsd = tamsds[i];
                 if (this->storeTAMSD)
                     this->doStoreTAMSD(tamsd, simulationIndex, startTrajectory + i, logger);
 

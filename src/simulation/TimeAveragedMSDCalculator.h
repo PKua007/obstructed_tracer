@@ -8,6 +8,8 @@
 #ifndef TIMEAVERAGEDMSDCALCULATOR_H_
 #define TIMEAVERAGEDMSDCALCULATOR_H_
 
+#include <vector>
+
 #include "TimeAveragedMSD.h"
 #include "Trajectory.h"
 
@@ -27,7 +29,7 @@ public:
      */
     TimeAveragedMSDCalculator(std::size_t maxDelta, std::size_t deltaStep, float integrationStep);
 
-    TimeAveragedMSD calculate(const Trajectory &trajectory);
+    std::vector<TimeAveragedMSD> calculate(const std::vector<Trajectory> &trajectories);
 
     std::size_t getMaxDelta() const { return this->maxDelta; }
     std::size_t getDeltaStep() const { return this->deltaStep; }

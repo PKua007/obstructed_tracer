@@ -22,7 +22,9 @@ TEST_CASE("TimeAveragedMSDCalculator") {
     float integrationStep = 0.25;
     TimeAveragedMSDCalculator calculator(maxDelta, deltaStep, integrationStep);
 
-    TimeAveragedMSD tamsd = calculator.calculate(trajectory);
+    auto tamsds = calculator.calculate({trajectory});
+    REQUIRE(tamsds.size() == 1);
+    auto &tamsd = tamsds.front();
 
     // Assert trajectory "metadata"
     REQUIRE_FALSE(tamsd.empty());
