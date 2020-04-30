@@ -563,17 +563,17 @@ TEST_CASE("Simulation: run") {
             .LR_RETURN(std::move(randomWalker2)));
 
         // We want correct names for correct trajectories
-        REQUIRE_CALL_V(*trajectoryPrinter, print(_, "trajectory_0_0.txt"),
+        REQUIRE_CALL_V(*trajectoryPrinter, print(_, "test_traj_0_0.txt"),
             .LR_WITH(&_1 == &t1));
-        REQUIRE_CALL_V(*trajectoryPrinter, print(_, "trajectory_0_1.txt"),
+        REQUIRE_CALL_V(*trajectoryPrinter, print(_, "test_traj_0_1.txt"),
             .LR_WITH(&_1 == &t2));
-        REQUIRE_CALL_V(*trajectoryPrinter, print(_, "trajectory_1_0.txt"),
+        REQUIRE_CALL_V(*trajectoryPrinter, print(_, "test_traj_1_0.txt"),
             .LR_WITH(&_1 == &t3));
-        REQUIRE_CALL_V(*trajectoryPrinter, print(_, "trajectory_1_1.txt"),
+        REQUIRE_CALL_V(*trajectoryPrinter, print(_, "test_traj_1_1.txt"),
             .LR_WITH(&_1 == &t4));
 
         SimulationImpl simulation(parameters, std::move(randomWalkerFactory), std::move(trajectoryPrinter),
-                                  "trajectory", logger);
+                                  "test", logger);
 
 
         simulation.run(logger);

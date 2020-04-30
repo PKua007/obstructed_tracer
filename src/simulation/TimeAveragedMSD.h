@@ -59,6 +59,9 @@ public:
      */
     double getPowerLawExponent(double relativeFitStart, double relativeFitEnd) const;
 
+    /**
+     * @brief Stores TA MSD - each step is a separate text line of format [real time] [value]
+     */
     void store(std::ostream &out) const;
 
     TimeAveragedMSD &operator+=(const TimeAveragedMSD &other);
