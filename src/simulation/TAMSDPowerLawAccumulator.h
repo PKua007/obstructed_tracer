@@ -22,7 +22,6 @@ private:
     std::size_t numMSDs{};
     std::vector<double> exponentHistogram;
     TimeAveragedMSD ensembleAveragedTAMSD;
-    double averageExponent{};
 
 public:
     /**
