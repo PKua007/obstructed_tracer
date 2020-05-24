@@ -267,10 +267,17 @@ void SimulationImpl::storeTAMSDData(std::ostream &logger) {
     auto fileOstreamProvider = std::unique_ptr<FileOstreamProvider>(new FileOstreamProvider());
 
     std::string histogramFilename = this->outputFilePrefix + "_alpha_hist.txt";
-    fileOstreamProvider->setFileDescription("TA MSD power law esponent histogram");
+    fileOstreamProvider->setFileDescription("TA MSD power law exponent histogram");
     auto histogramFile = fileOstreamProvider->openFile(histogramFilename);
     auto histogram = this->tamsdPowerLawAccumulator->getExponentHistogram();
     std::copy(histogram.begin(), histogram.end(), std::ostream_iterator<double>(*histogramFile, "\n"));
+
+    std::string varianceHistogramFilename = this->outputFilePrefix + "_var_alpha_hist.txt";
+    fileOstreamProvider->setFileDescription("TA MSD power law variance variance histogram");
+    auto varianceHistogramFile = fileOstreamProvider->openFile(varianceHistogramFilename);
+    auto varianceHistogram = this->tamsdPowerLawAccumulator->getVarianceExponentHistogram();
+    std::copy(varianceHistogram.begin(), varianceHistogram.end(),
+              std::ostream_iterator<double>(*varianceHistogramFile, "\n"));
 
     std::string meanTamsdFilename = this->outputFilePrefix + "_mean_tamsd.txt";
     fileOstreamProvider->setFileDescription("ensemble averaged TA MSD");
@@ -279,9 +286,13 @@ void SimulationImpl::storeTAMSDData(std::ostream &logger) {
     meanTamsd.store(*meanTamsdFile);
 
     logger << "[SimulationImpl::run] TAMSD alpha histogram stored to " << histogramFilename << std::endl;
+    logger << "[SimulationImpl::run] TAMSD variance alpha histogram stored to " << varianceHistogramFilename;
+    logger << std::endl;
     logger << "[SimulationImpl::run] Ensemble averaged TAMSD stored to " << meanTamsdFilename << std::endl;
     logger << "[SimulationImpl::run] Ensemble averaged TAMSD alpha: ";
     logger << this->tamsdPowerLawAccumulator->getEnsembleAveragedExponent() << std::endl;
+    logger << "[SimulationImpl::run] Ensemble averaged TAMSD variance alpha: ";
+    logger << this->tamsdPowerLawAccumulator->getEnsembleAveragedVarianceExponent() << std::endl;
 }
 
 SimulationImpl::SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix,

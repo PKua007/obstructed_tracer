@@ -88,7 +88,7 @@ TimeAveragedMSD operator/(const TimeAveragedMSD &tamsd, float a) {
 
 void TimeAveragedMSD::store(std::ostream &out) const {
     for (std::size_t i{}; i < this->size(); i++)
-        out << this->dataIndexToRealTime(i) << " " << this->data[i] << this->getVariance(i) << std::endl;
+        out << this->dataIndexToRealTime(i) << " " << this->data[i] << " " << this->getVariance(i) << std::endl;
 }
 
 TimeAveragedMSD::Entry operator+(const TimeAveragedMSD::Entry &e1, const TimeAveragedMSD::Entry &e2) {
