@@ -21,6 +21,7 @@ private:
 
     std::size_t numMSDs{};
     std::vector<double> exponentHistogram;
+    std::vector<double> varianceExponentHistogram;
     TimeAveragedMSD ensembleAveragedTAMSD;
 
 public:
@@ -32,8 +33,10 @@ public:
     void addTAMSD(const TimeAveragedMSD &tamsd);
 
     std::vector<double> getExponentHistogram() const;
+    std::vector<double> getVarianceExponentHistogram() const;
     TimeAveragedMSD getEnsembleAveragedTAMSD() const;
     double getEnsembleAveragedExponent() const;
+    double getEnsembleAveragedVarianceExponent() const;
 };
 
 #endif /* TAMSDPOWERLAWACCUMULATOR_H_ */
