@@ -33,7 +33,7 @@ TEST_CASE("TAMSDPowerLawAccumulator") {
     tamsd2[3].delta2 = K2 * std::pow(3 * 0.25, alpha2);
     tamsd2[4].delta2 = K2 * std::pow(4 * 0.25, alpha2);
 
-    // delta is prepared in such a way with  nontrivial x, y components, that delta^2 = 0.25 delta2
+    // delta is prepared in such a way with nontrivial x, y components, that delta^2 = 0.25 delta2
     tamsd1[2].delta = Move{std::sqrt(tamsd1[2].delta2 / 2.f - 0.1f), std::sqrt(tamsd1[2].delta2 / 2.f + 0.1f)} / 2.f;
     tamsd1[3].delta = Move{std::sqrt(tamsd1[3].delta2 / 2.f - 0.1f), std::sqrt(tamsd1[3].delta2 / 2.f + 0.1f)} / 2.f;
     tamsd1[4].delta = Move{std::sqrt(tamsd1[4].delta2 / 2.f - 0.1f), std::sqrt(tamsd1[4].delta2 / 2.f + 0.1f)} / 2.f;

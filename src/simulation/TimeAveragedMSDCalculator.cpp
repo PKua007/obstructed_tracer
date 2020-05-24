@@ -32,7 +32,7 @@ std::vector<TimeAveragedMSD> TimeAveragedMSDCalculator::calculate(const std::vec
         auto &trajectory = trajectories[resultI];
         auto &result = resultVector[resultI];
         // For each delta mentioned above, we average all displacements differing by delta steps, so for example for
-        // delta = 2 we average (2 - 0), (4 - 2) and so on
+        // delta = 2 we average (2 - 0), (3 - 1), (4 - 2) and so on
         for (std::size_t deltaStepI{}; deltaStepI <= this->maxDelta/this->deltaStep; deltaStepI++) {
             std::size_t delta = deltaStepI*this->deltaStep;
             float r2{};

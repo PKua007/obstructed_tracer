@@ -12,7 +12,8 @@
 
 /**
  * @brief A class which calculates and collects some information about TA MSD from a several TA MSD.
- * @details There are: histogram of exponents of power law, ensemble averaged TA MSD and and exponent for it.
+ * @details There are: histogram of exponents of TA MSD and variance, ensemble averaged TA MSD and exponent for it and
+ * also its variance.
  */
 class TAMSDPowerLawAccumulator {
 private:

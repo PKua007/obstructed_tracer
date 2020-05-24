@@ -30,29 +30,21 @@ TimeAveragedMSD::Entry TimeAveragedMSD::operator[](std::size_t stepIdx) const {
     return data[stepIdx];
 }
 
-float TimeAveragedMSD::getVariance(std::size_t stepIdx) const {
-    Expects(stepIdx < this->size());
-    return data[stepIdx].delta2 - std::pow(data[stepIdx].delta.x, 2) - std::pow(data[stepIdx].delta.y, 2);
-}
-
 double TimeAveragedMSD::getPowerLawExponent(double relativeFitStart, double relativeFitEnd) const {
-    Expects(relativeFitStart > 0);
-    Expects(relativeFitEnd > relativeFitStart);
-    Expects(relativeFitEnd <= 1);
-
-    std::size_t fitStartIdx = static_cast<std::size_t>(this->size()*relativeFitStart);
-    std::size_t fitEndIdx = static_cast<std::size_t>(this->size()*relativeFitEnd);
-    Assert(fitStartIdx > 0);    // TA MSD is 0 for Delta=0, so it breaks the logarithm in the power-law fit
-    Assert(fitEndIdx <= this->size());
-
-    PowerRegression regression;
-    for (std::size_t i = fitStartIdx; i < fitEndIdx; i++)
-        regression.addXY(this->dataIndexToRealTime(i), this->data[i].delta2);
-    regression.calculate();
-    return regression.getExponent().value;
+    return this->getObservableLawExponent(relativeFitStart, relativeFitEnd, [this](std::size_t i) {
+        return this->data[i].delta2;
+    });
 }
 
 double TimeAveragedMSD::getVariancePowerLawExponent(double relativeFitStart, double relativeFitEnd) const {
+    return this->getObservableLawExponent(relativeFitStart, relativeFitEnd, [this](std::size_t i) {
+        return this->data[i].variance();
+    });
+}
+
+double TimeAveragedMSD::getObservableLawExponent(double relativeFitStart, double relativeFitEnd,
+                                                 std::function<float(std::size_t)> observable) const
+{
     Expects(relativeFitStart > 0);
     Expects(relativeFitEnd > relativeFitStart);
     Expects(relativeFitEnd <= 1);
@@ -64,7 +56,7 @@ double TimeAveragedMSD::getVariancePowerLawExponent(double relativeFitStart, dou
 
     PowerRegression regression;
     for (std::size_t i = fitStartIdx; i < fitEndIdx; i++)
-        regression.addXY(this->dataIndexToRealTime(i), this->getVariance(i));
+        regression.addXY(this->dataIndexToRealTime(i), observable(i));
     regression.calculate();
     return regression.getExponent().value;
 }
@@ -88,7 +80,7 @@ TimeAveragedMSD operator/(const TimeAveragedMSD &tamsd, float a) {
 
 void TimeAveragedMSD::store(std::ostream &out) const {
     for (std::size_t i{}; i < this->size(); i++)
-        out << this->dataIndexToRealTime(i) << " " << this->data[i] << " " << this->getVariance(i) << std::endl;
+        out << this->dataIndexToRealTime(i) << " " << this->data[i] << std::endl;
 }
 
 TimeAveragedMSD::Entry operator+(const TimeAveragedMSD::Entry &e1, const TimeAveragedMSD::Entry &e2) {
@@ -110,5 +102,5 @@ bool operator==(const TimeAveragedMSD::Entry &e1, const TimeAveragedMSD::Entry &
 }
 
 std::ostream &operator<<(std::ostream &out, const TimeAveragedMSD::Entry &entry) {
-    return out << entry.delta2 << " " << entry.delta;
+    return out << entry.delta2 << " " << entry.delta << " " << entry.variance();
 }
