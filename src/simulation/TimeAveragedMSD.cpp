@@ -32,7 +32,7 @@ TimeAveragedMSD::Entry TimeAveragedMSD::operator[](std::size_t stepIdx) const {
 
 float TimeAveragedMSD::getVariance(std::size_t stepIdx) const {
     Expects(stepIdx < this->size());
-    return data[stepIdx].delta2 - std::pow(data[stepIdx].delta, 2);
+    return data[stepIdx].delta2 - std::pow(data[stepIdx].delta.x, 2) + std::pow(data[stepIdx].delta.y, 2);
 }
 
 double TimeAveragedMSD::getPowerLawExponent(double relativeFitStart, double relativeFitEnd) const {

@@ -33,13 +33,17 @@ std::vector<TimeAveragedMSD> TimeAveragedMSDCalculator::calculate(const std::vec
         for (std::size_t deltaStepI{}; deltaStepI <= this->maxDelta/this->deltaStep; deltaStepI++) {
             std::size_t delta = deltaStepI*this->deltaStep;
             float r2{};
+            Move r{};
             for (std::size_t trajStepI = delta; trajStepI < trajectory.getSize(); trajStepI++) {
                 Move deltaR = trajectory[trajStepI] - trajectory[trajStepI - delta];
 
                 r2 += deltaR.x*deltaR.x + deltaR.y*deltaR.y;
+                r += deltaR;
             }
             r2 /= (trajectory.getSize() - delta);
+            r /= (trajectory.getSize() - delta);
             result[deltaStepI].delta2 = r2;
+            result[deltaStepI].delta = r;
         }
     }
 

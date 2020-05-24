@@ -11,6 +11,8 @@
 #include <vector>
 #include <iosfwd>
 
+#include "Move.h"
+
 /**
  * @brief Mean square displacement averaged over the trajectory.
  * @details It is a function of Delta and calculated as
@@ -21,10 +23,10 @@ class TimeAveragedMSD {
 public:
     struct Entry {
         float delta2{};
-        float delta{};
+        Move delta{};
 
         Entry() { }
-        Entry(float delta2, float delta) : delta2{delta2}, delta{delta} { }
+        Entry(float delta2, Move delta) : delta2{delta2}, delta{delta} { }
 
         friend Entry operator+(const Entry &e1, const Entry &e2);
         friend Entry operator/(const Entry &tamsd, float a);

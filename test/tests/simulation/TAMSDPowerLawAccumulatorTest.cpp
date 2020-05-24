@@ -21,8 +21,8 @@ TEST_CASE("TAMSDPowerLawAccumulator") {
     TimeAveragedMSD tamsd2(6, 2, 0.25);
 
     // Now we fill only 2, 3, 4 steps with a nice power law, the rest with junk
-    std::fill(tamsd1.begin(), tamsd1.end(), TimeAveragedMSD::Entry{1337, 0});
-    std::fill(tamsd2.begin(), tamsd2.end(), TimeAveragedMSD::Entry{1337, 0});
+    std::fill(tamsd1.begin(), tamsd1.end(), TimeAveragedMSD::Entry{1337, {0, 0}});
+    std::fill(tamsd2.begin(), tamsd2.end(), TimeAveragedMSD::Entry{1337, {0, 0}});
     const float K1 = 2, K2 = 3, alpha1 = 2, alpha2 = 4;
     tamsd1[2].delta2 = K1 * std::pow(2 * 0.25, alpha1);
     tamsd1[3].delta2 = K1 * std::pow(3 * 0.25, alpha1);
