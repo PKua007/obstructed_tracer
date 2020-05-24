@@ -24,12 +24,17 @@ void TAMSDPowerLawAccumulator::addTAMSD(const TimeAveragedMSD &tamsd) {
         this->ensembleAveragedTAMSD += tamsd;    // This also checks if the new TA MDS has the same params as the rest
 
     this->numMSDs++;
-    double alpha = tamsd.getPowerLawExponent(this->relativeFitStart, this->relativeFitEnd);
-    this->exponentHistogram.push_back(alpha);
+    this->exponentHistogram.push_back(tamsd.getPowerLawExponent(this->relativeFitStart, this->relativeFitEnd));
+    this->varianceExponentHistogram.push_back(tamsd.getVariancePowerLawExponent(this->relativeFitStart,
+                                                                                this->relativeFitEnd));
 }
 
 std::vector<double> TAMSDPowerLawAccumulator::getExponentHistogram() const {
     return this->exponentHistogram;
+}
+
+std::vector<double> TAMSDPowerLawAccumulator::getVarianceExponentHistogram() const {
+    return this->varianceExponentHistogram;
 }
 
 TimeAveragedMSD TAMSDPowerLawAccumulator::getEnsembleAveragedTAMSD() const {
@@ -38,4 +43,8 @@ TimeAveragedMSD TAMSDPowerLawAccumulator::getEnsembleAveragedTAMSD() const {
 
 double TAMSDPowerLawAccumulator::getEnsembleAveragedExponent() const {
     return this->getEnsembleAveragedTAMSD().getPowerLawExponent(this->relativeFitStart, this->relativeFitEnd);
+}
+
+double TAMSDPowerLawAccumulator::getEnsembleAveragedVarianceExponent() const {
+    return this->getEnsembleAveragedTAMSD().getVariancePowerLawExponent(this->relativeFitStart, this->relativeFitEnd);
 }

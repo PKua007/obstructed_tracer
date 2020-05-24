@@ -24,8 +24,10 @@ TEST_CASE("Move") {
         Move m2{3, 4};
 
         Move m = m1 + m2;
-
         REQUIRE(m == Move{4, 6});
+
+        m += Move{-2, -3};
+        REQUIRE(m == Move{2, 3});
     }
 
     SECTION("scalar multiplication") {
@@ -36,6 +38,16 @@ TEST_CASE("Move") {
 
         REQUIRE(m1 == Move{2, 4});
         REQUIRE(m2 == Move{2, 4});
+    }
+
+    SECTION("scalar division") {
+        Move m{6, 12};
+
+        Move m1 = m / 2;
+        REQUIRE(m1 == Move{3, 6});
+
+        m1 /= 3;
+        REQUIRE(m1 == Move{1, 2});
     }
 }
 
