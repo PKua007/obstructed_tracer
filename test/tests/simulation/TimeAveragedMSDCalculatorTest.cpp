@@ -31,7 +31,7 @@ TEST_CASE("TimeAveragedMSDCalculator") {
     REQUIRE(tamsd.size() == 3);
     REQUIRE(tamsd.dataIndexToRealTime(1) == Approx(0.5));
     // Assert the actual data
-    REQUIRE(tamsd[0] == 0);
-    REQUIRE(tamsd[1] == Approx(66.5));
-    REQUIRE(tamsd[2] == Approx(39));
+    REQUIRE(tamsd[0].delta2 == 0);
+    REQUIRE(tamsd[1].delta2 == Approx(66.5));
+    REQUIRE(tamsd[2].delta2 == Approx(39));
 }

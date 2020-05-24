@@ -39,7 +39,7 @@ std::vector<TimeAveragedMSD> TimeAveragedMSDCalculator::calculate(const std::vec
                 r2 += deltaR.x*deltaR.x + deltaR.y*deltaR.y;
             }
             r2 /= (trajectory.getSize() - delta);
-            result[deltaStepI] = r2;
+            result[deltaStepI].delta2 = r2;
         }
     }
 

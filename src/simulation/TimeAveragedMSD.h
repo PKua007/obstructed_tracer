@@ -18,14 +18,27 @@
  * where T is a whole trajectory time.
  */
 class TimeAveragedMSD {
+public:
+    struct Entry {
+        float delta2{};
+        float delta{};
+
+        Entry() { }
+        Entry(float delta2, float delta) : delta2{delta2}, delta{delta} { }
+
+        friend Entry operator+(const Entry &e1, const Entry &e2);
+        friend Entry operator/(const Entry &tamsd, float a);
+        friend std::ostream &operator<<(std::ostream &out, const Entry &entry);
+    };
+
 private:
-    std::vector<float> data;
+    std::vector<Entry> data;
     std::size_t stepSize;
     float integrationStep;
 
 public:
-    using iterator = std::vector<float>::iterator;
-    using const_iterator = std::vector<float>::const_iterator;
+    using iterator = std::vector<Entry>::iterator;
+    using const_iterator = std::vector<Entry>::const_iterator;
 
     TimeAveragedMSD() { }
 
@@ -37,8 +50,9 @@ public:
      */
     TimeAveragedMSD(std::size_t numSteps, std::size_t stepSize, float integrationStep);
 
-    float &operator[](std::size_t stepIdx);
-    float operator[](std::size_t stepIdx) const;
+    Entry &operator[](std::size_t stepIdx);
+    Entry operator[](std::size_t stepIdx) const;
+    float getVariance(std::size_t stepIdx) const;
 
     std::size_t size() const { return data.size(); }
     bool empty() const { return data.empty(); }
