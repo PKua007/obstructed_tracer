@@ -52,6 +52,23 @@ double TimeAveragedMSD::getPowerLawExponent(double relativeFitStart, double rela
     return regression.getExponent().value;
 }
 
+double TimeAveragedMSD::getVariancePowerLawExponent(double relativeFitStart, double relativeFitEnd) const {
+    Expects(relativeFitStart > 0);
+    Expects(relativeFitEnd > relativeFitStart);
+    Expects(relativeFitEnd <= 1);
+
+    std::size_t fitStartIdx = static_cast<std::size_t>(this->size()*relativeFitStart);
+    std::size_t fitEndIdx = static_cast<std::size_t>(this->size()*relativeFitEnd);
+    Assert(fitStartIdx > 0);    // TA MSD is 0 for Delta=0, so it breaks the logarithm in the power-law fit
+    Assert(fitEndIdx <= this->size());
+
+    PowerRegression regression;
+    for (std::size_t i = fitStartIdx; i < fitEndIdx; i++)
+        regression.addXY(this->dataIndexToRealTime(i), this->getVariance(i));
+    regression.calculate();
+    return regression.getExponent().value;
+}
+
 TimeAveragedMSD &TimeAveragedMSD::operator+=(const TimeAveragedMSD &other) {
     Expects(this->size() == other.size());
     Expects(this->stepSize == other.stepSize);
@@ -86,6 +103,10 @@ TimeAveragedMSD::Entry operator/(const TimeAveragedMSD::Entry &tamsd, float a) {
     result.delta = tamsd.delta / a;
     result.delta2 = tamsd.delta2 / a;
     return result;
+}
+
+bool operator==(const TimeAveragedMSD::Entry &e1, const TimeAveragedMSD::Entry &e2) {
+    return e1.delta2 == e2.delta2 && e1.delta == e2.delta;
 }
 
 std::ostream &operator<<(std::ostream &out, const TimeAveragedMSD::Entry &entry) {

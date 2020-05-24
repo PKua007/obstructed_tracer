@@ -30,6 +30,7 @@ public:
 
         friend Entry operator+(const Entry &e1, const Entry &e2);
         friend Entry operator/(const Entry &tamsd, float a);
+        friend bool operator==(const Entry &e1, const Entry &e2);
         friend std::ostream &operator<<(std::ostream &out, const Entry &entry);
     };
 
@@ -70,10 +71,16 @@ public:
     float dataIndexToRealTime(std::size_t index) const { return index * this->stepSize * this->integrationStep; }
 
     /**
-     * @brief Fits power law to the relative range of data given by @a relativeFitStart and @a relativeFitEnd and
+     * @brief Fits power law to the relative range of TA MSD data given by @a relativeFitStart and @a relativeFitEnd and
      * returns the exponent.
      */
     double getPowerLawExponent(double relativeFitStart, double relativeFitEnd) const;
+
+    /**
+     * @brief Fits power law to the relative range of variance data given by @a relativeFitStart and @a relativeFitEnd\
+     * and returns the exponent.
+     */
+    double getVariancePowerLawExponent(double relativeFitStart, double relativeFitEnd) const;
 
     /**
      * @brief Stores TA MSD - each step is a separate text line of format [real time] [value]

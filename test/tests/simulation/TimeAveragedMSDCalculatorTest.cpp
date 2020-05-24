@@ -20,6 +20,7 @@ TEST_CASE("TimeAveragedMSDCalculator") {
     std::size_t maxDelta = 4;
     std::size_t deltaStep = 2;
     float integrationStep = 0.25;
+    // So we have (delta in steps, actual delta - time): (0, 0), (2, 0.5), (4, 1)
     TimeAveragedMSDCalculator calculator(maxDelta, deltaStep, integrationStep);
 
     auto tamsds = calculator.calculate({trajectory});
@@ -31,7 +32,7 @@ TEST_CASE("TimeAveragedMSDCalculator") {
     REQUIRE(tamsd.size() == 3);
     REQUIRE(tamsd.dataIndexToRealTime(1) == Approx(0.5));
     // Assert the actual data
-    REQUIRE(tamsd[0].delta2 == 0);
-    REQUIRE(tamsd[1].delta2 == Approx(66.5));
-    REQUIRE(tamsd[2].delta2 == Approx(39));
+    REQUIRE(tamsd[0] == TimeAveragedMSD::Entry{0, {0, 0}});
+    REQUIRE(tamsd[1] == TimeAveragedMSD::Entry{66.5, {2.5, -1.5}});
+    REQUIRE(tamsd[2] == TimeAveragedMSD::Entry{39, {5, -3}});
 }
