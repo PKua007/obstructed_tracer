@@ -12,6 +12,15 @@
 #include "Trajectory.h"
 
 class SurvivalProbabilityAccumulator {
+private:
+    std::vector<double> radii;
+    std::size_t numSteps{};
+    std::size_t stepDelta{};
+    double integrationStep{};
+    std::size_t numTrajectories{};
+
+    std::vector<std::vector<double>> data;
+
 public:
     SurvivalProbabilityAccumulator(const std::vector<double> &radii, std::size_t numSteps, std::size_t stepDelta,
                                    double integrationStep);
