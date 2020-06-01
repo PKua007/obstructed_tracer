@@ -188,6 +188,28 @@ void SimulationImpl::initializeTAMSDCalculators(const Parameters &parameters) {
     }
 }
 
+void SimulationImpl::initializeSurvivalProbabilityAccumulator(const Parameters &parameters) {
+    std::istringstream survivalParamsStream(parameters.survival);
+
+    std::size_t stepDelta{};
+    std::vector<double> radii;
+
+    survivalParamsStream >> stepDelta;
+    ValidateMsg(survivalParamsStream, "Wrong format of survival parameters. Use: [step delta] [radius 1] [r 2] ...");
+    Validate(stepDelta > 0);
+    Validate(parameters.numberOfSteps % stepDelta == 0);
+
+    std::copy(std::istream_iterator<double>(survivalParamsStream), std::istream_iterator<double>(),
+              std::back_inserter(radii));
+    Validate(!radii.empty());
+    for (double radius : radii)
+        Validate(radius > 0);
+
+    this->survivalProbabilityAccumulator = std::unique_ptr<SurvivalProbabilityAccumulator>(
+        new SurvivalProbabilityAccumulator(radii, parameters.numberOfSteps, stepDelta, parameters.integrationStep)
+    );
+}
+
 void SimulationImpl::storeTrajectories(const RandomWalker &randomWalker, std::size_t simulationIndex,
                                        std::size_t firstTrajectoryIndex, std::ostream &logger)
 {
@@ -295,6 +317,30 @@ void SimulationImpl::storeTAMSDData(std::ostream &logger) {
     logger << this->tamsdPowerLawAccumulator->getEnsembleAveragedVarianceExponent() << std::endl;
 }
 
+void SimulationImpl::storeSurvivalProbabilities(std::ostream &logger) {
+    if (this->survivalProbabilityAccumulator == nullptr)
+        return;
+
+    auto fileOstreamProvider = std::unique_ptr<FileOstreamProvider>(new FileOstreamProvider());
+
+    const auto &survivalProbabilities = this->survivalProbabilityAccumulator->calculateSurvivalProbabilities();
+    const auto &radii = this->survivalProbabilityAccumulator->getRadii();
+    for (std::size_t i{}; i < radii.size(); i++) {
+        double radius = radii[i];
+        std::ostringstream radiusStream;
+        radiusStream << radius;
+        std::string radiusString = radiusStream.str();
+        std::string survivalFilename = this->outputFilePrefix + "_surv_" + radiusString + ".txt";
+
+        fileOstreamProvider->setFileDescription("survival probability for radius " + radiusString);
+        auto survivalFile = fileOstreamProvider->openFile(survivalFilename);
+
+        survivalProbabilities[i].store(*survivalFile);
+        logger << "[SimulationImpl::run] Survival probability for radius " << radiusString << " stored to ";
+        logger << survivalFilename << std::endl;
+    }
+}
+
 SimulationImpl::SimulationImpl(const Parameters &parameters, const std::string &outputFilePrefix,
                                std::ostream &logger)
         : SimulationImpl(parameters, std::unique_ptr<RandomWalkerFactory>(new RandomWalkerFactoryImpl(logger)),
@@ -319,6 +365,7 @@ SimulationImpl::SimulationImpl(const Parameters &parameters, std::unique_ptr<Ran
     this->initializePositionHistogram(parameters.positionHistogramSteps, parameters.numberOfSteps);
     this->initializeCoverageMapAccumulator(parameters.coverageMapsSize);
     this->initializeTAMSDCalculators(parameters);
+    this->initializeSurvivalProbabilityAccumulator(parameters);
     this->initializeSeedGenerator(this->parameters.seed, logger);
     this->initializeDevice(this->parameters.device);
 
@@ -337,6 +384,13 @@ SimulationImpl::SimulationImpl(const Parameters &parameters, std::unique_ptr<Ran
     if (this->tamsdCalculator != nullptr) {
         logger << "[SimulationImpl] TA MSD will be calculated up to Delta = " << this->tamsdCalculator->getMaxDelta();
         logger << " with a step " << this->tamsdCalculator->getDeltaStep() << std::endl;
+    }
+
+    if (this->survivalProbabilityAccumulator != nullptr) {
+        const auto &radii = this->survivalProbabilityAccumulator->getRadii();
+        logger << "[SimulationImpl] Survival probability will be calculated for radii: ";
+        std::copy(radii.begin(), radii.end(), std::ostream_iterator<std::size_t>(logger, ", "));
+        logger << "with a step " << this->survivalProbabilityAccumulator->getStepDelta() << std::endl;
     }
 
     logger << std::endl;
@@ -400,6 +454,14 @@ void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalk
             timer.stop();
             logger << "completed in " << timer.countMicroseconds() << " μs." << std::endl;
         }
+
+        if (this->survivalProbabilityAccumulator != nullptr) {
+            logger << "[SimulationImpl::run] Calculating survival probability... " << std::flush;
+            timer.start();
+            this->survivalProbabilityAccumulator->addTrajectories(randomWalker.getTrajectories());
+            timer.stop();
+            logger << "completed in " << timer.countMicroseconds() << " μs." << std::endl;
+        }
     }
     logger << std::endl;
 }
@@ -416,7 +478,6 @@ SimulationImpl::getWalkerParametersForSimulation(std::size_t simulationIndex) co
 std::size_t SimulationImpl::getNumberOfSimulations() const {
     return this->moveFilters.size();
 }
-
 
 void SimulationImpl::run(std::ostream &logger) {
     for (std::size_t simulationIndex = 0; simulationIndex < this->getNumberOfSimulations(); simulationIndex++) {
@@ -443,5 +504,6 @@ void SimulationImpl::run(std::ostream &logger) {
     this->storeHistograms(logger);
     this->storeCoverageMaps(logger);
     this->storeTAMSDData(logger);
+    this->storeSurvivalProbabilities(logger);
     this->msdData = this->msdDataCalculator.fetchMSDData();
 }

@@ -44,7 +44,7 @@ public:
     iterator end() { return this->data.end(); }
     const_iterator end() const { return this->data.end(); }
 
-    void store(std::ostream &out);
+    void store(std::ostream &out) const;
 };
 
 #endif /* SURVIVALPROBABILITY_H_ */

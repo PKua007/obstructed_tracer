@@ -19,6 +19,7 @@
 #include "CoverageMapAccumulator.h"
 #include "TimeAveragedMSDCalculator.h"
 #include "TAMSDPowerLawAccumulator.h"
+#include "SurvivalProbabilityAccumulator.h"
 
 /**
  * @brief The concrete implementation of Simulation.
@@ -68,6 +69,8 @@ private:
     std::unique_ptr<TimeAveragedMSDCalculator> tamsdCalculator;
     bool shouldStoreTAMSD{};
     std::unique_ptr<TAMSDPowerLawAccumulator> tamsdPowerLawAccumulator;
+    std::unique_ptr<SurvivalProbabilityAccumulator> survivalProbabilityAccumulator;
+
     MSDData msdData;
 
     Move parseDrift(const std::string &driftString) const;
@@ -75,6 +78,7 @@ private:
     std::vector<std::string> prepareMoveFilterParameters(const std::string &moveFilterChain) const;
     void initializePositionHistogram(const std::string &stepsString, std::size_t numberOfSteps);
     void initializeCoverageMapAccumulator(const std::string &coverageMapsSize);
+    void initializeSurvivalProbabilityAccumulator(const Parameters &parameters);
     void initializeSeedGenerator(const std::string &seed, std::ostream &logger);
     void initializeDevice(const std::string &device);
     void initializeTAMSDCalculators(const Parameters &parameters);
@@ -86,6 +90,7 @@ private:
     void storeHistograms(std::ostream &logger);
     void storeCoverageMaps(std::ostream &logger);
     void storeTAMSDData(std::ostream &logger);
+    void storeSurvivalProbabilities(std::ostream &logger);
 
 public:
     /**

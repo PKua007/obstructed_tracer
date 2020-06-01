@@ -23,7 +23,7 @@ SurvivalProbability::SurvivalProbability(double radius, std::size_t numSteps, st
     data.resize(numSteps / stepDelta);
 }
 
-void SurvivalProbability::store(std::ostream &out) {
+void SurvivalProbability::store(std::ostream &out) const {
     double totalTime = this->data.size() * this->stepDelta * this->integrationStep;
 
     for (std::size_t i; i < this->data.size(); i++) {

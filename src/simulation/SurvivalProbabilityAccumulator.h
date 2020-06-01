@@ -27,6 +27,9 @@ public:
 
     void addTrajectories(const std::vector<Trajectory> &trajectories);
     std::vector<SurvivalProbability> calculateSurvivalProbabilities() const;
+
+    std::size_t getStepDelta() const { return this->stepDelta; }
+    const std::vector<double> &getRadii() const { return this->radii; }
 };
 
 #endif /* SURVIVALPROBABILITYACCUMULATOR_H_ */
