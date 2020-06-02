@@ -9,25 +9,22 @@
 
 #include <ostream>
 
-SurvivalProbability::SurvivalProbability(double radius, std::size_t numSteps, std::size_t stepDelta,
+SurvivalProbability::SurvivalProbability(double radius, std::size_t numSteps, std::size_t stepSize,
                                          double integrationStep)
 
-        : radius{radius}, stepDelta{stepDelta}, integrationStep{integrationStep}
+        : radius{radius}, stepSize{stepSize}, integrationStep{integrationStep}
 {
     Expects(radius > 0);
     Expects(numSteps > 0);
-    Expects(stepDelta > 0);
+    Expects(stepSize > 0);
     Expects(integrationStep > 0);
-    Expects(numSteps % stepDelta == 0);
 
-    data.resize(numSteps / stepDelta);
+    data.resize(numSteps + 1);
 }
 
 void SurvivalProbability::store(std::ostream &out) const {
-    double totalTime = this->data.size() * this->stepDelta * this->integrationStep;
-
     for (std::size_t i; i < this->data.size(); i++) {
-        double t = totalTime * (i + 1) / this->data.size();
+        double t = i * this->stepSize * this->integrationStep;
         out << t << " " << this->data[i] << std::endl;
     }
 }

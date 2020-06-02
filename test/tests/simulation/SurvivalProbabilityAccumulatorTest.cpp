@@ -46,15 +46,15 @@ TEST_CASE("SurvivalProbabilityAccumulator") {
         std::vector<double> sp2(sps[0].begin(), sps[0].end()), sp4(sps[1].begin(), sps[1].end()),
                             sp6(sps[2].begin(), sps[2].end());
         REQUIRE(sps[0].getRadius() == 2);
-        REQUIRE(sp2 == std::vector<double>{0.5, 0.5,   0,   0, 0, 0,   0,   0,   0,   0});
+        REQUIRE(sp2 == std::vector<double>{1, 0.5, 0.5,   0,   0, 0, 0,   0,   0,   0,   0});
         REQUIRE(sps[1].getRadius() == 4);
-        REQUIRE(sp4 == std::vector<double>{  1,   1, 0.5, 0.5, 0, 0,   0,   0,   0,   0});
+        REQUIRE(sp4 == std::vector<double>{1,   1,   1, 0.5, 0.5, 0, 0,   0,   0,   0,   0});
         REQUIRE(sps[2].getRadius() == 6);
-        REQUIRE(sp6 == std::vector<double>{  1,   1,   1,   1, 1, 1, 0.5, 0.5, 0.5, 0.5});
+        REQUIRE(sp6 == std::vector<double>{1,   1,   1,   1,   1, 1, 1, 0.5, 0.5, 0.5, 0.5});
     }
 
     SECTION("every second step for radius = 4") {
-        SurvivalProbabilityAccumulator accumulator({4}, 10, 2, 3);
+        SurvivalProbabilityAccumulator accumulator({4}, 5, 2, 3);
 
         accumulator.addTrajectories({traj1, traj2});
 
@@ -63,6 +63,6 @@ TEST_CASE("SurvivalProbabilityAccumulator") {
         REQUIRE(sps.size() == 1);
         std::vector<double> sp(sps[0].begin(), sps[0].end());
         REQUIRE(sps[0].getRadius() == 4);
-        REQUIRE(sp == std::vector<double>{1, 1, 0, 0, 0});
+        REQUIRE(sp == std::vector<double>{1, 1, 1, 0, 0, 0});
     }
 }

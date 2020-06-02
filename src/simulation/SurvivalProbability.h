@@ -16,7 +16,7 @@
 class SurvivalProbability {
 private:
     double radius{};
-    std::size_t stepDelta{};
+    std::size_t stepSize{};
     double integrationStep{};
     std::vector<double> data;
 
@@ -24,7 +24,7 @@ public:
     using iterator = std::vector<double>::iterator;
     using const_iterator = std::vector<double>::const_iterator;
 
-    SurvivalProbability(double radius, std::size_t numSteps, std::size_t stepDelta, double integrationStep);
+    SurvivalProbability(double radius, std::size_t numSteps, std::size_t stepSize, double integrationStep);
 
     double getRadius() const { return this->radius; }
 

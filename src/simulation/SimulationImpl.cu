@@ -206,7 +206,8 @@ void SimulationImpl::initializeSurvivalProbabilityAccumulator(const Parameters &
         Validate(radius > 0);
 
     this->survivalProbabilityAccumulator = std::unique_ptr<SurvivalProbabilityAccumulator>(
-        new SurvivalProbabilityAccumulator(radii, parameters.numberOfSteps, stepDelta, parameters.integrationStep)
+        new SurvivalProbabilityAccumulator(radii, parameters.numberOfSteps / stepDelta, stepDelta,
+                                           parameters.integrationStep)
     );
 }
 
@@ -390,7 +391,7 @@ SimulationImpl::SimulationImpl(const Parameters &parameters, std::unique_ptr<Ran
         const auto &radii = this->survivalProbabilityAccumulator->getRadii();
         logger << "[SimulationImpl] Survival probability will be calculated for radii: ";
         std::copy(radii.begin(), radii.end(), std::ostream_iterator<std::size_t>(logger, ", "));
-        logger << "with a step " << this->survivalProbabilityAccumulator->getStepDelta() << std::endl;
+        logger << "with a step " << this->survivalProbabilityAccumulator->getStepSize() << std::endl;
     }
 
     logger << std::endl;

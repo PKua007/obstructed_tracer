@@ -15,20 +15,20 @@ class SurvivalProbabilityAccumulator {
 private:
     std::vector<double> radii;
     std::size_t numSteps{};
-    std::size_t stepDelta{};
+    std::size_t stepSize{};
     double integrationStep{};
     std::size_t numTrajectories{};
 
     std::vector<std::vector<double>> data;
 
 public:
-    SurvivalProbabilityAccumulator(const std::vector<double> &radii, std::size_t numSteps, std::size_t stepDelta,
+    SurvivalProbabilityAccumulator(const std::vector<double> &radii, std::size_t numSteps, std::size_t stepSize,
                                    double integrationStep);
 
     void addTrajectories(const std::vector<Trajectory> &trajectories);
     std::vector<SurvivalProbability> calculateSurvivalProbabilities() const;
 
-    std::size_t getStepDelta() const { return this->stepDelta; }
+    std::size_t getStepSize() const { return this->stepSize; }
     const std::vector<double> &getRadii() const { return this->radii; }
 };
 
