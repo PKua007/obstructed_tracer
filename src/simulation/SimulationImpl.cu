@@ -326,6 +326,7 @@ void SimulationImpl::storeSurvivalProbabilities(std::ostream &logger) {
 
     const auto &survivalProbabilities = this->survivalProbabilityAccumulator->calculateSurvivalProbabilities();
     const auto &radii = this->survivalProbabilityAccumulator->getRadii();
+
     for (std::size_t i{}; i < radii.size(); i++) {
         double radius = radii[i];
         std::ostringstream radiusStream;
@@ -391,7 +392,7 @@ SimulationImpl::SimulationImpl(const Parameters &parameters, std::unique_ptr<Ran
         const auto &radii = this->survivalProbabilityAccumulator->getRadii();
         logger << "[SimulationImpl] Survival probability will be calculated for radii: ";
         std::copy(radii.begin(), radii.end(), std::ostream_iterator<std::size_t>(logger, ", "));
-        logger << "with a step " << this->survivalProbabilityAccumulator->getStepSize() << std::endl;
+        logger << "with a step size " << this->survivalProbabilityAccumulator->getStepSize() << std::endl;
     }
 
     logger << std::endl;

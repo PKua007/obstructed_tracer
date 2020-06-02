@@ -20,7 +20,7 @@ SurvivalProbabilityAccumulator::SurvivalProbabilityAccumulator(const std::vector
 
     this->data.resize(radii.size());
     for (auto &dataEntry : this->data)
-        dataEntry.resize(numSteps + 1);
+        dataEntry.resize(numSteps + 1);     // +1 for t = 0
 }
 
 void SurvivalProbabilityAccumulator::addTrajectories(const std::vector<Trajectory> &trajectories) {
@@ -30,16 +30,17 @@ void SurvivalProbabilityAccumulator::addTrajectories(const std::vector<Trajector
         return;
 
     _OMP_PARALLEL_FOR
-    for (std::size_t i = 0; i < this->radii.size(); i++) {
+    for (std::size_t radiusIdx = 0; radiusIdx < this->radii.size(); radiusIdx++) {
         for (const auto trajectory : trajectories) {
             Assert(trajectory.getSize() >= this->numSteps + 1);
             Point start = trajectory.getFirst();
 
-            for (std::size_t j{}; j <= this->numSteps; j++) {
-                Move diff = trajectory[j * this->stepSize] - start;
-                double dist2 = diff.x*diff.x + diff.y*diff.y;
-                if (dist2 <= radii[i]*radii[i])
-                    this->data[i][j]++;
+            // We go from 0 to this->numSteps inclusive, because index 0 corresponds to t=0 and last to t=tmax
+            for (std::size_t step{}; step <= this->numSteps; step++) {
+                Move diff = trajectory[step * this->stepSize] - start;
+                double displacement2 = diff.x*diff.x + diff.y*diff.y;
+                if (displacement2 <= radii[radiusIdx]*radii[radiusIdx])
+                    this->data[radiusIdx][step]++;
                 else
                     break;
             }
@@ -52,11 +53,11 @@ std::vector<SurvivalProbability> SurvivalProbabilityAccumulator::calculateSurviv
 
     std::vector<SurvivalProbability> result;
     result.reserve(this->radii.size());
-    for (std::size_t i{}; i < this->radii.size(); i++) {
-        double radius = radii[i];
+    for (std::size_t radiusIdx{}; radiusIdx < this->radii.size(); radiusIdx++) {
+        double radius = radii[radiusIdx];
         SurvivalProbability sp(radius, this->numSteps, this->stepSize, this->integrationStep);
         for (std::size_t j{}; j < sp.size(); j++)
-            sp[j] = this->data[i][j] / this->numTrajectories;
+            sp[j] = this->data[radiusIdx][j] / this->numTrajectories;
         result.push_back(sp);
     }
 

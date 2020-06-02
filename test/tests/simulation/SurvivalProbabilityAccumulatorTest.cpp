@@ -41,15 +41,18 @@ TEST_CASE("SurvivalProbabilityAccumulator") {
         accumulator.addTrajectories({traj1, traj2});
 
         std::vector<SurvivalProbability> sps = accumulator.calculateSurvivalProbabilities();
-
         REQUIRE(sps.size() == 3);
-        std::vector<double> sp2(sps[0].begin(), sps[0].end()), sp4(sps[1].begin(), sps[1].end()),
-                            sp6(sps[2].begin(), sps[2].end());
+
         REQUIRE(sps[0].getRadius() == 2);
+        std::vector<double> sp2(sps[0].begin(), sps[0].end());
         REQUIRE(sp2 == std::vector<double>{1, 0.5, 0.5,   0,   0, 0, 0,   0,   0,   0,   0});
+
         REQUIRE(sps[1].getRadius() == 4);
+        std::vector<double> sp4(sps[1].begin(), sps[1].end());
         REQUIRE(sp4 == std::vector<double>{1,   1,   1, 0.5, 0.5, 0, 0,   0,   0,   0,   0});
+
         REQUIRE(sps[2].getRadius() == 6);
+        std::vector<double> sp6(sps[2].begin(), sps[2].end());
         REQUIRE(sp6 == std::vector<double>{1,   1,   1,   1,   1, 1, 1, 0.5, 0.5, 0.5, 0.5});
     }
 
@@ -59,10 +62,9 @@ TEST_CASE("SurvivalProbabilityAccumulator") {
         accumulator.addTrajectories({traj1, traj2});
 
         std::vector<SurvivalProbability> sps = accumulator.calculateSurvivalProbabilities();
-
         REQUIRE(sps.size() == 1);
-        std::vector<double> sp(sps[0].begin(), sps[0].end());
         REQUIRE(sps[0].getRadius() == 4);
+        std::vector<double> sp(sps[0].begin(), sps[0].end());
         REQUIRE(sp == std::vector<double>{1, 1, 1, 0, 0, 0});
     }
 }
