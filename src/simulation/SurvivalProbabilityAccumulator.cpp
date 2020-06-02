@@ -5,7 +5,8 @@
  *      Author: pkua
  */
 
-#include <simulation/SurvivalProbabilityAccumulator.h>
+#include "SurvivalProbabilityAccumulator.h"
+#include "utils/OMPDefines.h"
 
 SurvivalProbabilityAccumulator::SurvivalProbabilityAccumulator(const std::vector<double> &radii, std::size_t numSteps,
                                                                std::size_t stepDelta, double integrationStep)
@@ -30,7 +31,8 @@ void SurvivalProbabilityAccumulator::addTrajectories(const std::vector<Trajector
         return;
 
     std::size_t numIter = this->numSteps / this->stepDelta;
-    for (std::size_t i{}; i < this->radii.size(); i++) {
+    _OMP_PARALLEL_FOR
+    for (std::size_t i = 0; i < this->radii.size(); i++) {
         for (const auto trajectory : trajectories) {
             Assert(trajectory.getSize() >= this->numSteps + 1);
             Point start = trajectory.getFirst();
