@@ -1,6 +1,6 @@
 # Number of steps in a single trajectory, not including starting point
 
-numberOfSteps = 10000
+numberOfSteps = 100000
 
 
 # The radius of a tracer 
@@ -25,18 +25,18 @@ moveGenerator = GaussianMoveGenerator 3
 # parameters performed, allowing for example to average reuslting mean swuare displacement data over different
 # images.
 
-moveFilter = DefaultMoveFilter#ImageMoveFilter sample_images/fibrinogen.ppm PeriodicBoundaryConditions
+moveFilter = ImageMoveFilter sample_images/fibrinogen.ppm PeriodicBoundaryConditions
 
 
 # The increment of time in each iteration. The move generator lenght scale and drift will be altered accordingly, and
 # integration step equal 1 means no rescaling
 
-integrationStep = 0.1
+integrationStep = 0.5
 
 
 # Constant drift to be added to each sampled move. Available formats: xy (x) (y); rt (radius) (angle in degrees)
 
-drift = rt 0 50
+drift = rt 1 0
 
 
 # Number of walks to be performed in a single series. They have to fit into video memory/RAM and will be performed
@@ -49,14 +49,14 @@ numberOfWalksInSeries = 500
 # walks is then
 #    (number of simulations based on movefilter) * (number of series) * (number of walks in series)
 
-numberOfSeries = 1
+numberOfSeries = 3
 
 
 # If greater than 1, each trajectory will be split into that many parts. That parts will be run in separate random
 # walk (of course in parallel numberOfWalksInSeries times). It can be used to generate longer trajectories on GPU
 # with the same numberOfWalksInSeries without running out of memory
 
-numberOfSplits = 1
+numberOfSplits = 10
 
 
 # If true, trajectories after single series run will be stored in files with names:
@@ -80,7 +80,7 @@ device = gpu
 
 # When specified, for each given step the x, y will be dumped to file (output prefix)_histogram_(step).txt
 
-positionHistogramSteps = 
+positionHistogramSteps = #100 1000
 
 
 # When specified, coverage maps, one with each point counted normally, and the second one, with points in a single
@@ -102,4 +102,12 @@ coverageMapsSize = #1000 1000
 # [delta step size] means how dense TA MSD should be sampled (disregarding integration step!). For example, if the
 # trajectory steps are 100 and [delta step size] = 5, TA MSD will be sampled for 0, 5, 10, ..., 95
 
-tamsdMode = powerLaw 10 0.01 0.1
+tamsdMode = none #individual 10 0.01 0.1
+
+
+# If specified, survival probabilites for a given radii will be calculated. Format:
+#     [step size] [radius 1] [radius 2] ...
+# [step size] means how dense the probability should be measured (in trajectory step units). [radius 1], [radius 2]
+# describes for which radii SP-s should be calculated
+
+survival = 10 10 100 1000

@@ -45,6 +45,8 @@ Parameters::Parameters(std::istream& input) {
             this->coverageMapsSize = config.getString(key);
         else if (key == "tamsdMode")
             this->tamsdMode = config.getString(key);
+        else if (key == "survival")
+            this->survival = config.getString(key);
         else
             std::cerr << "[Parameters::Parameters] Warning: unknown parameter " << key << std::endl;
     }
@@ -68,6 +70,7 @@ void Parameters::print(std::ostream& out) {
     out << "positionHistogramSteps : " << this->positionHistogramSteps << std::endl;
     out << "coverageMapsSize       : " << this->coverageMapsSize << std::endl;
     out << "tamsdMode              : " << this->tamsdMode << std::endl;
+    out << "survival               : " << this->survival << std::endl;
 }
 
 void Parameters::validateParameters() const {

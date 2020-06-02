@@ -37,6 +37,7 @@ public:
     std::string positionHistogramSteps = "";
     std::string coverageMapsSize       = "";
     std::string tamsdMode              = "none";
+    std::string survival               = "";
 
     /**
      * @brief Creates default parameters.
