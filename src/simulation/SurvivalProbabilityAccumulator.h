@@ -11,6 +11,9 @@
 #include "SurvivalProbability.h"
 #include "Trajectory.h"
 
+/**
+ * @brief Class which accumulates SurvivalProbability for different radii for all passed trajectories.
+ */
 class SurvivalProbabilityAccumulator {
 private:
     std::vector<double> radii;
@@ -22,6 +25,10 @@ private:
     std::vector<std::vector<double>> data;
 
 public:
+    /**
+     * @brief Constructs accumulator creating SurvivalProbability -ies for all given @a radii.
+     * @details The rest of parameters are passed to SurvivalProbability - check its constructor.
+     */
     SurvivalProbabilityAccumulator(const std::vector<double> &radii, std::size_t numSteps, std::size_t stepSize,
                                    double integrationStep);
 

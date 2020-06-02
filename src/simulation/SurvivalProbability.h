@@ -13,6 +13,10 @@
 
 #include "utils/Assertions.h"
 
+/**
+ * @brief Class storing survival probability, so for each time, the percentage of trajectories which never escaped
+ * a circle of given radius up to this time.
+ */
 class SurvivalProbability {
 private:
     double radius{};
@@ -24,6 +28,13 @@ public:
     using iterator = std::vector<double>::iterator;
     using const_iterator = std::vector<double>::const_iterator;
 
+    /**
+     * @brief Constructs the class
+     * @param radius radius of a circle which should not be escaped from
+     * @param numSteps number of steps, each of size @a stepSize. The memory will actually be reserved for @a numSteps
+     * + 1, because t=0 is also included
+     * @param integrationStep the integration step (time delta per trajectory step - not SP step)
+     */
     SurvivalProbability(double radius, std::size_t numSteps, std::size_t stepSize, double integrationStep);
 
     double getRadius() const { return this->radius; }
