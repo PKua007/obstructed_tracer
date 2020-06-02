@@ -189,6 +189,9 @@ void SimulationImpl::initializeTAMSDCalculators(const Parameters &parameters) {
 }
 
 void SimulationImpl::initializeSurvivalProbabilityAccumulator(const Parameters &parameters) {
+    if (parameters.survival.empty())
+        return;
+
     std::istringstream survivalParamsStream(parameters.survival);
 
     std::size_t stepDelta{};
