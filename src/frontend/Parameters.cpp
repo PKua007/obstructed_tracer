@@ -43,10 +43,18 @@ Parameters::Parameters(std::istream& input) {
             this->positionHistogramSteps = config.getString(key);
         else if (key == "coverageMapsSize")
             this->coverageMapsSize = config.getString(key);
-        else if (key == "tamsdMode")
-            this->tamsdMode = config.getString(key);
+        else if (key == "doTAMSD")
+            this->doTAMSD = (config.getString(key) == "true" ? true : false);
+        else if (key == "tamsdDeltaStep")
+            this->tamsdDeltaStep = config.getFloat(key);
+        else if (key == "tamsdPrintIndividual")
+            this->tamsdPrintIndividual = (config.getString(key) == "true" ? true : false);
+        else if (key == "tamsdPowerLawFitRange")
+            this->tamsdPowerLawFitRange = config.getString(key);
         else if (key == "survival")
             this->survival = config.getString(key);
+        else if (key == "doEB")
+            this->doEB = (config.getString(key) == "true" ? true : false);
         else
             std::cerr << "[Parameters::Parameters] Warning: unknown parameter " << key << std::endl;
     }
@@ -54,7 +62,7 @@ Parameters::Parameters(std::istream& input) {
     this->validateParameters();
 }
 
-void Parameters::print(std::ostream& out) {
+void Parameters::print(std::ostream &out) {
     out << "numberOfSteps          : " << this->numberOfSteps << std::endl;
     out << "tracerRadius           : " << this->tracerRadius << std::endl;
     out << "moveGenerator          : " << this->moveGenerator << std::endl;
@@ -69,8 +77,12 @@ void Parameters::print(std::ostream& out) {
     out << "device                 : " << this->device << std::endl;
     out << "positionHistogramSteps : " << this->positionHistogramSteps << std::endl;
     out << "coverageMapsSize       : " << this->coverageMapsSize << std::endl;
-    out << "tamsdMode              : " << this->tamsdMode << std::endl;
+    out << "doTAMSD                : " << (this->doTAMSD ? "true" : "false") << std::endl;
+    out << "tamsdDeltaStep         : " << this->tamsdDeltaStep << std::endl;
+    out << "tamsdPrintIndividual   : " << (this->tamsdPrintIndividual ? "true" : "false") << std::endl;
+    out << "tamsdPowerLawFitRange  : " << this->tamsdPowerLawFitRange << std::endl;
     out << "survival               : " << this->survival << std::endl;
+    out << "doEB                   : " << (this->doEB ? "true" : "false") << std::endl;
 }
 
 void Parameters::validateParameters() const {
@@ -80,4 +92,5 @@ void Parameters::validateParameters() const {
     Validate(this->numberOfWalksInSeries > 0);
     Validate(this->numberOfSplits > 0);
     Validate(this->numberOfSeries > 0);
+    Validate(this->tamsdDeltaStep >= 0.f);
 }

@@ -101,6 +101,10 @@ public:
      */
     void store(std::ostream &out) const;
 
+    std::size_t getNumSteps() const { return this->data.size(); }
+    std::size_t getStepSize() const { return this->stepSize; }
+    float getIntegrationStep() const { return this->integrationStep; }
+
     TimeAveragedMSD &operator+=(const TimeAveragedMSD &other);
     friend TimeAveragedMSD operator/(const TimeAveragedMSD &tamsd, float a);
 };
