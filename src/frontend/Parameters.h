@@ -36,8 +36,12 @@ public:
     std::string device                 = "gpu";
     std::string positionHistogramSteps = "";
     std::string coverageMapsSize       = "";
-    std::string tamsdMode              = "none";
+    bool        doTAMSD                = false;
+    float       tamsdDeltaStep         = 0;
+    bool        tamsdPrintIndividual   = false;
+    std::string tamsdPowerLawFitRange  = "";
     std::string survival               = "";
+    bool        doEB                   = false;
 
     /**
      * @brief Creates default parameters.

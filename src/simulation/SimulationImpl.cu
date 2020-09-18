@@ -146,23 +146,12 @@ void SimulationImpl::initializeCoverageMapAccumulator(const std::string &coverag
 }
 
 void SimulationImpl::initializeTAMSDCalculators(const Parameters &parameters) {
-    std::istringstream tamsdParamStream(parameters.tamsdMode);
-    std::string mode;
-    tamsdParamStream >> mode;
-    ValidateMsg(tamsdParamStream, "Malformed TA MSD mode parameters, usage: [mode] ...");
-
-    if (mode == "none")
+    if (!parameters.doTAMSD)
         return;
-    else if (mode != "individual" && mode != "powerLaw" && mode != "both")
-        throw ValidationException("TA MSD mode should be one of: none, individual, powerLaw, both");
-
-    std::size_t deltaStep;
-    tamsdParamStream >> deltaStep;
-    ValidateMsg(tamsdParamStream, "Malformed TA MSD mode parameters, usage: " + mode + " [delta step] ...");
-    Validate(deltaStep > 0);
 
     // Max delta corresponds to number of steps / 10, because later it is just a mess, even for free diffusion.
     // Moreover, maxDelta should be divisible by deltaStep
+    float deltaStep = parameters.tamsdDeltaStep;
     std::size_t maxDelta = (parameters.numberOfSteps / 10) / deltaStep * deltaStep;
     ValidateMsg(maxDelta > 0, "Too large delta step");
 
@@ -170,20 +159,27 @@ void SimulationImpl::initializeTAMSDCalculators(const Parameters &parameters) {
         new TimeAveragedMSDCalculator(maxDelta, deltaStep, parameters.integrationStep)
     );
 
-    if (mode == "individual" || mode == "both")
+    if (parameters.tamsdPrintIndividual)
         this->shouldStoreTAMSD = true;
 
-    if (mode == "powerLaw" || mode == "both") {
+    if (!parameters.tamsdPowerLawFitRange.empty()) {
+        std::istringstream fitRangeStream(parameters.tamsdPowerLawFitRange);
         double relativeFitStart{}, relativeFitEnd{};
-        tamsdParamStream >> relativeFitStart >> relativeFitEnd;
-        ValidateMsg(tamsdParamStream, "Malformed TA MSD parameters, usage: " + mode + " [relative fit start] "
-                                      "[relative fit end]");
+        fitRangeStream >> relativeFitStart >> relativeFitEnd;
+        ValidateMsg(fitRangeStream, "Malformed TA MSD power law fit range, usage: [relative fit start] "
+                                    "[relative fit end]");
         Validate(relativeFitStart > 0);
         Validate(relativeFitStart < relativeFitEnd);
         Validate(relativeFitEnd <= 1);
 
         this->tamsdPowerLawAccumulator = std::unique_ptr<TAMSDPowerLawAccumulator>(
             new TAMSDPowerLawAccumulator(relativeFitStart, relativeFitEnd)
+        );
+    }
+
+    if (parameters.doEB) {
+        this->tamsdErgodicityBreakingAccumulator = std::unique_ptr<TAMSDErgodicityBreakingAccumulator>(
+            new TAMSDErgodicityBreakingAccumulator(maxDelta / deltaStep + 1, deltaStep, parameters.integrationStep)
         );
     }
 }
@@ -287,38 +283,45 @@ void SimulationImpl::storeTAMSD(const TimeAveragedMSD &tamsd, std::size_t simula
 }
 
 void SimulationImpl::storeTAMSDData(std::ostream &logger) {
-    if (this->tamsdPowerLawAccumulator == nullptr)
-        return;
-
     auto fileOstreamProvider = std::unique_ptr<FileOstreamProvider>(new FileOstreamProvider());
 
-    std::string histogramFilename = this->outputFilePrefix + "_alpha_hist.txt";
-    fileOstreamProvider->setFileDescription("TA MSD power law exponent histogram");
-    auto histogramFile = fileOstreamProvider->openFile(histogramFilename);
-    auto histogram = this->tamsdPowerLawAccumulator->getExponentHistogram();
-    std::copy(histogram.begin(), histogram.end(), std::ostream_iterator<double>(*histogramFile, "\n"));
+    if (this->tamsdPowerLawAccumulator != nullptr) {
+        std::string histogramFilename = this->outputFilePrefix + "_alpha_hist.txt";
+        fileOstreamProvider->setFileDescription("TA MSD power law exponent histogram");
+        auto histogramFile = fileOstreamProvider->openFile(histogramFilename);
+        auto histogram = this->tamsdPowerLawAccumulator->getExponentHistogram();
+        std::copy(histogram.begin(), histogram.end(), std::ostream_iterator<double>(*histogramFile, "\n"));
 
-    std::string varianceHistogramFilename = this->outputFilePrefix + "_var_alpha_hist.txt";
-    fileOstreamProvider->setFileDescription("TA MSD power law variance variance histogram");
-    auto varianceHistogramFile = fileOstreamProvider->openFile(varianceHistogramFilename);
-    auto varianceHistogram = this->tamsdPowerLawAccumulator->getVarianceExponentHistogram();
-    std::copy(varianceHistogram.begin(), varianceHistogram.end(),
-              std::ostream_iterator<double>(*varianceHistogramFile, "\n"));
+        std::string varianceHistogramFilename = this->outputFilePrefix + "_var_alpha_hist.txt";
+        fileOstreamProvider->setFileDescription("TA MSD power law variance variance histogram");
+        auto varianceHistogramFile = fileOstreamProvider->openFile(varianceHistogramFilename);
+        auto varianceHistogram = this->tamsdPowerLawAccumulator->getVarianceExponentHistogram();
+        std::copy(varianceHistogram.begin(), varianceHistogram.end(),
+                  std::ostream_iterator<double>(*varianceHistogramFile, "\n"));
 
-    std::string meanTamsdFilename = this->outputFilePrefix + "_mean_tamsd.txt";
-    fileOstreamProvider->setFileDescription("ensemble averaged TA MSD");
-    auto meanTamsdFile = fileOstreamProvider->openFile(meanTamsdFilename);
-    TimeAveragedMSD meanTamsd = this->tamsdPowerLawAccumulator->getEnsembleAveragedTAMSD();
-    meanTamsd.store(*meanTamsdFile);
+        std::string meanTamsdFilename = this->outputFilePrefix + "_mean_tamsd.txt";
+        fileOstreamProvider->setFileDescription("ensemble averaged TA MSD");
+        auto meanTamsdFile = fileOstreamProvider->openFile(meanTamsdFilename);
+        TimeAveragedMSD meanTamsd = this->tamsdPowerLawAccumulator->getEnsembleAveragedTAMSD();
+        meanTamsd.store(*meanTamsdFile);
 
-    logger << "[SimulationImpl::run] TAMSD alpha histogram stored to " << histogramFilename << std::endl;
-    logger << "[SimulationImpl::run] TAMSD variance alpha histogram stored to " << varianceHistogramFilename;
-    logger << std::endl;
-    logger << "[SimulationImpl::run] Ensemble averaged TAMSD stored to " << meanTamsdFilename << std::endl;
-    logger << "[SimulationImpl::run] Ensemble averaged TAMSD alpha: ";
-    logger << this->tamsdPowerLawAccumulator->getEnsembleAveragedExponent() << std::endl;
-    logger << "[SimulationImpl::run] Ensemble averaged TAMSD variance alpha: ";
-    logger << this->tamsdPowerLawAccumulator->getEnsembleAveragedVarianceExponent() << std::endl;
+        logger << "[SimulationImpl::run] TAMSD alpha histogram stored to " << histogramFilename << std::endl;
+        logger << "[SimulationImpl::run] TAMSD variance alpha histogram stored to " << varianceHistogramFilename;
+        logger << std::endl;
+        logger << "[SimulationImpl::run] Ensemble averaged TAMSD stored to " << meanTamsdFilename << std::endl;
+        logger << "[SimulationImpl::run] Ensemble averaged TAMSD alpha: ";
+        logger << this->tamsdPowerLawAccumulator->getEnsembleAveragedExponent() << std::endl;
+        logger << "[SimulationImpl::run] Ensemble averaged TAMSD variance alpha: ";
+        logger << this->tamsdPowerLawAccumulator->getEnsembleAveragedVarianceExponent() << std::endl;
+    }
+
+    if (this->tamsdErgodicityBreakingAccumulator != nullptr) {
+        std::string ebFilename = this->outputFilePrefix + "_eb.txt";
+        fileOstreamProvider->setFileDescription("ergodicity breaking parameter");
+        auto ebFile = fileOstreamProvider->openFile(ebFilename);
+        this->tamsdErgodicityBreakingAccumulator->storeEBParameters(*ebFile);
+        logger << "[SimulationImpl::run] EB stored to " << ebFilename << std::endl;
+    }
 }
 
 void SimulationImpl::storeSurvivalProbabilities(std::ostream &logger) {
@@ -389,6 +392,17 @@ SimulationImpl::SimulationImpl(const Parameters &parameters, std::unique_ptr<Ran
     if (this->tamsdCalculator != nullptr) {
         logger << "[SimulationImpl] TA MSD will be calculated up to Delta = " << this->tamsdCalculator->getMaxDelta();
         logger << " with a step " << this->tamsdCalculator->getDeltaStep() << std::endl;
+
+        if (this->shouldStoreTAMSD)
+            logger << "[SimulationImpl] > Individual TA MSDs will be stored" << std::endl;
+
+        if (this->tamsdPowerLawAccumulator != nullptr) {
+            logger << "[SimulationImpl] > Histograms of exponents of power law fit to TA MSD and TA variance, ";
+            logger << "together with exponent for ensemble averaged TA MSD will be performed" << std::endl;
+        }
+
+        if (this->tamsdErgodicityBreakingAccumulator != nullptr )
+            logger << "[SimulationImpl] > Ergodicity breaking parameter will be calculated" << std::endl;
     }
 
     if (this->survivalProbabilityAccumulator != nullptr) {
@@ -455,6 +469,9 @@ void SimulationImpl::runSingleSimulation(std::size_t simulationIndex, RandomWalk
 
                 if (this->tamsdPowerLawAccumulator != nullptr)
                     this->tamsdPowerLawAccumulator->addTAMSD(tamsd);
+
+                if (this->tamsdErgodicityBreakingAccumulator != nullptr)
+                    this->tamsdErgodicityBreakingAccumulator->addTAMSD(tamsd);
             }
             timer.stop();
             logger << "completed in " << timer.countMicroseconds() << " μs." << std::endl;

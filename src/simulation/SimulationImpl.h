@@ -20,6 +20,7 @@
 #include "TimeAveragedMSDCalculator.h"
 #include "TAMSDPowerLawAccumulator.h"
 #include "SurvivalProbabilityAccumulator.h"
+#include "TAMSDErgodicityBreakingAccumulator.h"
 
 /**
  * @brief The concrete implementation of Simulation.
@@ -70,6 +71,7 @@ private:
     bool shouldStoreTAMSD{};
     std::unique_ptr<TAMSDPowerLawAccumulator> tamsdPowerLawAccumulator;
     std::unique_ptr<SurvivalProbabilityAccumulator> survivalProbabilityAccumulator;
+    std::unique_ptr<TAMSDErgodicityBreakingAccumulator> tamsdErgodicityBreakingAccumulator;
 
     MSDData msdData;
 
